@@ -1,0 +1,6 @@
+node_modules/
+package-lock.json
+_*.js
+_*.json
+*.bak
+.DS_Store

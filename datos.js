@@ -1,0 +1,337 @@
+/* ============================================================
+   DATOS DEL VIAJE — Camino Francés, últimos 100 km
+   Sarria → Santiago de Compostela, 18–23 agosto 2026
+   Grupo: 12 personas (11 desde el jueves 20 por la tarde)
+
+   PROCEDENCIA
+   - Horarios, alojamientos, comidas, cultura: PDFs de la guía familiar.
+   - Coordenadas: Google Places, julio 2026.
+   - Altitudes (ele): cotas escritas en los perfiles de la guía.
+     Solo hay cota de los pueblos; entre uno y otro se interpola en
+     línea recta, así que el desnivel real será MAYOR que el calculado.
+   - Kilometrajes: de la guía. Sin verificar contra GPX.
+
+   Cada dato dudoso lleva `fiable: false` y una `nota` visible.
+   ============================================================ */
+'use strict';
+
+const ANIO_VIAJE = 2026;
+
+const CONFIG_MARCHA = {
+  V_BASE: 4.0,
+  ASCENSO_M_POR_HORA: 600,
+  UMBRAL_BAJADA_SUAVE: 0.05,
+  UMBRAL_BAJADA_FUERTE: 0.12,
+  BONIF_BAJADA_H_POR_300M: 0.166,
+  PENAL_BAJADA_H_POR_300M: 0.166,
+  FACTOR_FATIGA: 1.0,
+  MIN_DESCANSO_POR_HORA: 0
+};
+
+const COLORES_ETAPA = ['#C1462B','#8A6D3B','#4A6B52','#3D5A73','#7B4B6B','#B8860B'];
+
+const ETAPAS = [
+{
+  num:1, fecha:'2026-08-18', diaSemana:'martes',
+  origen:'Sarria', destino:'Portomarín', salida:'08:00',
+  km:{guia:22.4, sumaTramos:22.0, gpx:23.51,
+      nota:'El perfil dice 22,4 km; los tramos del timing suman 22,0 (4,2 + 9,1 + 8,7).'},
+  perfilNota:'El gráfico de la guía va de Portomarín a Sarria, al revés del sentido de marcha.',
+  puntos:[
+    {nombre:"Sarria", lat:42.772750, lon:-7.431120, km:1.99, ele:451, kmGuia:0, tipo:'inicio', fiable:false, ajustado:1850},
+    {nombre:"As Paredes", lat:42.769790, lon:-7.439580, km:2.97, ele:497, kmGuia:2.9, tipo:'paso', fiable:false, ajustado:943},
+    {nombre:"Iglesia de Santiago de Barbadelo", lat:42.765205, lon:-7.450386, km:4.36, ele:543, kmGuia:4.2, tipo:'iglesia', sellar:true, horario:"8:30-12:30", fiable:true, ficha:"Románica del s. XII. Primer punto de interés. Google recoge 8:00-12:00; la guía dice 8:30-12:30. Sin verificar."},
+    {nombre:"Barbadelo", lat:42.764284, lon:-7.453674, km:4.36, ele:543, kmGuia:4.4, tipo:'taxi', fiable:true, ficha:"Punto de escape. Taxis: Alberto 649850117, David 669087722. Tramo Sarria-Barbadelo: dificultad ALTA según la guía."},
+    {nombre:"Rente", lat:42.770000, lon:-7.462000, km:5.88, ele:590, kmGuia:5.6, tipo:'paso', fiable:true},
+    {nombre:"Mercado da Serra", lat:42.773000, lon:-7.470000, km:6.69, ele:616, kmGuia:6.4, tipo:'comida', fiable:true, ficha:"Taberna da Serra. Punto de desayuno propuesto en la guía."},
+    {nombre:"Peruscallo", lat:42.777050, lon:-7.481640, km:8.39, ele:599, kmGuia:8.6, tipo:'comida', fiable:false, ajustado:453, ficha:"Rest in Peruscallo. Desayuno alternativo."},
+    {nombre:"Cortiñas", lat:42.779000, lon:-7.499000, km:10.49, ele:630, kmGuia:9.6, tipo:'paso', fiable:true},
+    {nombre:"Brea", lat:42.780000, lon:-7.509000, km:11.44, ele:605, kmGuia:11.1, tipo:'cultura', fiable:true, ficha:"Entre Brea y Morgade está el mojón clásico del km 100."},
+    {nombre:"Morgade", lat:42.782435, lon:-7.521222, km:12.72, ele:633, kmGuia:11.9, tipo:'comida', fiable:true, ficha:"Bar Casa Morgade. Abre 7:30-21:30."},
+    {nombre:"Ferreiros", lat:42.783195, lon:-7.532830, km:14.14, ele:643, kmGuia:13.3, tipo:'taxi', fiable:true, ficha:"Punto de escape principal. Desde Casa Cruceiro (LU-633) o Iglesia de San Salvador (LU-P-5707). Veña Café Bar: miles de botellines firmados."},
+    {nombre:"Mirallos", lat:42.785000, lon:-7.539000, km:14.61, ele:620, kmGuia:13.9, tipo:'iglesia', fiable:true, ficha:"Iglesia de Santa María, románica s. XII-XIII. Suele estar cerrada, a 300 m de la salida del pueblo."},
+    {nombre:"A Pena", lat:42.787000, lon:-7.547000, km:15.41, ele:624, kmGuia:14.5, tipo:'cultura', fiable:true, ficha:"Cerca está el mojón del km 100 oficial actual."},
+    {nombre:"Couto", lat:42.783970, lon:-7.553660, km:16.03, ele:619, kmGuia:15, tipo:'paso', fiable:false, ajustado:560},
+    {nombre:"Rozas", lat:42.786950, lon:-7.562970, km:17.11, ele:585, kmGuia:15.5, tipo:'paso', fiable:false, ajustado:375},
+    {nombre:"Moimentos", lat:42.792000, lon:-7.570000, km:18.0, ele:509, kmGuia:16.6, tipo:'paso', fiable:true},
+    {nombre:"Mercadoiro", lat:42.793000, lon:-7.577000, km:18.43, ele:528, kmGuia:17.3, tipo:'paso', fiable:true},
+    {nombre:"Moutras", lat:42.794000, lon:-7.590000, km:19.77, ele:455, kmGuia:19, tipo:'paso', fiable:true},
+    {nombre:"Parrocha", lat:42.795000, lon:-7.597000, km:20.38, ele:424, kmGuia:19.7, tipo:'paso', fiable:true},
+    {nombre:"Vilachá", lat:42.795377, lon:-7.603628, km:20.95, ele:396, kmGuia:21, tipo:'comida', fiable:true, ficha:"Los Andantes. Última parada antes de la bajada final."},
+    {nombre:"Iglesia-fortaleza de San Nicolás", lat:42.807745, lon:-7.615707, km:23.46, ele:344, kmGuia:22.3, tipo:'iglesia', sellar:true, horario:"10:00-20:00", fiable:true, ficha:"S. XII, orden de San Juan de Jerusalén. Trasladada piedra a piedra al construirse el embalse."},
+    {nombre:"Portomarín", lat:42.807428, lon:-7.615830, km:23.46, ele:344, kmGuia:22.4, tipo:'fin', fiable:true}
+  ],
+  timing:[
+    {hora:'7:00', texto:'Coche a Portomarín. Dos personas llevan los dos coches y regresan con uno.'},
+    {hora:'8:00', texto:'Salida tras café. El hotel en Sarria (Baixo a Lua) está junto al camino.'},
+    {hora:'9:00', texto:'Llegada a Barbadelo (4,2 km). Dificultad ALTA.'},
+    {hora:'9:00-9:30', texto:'Desayuno en Mercado da Serra, o más adelante en Peruscallo.'},
+    {hora:'9:30-12:00', texto:'Barbadelo-Ferreiros (9,1 km). Dificultad BAJA. El mejor tramo: sombreado, pendientes moderadas, incluye el km 100.', destacado:true},
+    {hora:'12:00-12:30', texto:'Parada en Ferreiros. Buen punto para taxi a Portomarín.'},
+    {hora:'13:30 / 14:30', texto:'Llegada a Mercadeiro / Vilachá.', dudoso:'Dos horas sin criterio claro: ¿dos hitos o una horquilla?'},
+    {hora:'15:00', texto:'Llegada a Portomarín. Los 3 últimos km son bajada MUY IMPORTANTE. Ojo con las rodillas.'}
+  ],
+  alojamiento:{nombre:'Casa Grande do Costureiro', direccion:'Rúa Sánchez Carro, 8',
+    checkin:'15:00', telefono:'678503693', reserva:'Directa', plazas:21,
+    nota:'El desglose de la guía suma hasta 21 plazas (8 dobles + 4 individuales + sofá cama). Muy por encima del grupo.',
+    extra:'Sin piscina, pero hay embalse y piscina municipal en el pueblo.'},
+  comidas:{
+    comida:['Cervecería El Origen — ambiente peregrino, no cocina gallega',
+            'Restaurante Pérez — menú 17 € / 20 € con pulpo. Reservar: 982 54 50 40',
+            'Xoanes Raciones — reservar'],
+    cena:['O Mirador — RESERVADO 20:30. Lorena López, omiradorportomarin@gmail.com, 982 545323'],
+    nota:'El mapa de la guía marca Restaurante Pérez y Dgusta como "cerrado temporalmente", pero el texto lo recomienda. Capturas de fechas distintas. Sin verificar.',
+    otros:'Supermercado Claudio cierra a las 14:00. Covirán no cierra. Hay italiano con pizzas para llevar.'},
+  cultura:['Ponte da Aspera — se ve al salir de Sarria.',
+    'Iglesia de Santa María en Mirallos (s. XII-XIII). Suele estar cerrada, a 300 m de la salida del pueblo.',
+    'Mojón km 100 — el clásico entre Brea y Morgade; el oficial actual cerca de A Pena, después de Ferreiros.',
+    'Escalinata y capilla de la Virgen de las Nieves, Portomarín.',
+    'Palacio de Berbetoros (s. XVII), Crucero de la Casa del Conde de la Maza, Iglesia de San Pedro (1182).'],
+  avisos:['La guía deja anotado: "Falta incluir los puntos de interés cultural de la DIAPO 4".',
+    'Distancia de Mirallos a Sarria: el PDF dice "a __ km", falta el número.',
+    'La bajada final a Portomarín pierde unos 130 m en 3 km. Es lo más exigente para las rodillas de todo el viaje.']
+},
+{
+  num:2, fecha:'2026-08-19', diaSemana:'miércoles',
+  origen:'Portomarín', destino:'Palas de Rei', salida:'07:30',
+  km:{guia:25.0, sumaTramos:25.2, gpx:27.58,
+      nota:'El título dice 25 km; las dos ramas del timing (vía Gonzar o vía Castromaior) suman 25,2 ambas.'},
+  perfilNota:'El gráfico va de Palas de Rei a Portomarín, al revés del sentido de marcha.',
+  puntos:[
+    {nombre:"Portomarín", lat:42.807428, lon:-7.615830, km:0.0, ele:381, kmGuia:0, tipo:'inicio', fiable:true},
+    {nombre:"Fábrica de ladrillos", lat:42.811120, lon:-7.644710, km:3.45, ele:443, kmGuia:3, tipo:'paso', fiable:false, ajustado:437},
+    {nombre:"Toxibo", lat:42.812560, lon:-7.661020, km:4.93, ele:493, kmGuia:4.8, tipo:'paso', fiable:false, ajustado:611},
+    {nombre:"Gonzar", lat:42.824976, lon:-7.695852, km:8.81, ele:532, kmGuia:8.2, tipo:'taxi', fiable:true, ficha:"Iglesia de Santa María. Punto de escape. Bar/Albergue de Gonzar, Hostería de Gonzar. Fin del tramo más duro del día."},
+    {nombre:"Castro de Castromaior", lat:42.833336, lon:-7.719796, km:11.33, ele:666, kmGuia:9.5, tipo:'cultura', fiable:true, ficha:"Restos prerromanos celtas, más de 2400 años. Desvío de 5-10 min. Abierto 24 h, gratuito. Centro de interpretación al aire libre."},
+    {nombre:"Hospital da Cruz", lat:42.840426, lon:-7.734032, km:12.97, ele:656, kmGuia:12, tipo:'comida', fiable:true, ficha:"Taberna do Camiño — tortillas de patata famosas."},
+    {nombre:"Ventas de Narón", lat:42.844284, lon:-7.748630, km:14.62, ele:688, kmGuia:13.5, tipo:'iglesia', sellar:true, fiable:true, ficha:"Ermita de la Magdalena. SELLAR si está abierta, pero abre poco tiempo. Albergue."},
+    {nombre:"Sierra de Ligonde", lat:42.850000, lon:-7.762000, km:16.17, ele:691, kmGuia:15, tipo:'mirador', fiable:true, ficha:"Punto más alto de toda la ruta: 722 m."},
+    {nombre:"Cruceiro de Lameiros", lat:42.855155, lon:-7.777397, km:17.76, ele:616, kmGuia:16, tipo:'cultura', fiable:true, ficha:"Uno de los más famosos del camino, doble cara, mucha simbología. FECHA EN DISPUTA: la guía dice 1674 en una diapositiva y 1670 en otra. Google recoge 1670."},
+    {nombre:"Ligonde", lat:42.858655, lon:-7.780045, km:18.24, ele:614, kmGuia:16.5, tipo:'taxi', fiable:true, ficha:"Punto de escape. Bar Restaurante Ligonde, Casa Mariluz, Trisquel. Cementerio de peregrinos."},
+    {nombre:"Airexe", lat:42.865620, lon:-7.790760, km:19.66, ele:613, kmGuia:17.4, tipo:'iglesia', fiable:false, ajustado:407, ficha:"Iglesia de Santiago de Airexe. Bares y albergue público."},
+    {nombre:"Portos", lat:42.868340, lon:-7.797770, km:20.36, ele:629, kmGuia:18.9, tipo:'paso', fiable:false, ajustado:767, ficha:"Entre Portos y Lestedo sale el desvío a Vilar de Donas: 2,5 km de ida y otros tantos de vuelta."},
+    {nombre:"Lestedo", lat:42.872170, lon:-7.814280, km:22.19, ele:578, kmGuia:20, tipo:'paso', fiable:false, ajustado:554},
+    {nombre:"Os Valos", lat:42.873770, lon:-7.827360, km:23.51, ele:622, kmGuia:21.1, tipo:'paso', fiable:false, ajustado:471},
+    {nombre:"A Brea", lat:42.874260, lon:-7.843000, km:25.15, ele:617, kmGuia:22.2, tipo:'paso', fiable:false, ajustado:397},
+    {nombre:"Avenostre", lat:42.872000, lon:-7.856000, km:26.47, ele:595, kmGuia:23.4, tipo:'paso', fiable:true},
+    {nombre:"Palas de Rei", lat:42.873467, lon:-7.868759, km:27.52, ele:557, kmGuia:25, tipo:'fin', fiable:true}
+  ],
+  timing:[
+    {hora:'6:30', texto:'Coche a Palas de Rei.'},
+    {hora:'7:30', texto:'Salida tras desayuno importante. Cruzar el puente sobre el Miño al amanecer es bonito.'},
+    {hora:'9:30', texto:'Llegada a Gonzar / Castromaior (8,2 / 9,5 km). Dificultad MEDIA-ALTA, lo más duro del día.'},
+    {hora:'9:15-13:00', texto:'Gonzar/Castromaior-Ligonde (8,5 / 7,2 km). El tramo más interesante del día.',
+     dudoso:'La hora de inicio (9:15) es anterior a la de llegada a Gonzar (9:30). Probable errata.'},
+    {hora:'13:00-13:30', texto:'Parada en Ligonde. Taxi para quien quiera. Lo malo ya ha pasado.'},
+    {hora:'13:30-15:30', texto:'Ligonde-Palas de Rei (8,5 km).'}
+  ],
+  alojamiento:{nombre:'A Casa de Chelo', direccion:'Rúa do Cruceiro, 2',
+    checkin:null, telefono:null, plazas:null,
+    nota:'6 habitaciones, solo dos baños para el grupo. Lavadora/secadora gratuita. Sin datos de check-in ni teléfono en la guía.'},
+  comidas:{
+    comida:['Casa Curro — a 1 min del alojamiento, menú 16 €, 982 38 00 44. No cierra cocina',
+            'Pulpería A Nosa Terra — sin reservas, buenos comentarios',
+            'Restaurante Ultreya — menú 15 €','Restaurante Castro','Albergue Mesón de Benito','Quinto Carallo'],
+    cena:['Mesón A Lareira — RESERVADO 21:00. Menús de 16 € y 22 €, o a la carta. Vanesa Vilela, vanesavilelacastro@gmail.com'],
+    nota:'FECHA LÍMITE: hay que comunicar a A Lareira qué va a cenar cada uno una semana antes, es decir antes del 12 de agosto de 2026.'},
+  cultura:['Iglesia de Santa María, en Gonzar.','Iglesia de Santiago de Airexe, después de Portos.',
+    'Cementerio de Ligonde — anexo a un desaparecido hospital de la Orden de Santiago.',
+    'Iglesia de San Tirso, Palas de Rei. SELLAR.',
+    'Iglesia de Vilar de Donas — fuera del camino, a 7 km de Palas de Rei. Abierta 16:00-20:00.',
+    'Castillo de Pambre — a 10 km de Palas de Rei, fuera del camino.'],
+  avisos:['Vilar de Donas: la guía dice "10 min en coche" tanto desde Palas de Rei como desde Melide (etapa 3). Ambas no pueden ser ciertas.',
+    'Castillo de Pambre aparece también como "Pombre" y con tres distancias distintas: 10 km, 15 min, 20 min desde Melide.',
+    'Es la etapa más larga y con más desnivel del viaje. La Sierra de Ligonde (722 m) es el punto más alto de toda la ruta.']
+},
+{
+  num:3, fecha:'2026-08-20', diaSemana:'jueves',
+  origen:'Palas de Rei', destino:'Melide', salida:'09:30',
+  km:{guia:14.5, guiaAlt:14.8, sumaTramos:14.7, gpx:15.63,
+      nota:'TRES cifras distintas en el mismo PDF: 14,8 (perfil), 14,5 (timing) y 14,7 (suma de tramos: 3,5 + 5,7 + 4 + 1,5).'},
+  perfilNota:'La guía usa aquí el perfil de Arzúa-Palas de Rei (28,8 km), que cubre las etapas 3 y 4 juntas. No es el perfil de esta etapa.',
+  puntos:[
+    {nombre:"Palas de Rei", lat:42.873467, lon:-7.868759, km:0.25, ele:569, kmGuia:0, tipo:'inicio', fiable:true},
+    {nombre:"Carballal", lat:42.872680, lon:-7.882090, km:1.49, ele:509, kmGuia:2.1, tipo:'paso', fiable:false, ajustado:439},
+    {nombre:"San Xulián do Camiño", lat:42.873677, lon:-7.907957, km:4.27, ele:454, kmGuia:3.5, tipo:'comida', fiable:true, ficha:"The Essential Coffee Home — muchas tostadas, tarta de Santiago. Iglesia románica s. XII y cementerio. Coordenada aproximada."},
+    {nombre:"Pontecampaña", lat:42.879000, lon:-7.920000, km:5.31, ele:435, kmGuia:4.7, tipo:'comida', fiable:true, ficha:"Mesón A Pontecampaña."},
+    {nombre:"Casanova", lat:42.882000, lon:-7.935000, km:6.75, ele:491, kmGuia:6, tipo:'paso', fiable:true},
+    {nombre:"Límite Lugo / A Coruña", lat:42.881790, lon:-7.948470, km:8.03, ele:446, kmGuia:7.2, tipo:'cultura', fiable:false, ajustado:378, ficha:"Se entra en la provincia de A Coruña, la última del Camino."},
+    {nombre:"O Leboreiro", lat:42.888079, lon:-7.970460, km:10.21, ele:439, kmGuia:9.2, tipo:'taxi', fiable:true, ficha:"Aldea medieval. Cabazo (granero-canasta para maíz). Iglesia de Santa María, románico de transición. Punto de escape: taxi desde la iglesia. Taberna de Leboreiro."},
+    {nombre:"Parque empresarial", lat:42.900000, lon:-7.985000, km:12.15, ele:460, kmGuia:11.2, tipo:'paso', fiable:true},
+    {nombre:"Furelos", lat:42.909487, lon:-7.999141, km:13.81, ele:408, kmGuia:13, tipo:'cultura', fiable:true, ficha:"Puente medieval. Sitio agradable junto al río."},
+    {nombre:"Melide", lat:42.914640, lon:-8.017500, km:15.62, ele:453, kmGuia:14.5, tipo:'fin', fiable:false, ajustado:620}
+  ],
+  timing:[
+    {hora:'8:30', texto:'Coche a Melide.'},
+    {hora:'9:30', texto:'Salida de Palas de Rei.'},
+    {hora:'10:15-10:45', texto:'Desayuno en San Julián de Camiño (3,5 km).'},
+    {hora:'12:30', texto:'Llegada a Leboreiro (5,7 km más). Acumulado: 9,2 km.'},
+    {hora:'12:30-13:00', texto:'Parada en Leboreiro. Merece la pena dar una vuelta. Se puede volver en taxi desde la Iglesia de Santa María.',
+     destacado:true, dudoso:'Llegada y comienzo de la parada a la misma hora: sin margen.'},
+    {hora:'14:30', texto:'Llegada a Melide (1,5 km más). Etapa corta: tarde libre para visita turística.'}
+  ],
+  alojamiento:{nombre:'Albergue y pensión San Antón', direccion:'Rúa San Anton',
+    checkin:'13:00 albergue / 13:30 pensión', reserva:'33630', plazas:11,
+    web:['https://albergueanton.com','https://pensionsananton.com'],
+    nota:'Albergue: habitación de 6. Pensión: una doble y una triple. Total 11 plazas — justo para las 11 personas desde esta tarde. Las dos URLs difieren (anton vs sananton): posible errata en la primera. Sin verificar.'},
+  comidas:{
+    comida:['Pulpería Ezequiel — la más famosa, algo más económica','Pulpería A Garnacha — 605833268'],
+    cena:['Restaurante O Codeseira — RESERVADO 20:30. Pedro Ultrich, 691605015'],
+    nota:'CONFLICTO: la misa de Sancti Spiritus es a las 20:00 y la cena a las 20:30. Además A Garnacha aparece bajo "comida" pero el texto dice que está reservada para cenar: dos cenas el mismo día. El nombre baila entre O Codeseira y A Codeseira (la URL).',
+    otros:'El pulpo a feira es la especialidad. Pedir cachelos. Repostería: ricos y melindres.'},
+  cultura:['San Xulián do Camiño — iglesia románica s. XII y cementerio.',
+    'Leboreiro — aldea medieval, cabazo, puente del s. XIV sobre el río Seco.',
+    'Furelos — puente medieval.',
+    'Melide: Iglesia de Sancti Spiritus / San Pedro (misa 20:00), Museo da Terra de Melide, Capilla de San Antonio — todo en la Plaza del Convento.',
+    'Capilla de San Roque (s. XX) con portada románica del s. XII de la antigua San Pedro.',
+    'Iglesia de Santa María — Monumento Nacional s. XII, a las afueras. SELLAR.',
+    'Cruceiro del s. XIV — el más antiguo de Galicia, Rúa Cantón San Roque 38.'],
+  avisos:['La guía se contradice sobre Melide: en un sitio equipara Sancti Spiritus con San Pedro, en otro dice que San Pedro es hoy la capilla de San Roque. Son edificios distintos.',
+    'Alternativa apuntada en la guía: hay quien hace Palas de Rei-Arzúa directamente.',
+    'Plan B por la tarde: Iglesia de Vilar de Donas, 10 min en coche, abierta 16:00-20:00.']
+},
+{
+  num:4, fecha:'2026-08-21', diaSemana:'viernes',
+  origen:'Melide', destino:'Arzúa', salida:'09:00',
+  km:{guia:14.5, sumaTramos:14.1, gpx:15.44,
+      nota:'El título dice 14,5 km; los tramos suman 14,1 (5,8 + 5,3 + 3).'},
+  perfilNota:'Mismo problema que la etapa 3: la guía reutiliza el perfil de Arzúa-Palas de Rei (28,8 km). Las etapas 3 y 4 comparten gráfico.',
+  puntos:[
+    {nombre:"Melide", lat:42.912834, lon:-8.024700, km:0.89, ele:434, kmGuia:0, tipo:'inicio', fiable:true},
+    {nombre:"Santa María de Melide", lat:42.915000, lon:-8.040000, km:2.38, ele:428, kmGuia:1.8, tipo:'iglesia', fiable:true, ficha:"Monumento Nacional s. XII, a las afueras de Melide. SELLAR."},
+    {nombre:"Raido", lat:42.916000, lon:-8.055000, km:3.88, ele:463, kmGuia:3.2, tipo:'paso', fiable:true},
+    {nombre:"Parabispo", lat:42.917000, lon:-8.065000, km:4.7, ele:427, kmGuia:4, tipo:'paso', fiable:true},
+    {nombre:"Boente", lat:42.916050, lon:-8.078803, km:5.99, ele:396, kmGuia:5.8, tipo:'iglesia', horario:"7:30-14:30", fiable:true, ficha:"Iglesia de Santiago. Cafetería El Alemán, Panadería A Castellana, Albergue Boente enfrente de la iglesia."},
+    {nombre:"Castañeda", lat:42.923230, lon:-8.100650, km:8.6, ele:413, kmGuia:8, tipo:'cultura', fiable:false, ajustado:351, ficha:"Aquí hubo un horno de cal para la catedral de Santiago. Tradición: llevar una piedra desde Triacastela. Bar No Camino. COORDENADA APROXIMADA: la búsqueda devolvió A Fraga Alta, localidad vecina."},
+    {nombre:"Ribadiso da Baixo", lat:42.929920, lon:-8.153070, km:13.97, ele:388, kmGuia:11.1, tipo:'taxi', fiable:false, ajustado:933, ficha:"Puente medieval sobre el río Iso. Hospital de San Antón (s. XV) hoy albergue. Playa fluvial. Punto de escape junto al Albergue Público, a la entrada."},
+    {nombre:"Arzúa", lat:42.929688, lon:-8.160784, km:14.73, ele:390, kmGuia:14.1, tipo:'fin', fiable:true}
+  ],
+  timing:[
+    {hora:'8:00', texto:'Coche a Arzúa. Carretera paralela al camino, 16 minutos.'},
+    {hora:'9:00', texto:'Salida de Melide.'},
+    {hora:'10:30', texto:'Llegada a Boente (5,8 km).'},
+    {hora:'10:30-11:00', texto:'Desayuno. Iglesia de Santiago.'},
+    {hora:'12:00', texto:'Llegada a Ribadiso da Baixo (5,3 km). Buen punto para taxi: los 3 km que faltan son en subida.'},
+    {hora:'12:00-13:00', texto:'Parada en Ribadiso. Desvío a la playa fluvial: a la salida del pueblo, a la derecha, unos 9 min.',
+     destacado:true, dudoso:'La guía dice "creo que" y advierte de que NO está señalizado.'},
+    {hora:'14:00', texto:'Llegada a Arzúa (3 km). Tarde libre. Posible misa del peregrino.'}
+  ],
+  alojamiento:{nombre:'Albergue San Francisco', direccion:'Rúa do Carme 7',
+    checkin:'13:30', telefono:'881979304', plazas:13, web:['https://alberguesanfrancisco.com'],
+    nota:'Habitación de 12 + una individual = 13 plazas para 11 personas. Sobra sitio. El correo de la guía (29 sept 2025) confirma cambio a entrada el 21 y salida el 22 de agosto.'},
+  comidas:{
+    comida:['El Pequeño Oasis — a 4 km de Melide, frutas, smoothies, tarta de frambuesa y de Santiago',
+            'Mesón Ribadiso — junto al río, después del puente','Chiringuito de la Playa Fluvial'],
+    cena:['Casa Nené — RESERVADO 20:30 para 8 pax + reserva adicional de 4 pax a las 20:00. 981 508107, https://casanene.es/',
+          'Restaurante Casa Chelo — 981 50 82 48, por si queréis reservar'],
+    nota:'Las dos reservas de Casa Nené suman 12, pero desde el jueves sois 11. Probablemente se hizo antes de saberlo. Conviene ajustar y unificar la hora.',
+    otros:'Hay que probar el queso DO Arzúa-Ulloa.'},
+  cultura:['Melide — Iglesia de Santa María.','Boente — Iglesia de Santiago, 7:30-14:30.',
+    'Castañeda — hórreo.','Ribadiso — puente medieval sobre el río Iso, playa fluvial.',
+    'Arzúa — convento de la Magdalena (s. XIV, en ruinas), iglesia parroquial de Santiago con Apóstol Peregrino y Matamoros. SELLAR.',
+    'Fiesta del queso desde 1975.'],
+  avisos:['El desvío a la playa fluvial de Ribadiso NO está señalizado y la propia guía duda de dónde está.',
+    'Los últimos 3 km son en subida: +80 m desde Ribadiso. Poco según el modelo, pero se notan al final.']
+},
+{
+  num:5, fecha:'2026-08-22', diaSemana:'sábado',
+  origen:'Arzúa', destino:'O Pedrouzo', salida:'08:30',
+  km:{guia:19.1, sumaTramos:19.1, gpx:19.55,
+      nota:'El total y la suma de tramos del gráfico coinciden (19,1). Pero el timing solo detalla 10 + 3 km: no cierra la etapa.'},
+  perfilNota:'El gráfico va de O Pedrouzo a Arzúa, al revés del sentido de marcha.',
+  puntos:[
+    {nombre:"Arzúa", lat:42.926240, lon:-8.163430, km:0.0, ele:385, kmGuia:0, tipo:'inicio', fiable:false, ajustado:440},
+    {nombre:"As Barrosas", lat:42.928000, lon:-8.172000, km:0.72, ele:347, kmGuia:0.9, tipo:'paso', fiable:true},
+    {nombre:"Preguntoño", lat:42.927000, lon:-8.186000, km:1.98, ele:334, kmGuia:2.2, tipo:'paso', fiable:true},
+    {nombre:"A Peroxa", lat:42.926000, lon:-8.200000, km:3.7, ele:360, kmGuia:3.3, tipo:'paso', fiable:true},
+    {nombre:"Taberna Vella", lat:42.925000, lon:-8.220000, km:5.73, ele:384, kmGuia:5.2, tipo:'paso', fiable:true},
+    {nombre:"A Calzada", lat:42.920190, lon:-8.237130, km:7.2, ele:379, kmGuia:5.8, tipo:'taxi', fiable:false, ajustado:445, ficha:"Bar Casa Calzada. Punto de escape: aquí se puede quedar con el taxi desde Arzúa. COORDENADA ESTIMADA: la búsqueda devolvió un bar homónimo en Santiago. El timing de la guía la sitúa a 10 km, el perfil hacia el 5,8."},
+    {nombre:"A Calle", lat:42.923000, lon:-8.256000, km:9.3, ele:377, kmGuia:7.8, tipo:'paso', fiable:true},
+    {nombre:"Boavista", lat:42.922500, lon:-8.266000, km:10.17, ele:367, kmGuia:9.3, tipo:'comida', fiable:true, ficha:"Café Bar Veña, el de los botellines, está entre A Calle y Boavista. OJO: la guía menciona un Veña Café Bar con la misma descripción en Ferreiros (etapa 1), a 60 km. O son dos locales homónimos, o uno está mal situado."},
+    {nombre:"Salceda", lat:42.925750, lon:-8.273780, km:10.81, ele:372, kmGuia:11.1, tipo:'comida', fiable:false, ajustado:435, ficha:"Casa Tía Teresa (más para descansar) u O Curro. Después de Salceda está el monumento al peregrino Guillermo Watt."},
+    {nombre:"O Xen", lat:42.923360, lon:-8.291300, km:12.38, ele:395, kmGuia:12.5, tipo:'paso', fiable:false, ajustado:388},
+    {nombre:"Ras", lat:42.919000, lon:-8.301000, km:13.36, ele:376, kmGuia:13.1, tipo:'paso', fiable:true},
+    {nombre:"A Brea", lat:42.918500, lon:-8.308000, km:13.98, ele:366, kmGuia:13.7, tipo:'paso', fiable:true},
+    {nombre:"Rabiña", lat:42.918000, lon:-8.316000, km:14.71, ele:380, kmGuia:15, tipo:'paso', fiable:true},
+    {nombre:"Santa Irene", lat:42.916964, lon:-8.331945, km:16.38, ele:374, kmGuia:16, tipo:'iglesia', sellar:true, fiable:true, ficha:"Ermita de Santa Irene (SELLAR, normalmente cerrada) y fuente barroca, llamada de la eterna juventud. Desvío señalizado de 1-2 min a la izquierda, antes del núcleo. Restaurante O Ceadoiro: tortilla de patatas."},
+    {nombre:"O Empalme", lat:42.914610, lon:-8.347700, km:17.94, ele:309, kmGuia:17, tipo:'mirador', fiable:false, ajustado:418, ficha:"Desde aquí se atisba el horizonte hacia las costas gallegas."},
+    {nombre:"A Rúa", lat:42.909010, lon:-8.358460, km:19.22, ele:268, kmGuia:17.9, tipo:'paso', fiable:false, ajustado:380},
+    {nombre:"O Pedrouzo", lat:42.909180, lon:-8.359000, km:19.3, ele:270, kmGuia:19.1, tipo:'fin', fiable:false, ajustado:589}
+  ],
+  timing:[
+    {hora:'7:30', texto:'Coche a O Pedrouzo. 19 minutos.'},
+    {hora:'8:30', texto:'Salida de Arzúa.'},
+    {hora:'10:45', texto:'Llegada a A Calzada (10 km).'},
+    {hora:'10:45-11:15', texto:'Descanso en Bar Casa Calzada. Punto de encuentro con el taxi desde Arzúa.'},
+    {hora:'11:15-13:30', texto:'Café Bar Veña (el de los botellines) y monumento al peregrino Guillermo Watt tras Salceda.'},
+    {hora:'13:30-14:00', texto:'Parada en Santa Irene. Ver la fuente barroca. Desvío señalizado de 1-2 min.', destacado:true},
+    {hora:'14:45', texto:'Llegada a O Pedrouzo (3 km).'}
+  ],
+  alojamiento:{nombre:'Villa Xardín', direccion:'Rúa Nova 26', checkin:null,
+    telefono:'600427167', plazas:10,
+    nota:'PROBLEMA SIN RESOLVER: 5 dormitorios dobles = 10 plazas, pero sois 11. Falta una cama. Tampoco consta hora de check-in.'},
+  comidas:{
+    comida:['Trebol Arca — mucho ambiente de peregrino',
+            'Km19 — comida rápida, mucho ambiente; por la noche bar de copas',
+            'Buenas pizzerías en el pueblo; también se puede cocinar en la casa'],
+    cena:['Restaurante O Ceadoiro (Cerceda) — RESERVA SOLICITADA 20:00, 981313354, rafatrasmallo@gmail.com'],
+    nota:'Única cena del viaje SIN CONFIRMAR. Además la guía sitúa O Ceadoiro en Santa Irene y en Cerceda: ¿mismo restaurante o dos distintos?'},
+  cultura:['Santa Irene — ermita y fuente barroca de aguas curativas.',
+    'Piedra del camino con mensajes, después de Santa Irene.',
+    'O Pedrouzo — Iglesia de Santa Eulalia de Arca. SELLAR. Misa 19:00.'],
+  avisos:['Conflicto de horas: misa a las 19:00 en Santa Eulalia y cena a las 20:00 en Cerceda. Ajustado.',
+    'O Pedrouzo tiene todos los servicios: albergues, pensiones, cajero, restaurantes, farmacia, centro de salud.',
+    'El timing sitúa A Calzada a 10 km, pero el perfil de la guía la coloca hacia el km 5,8. Discrepancia sin resolver.']
+},
+{
+  num:6, fecha:'2026-08-23', diaSemana:'domingo',
+  origen:'O Pedrouzo', destino:'Santiago de Compostela', salida:'07:15',
+  km:{guia:20.0, sumaTramos:20.0, sumaGrafico:19.3, gpx:20.55,
+      nota:'El timing suma 20 km (10 + 5 + 5), coherente con el título. Pero los tramos del gráfico del perfil suman 19,3.'},
+  perfilNota:'El gráfico va de Santiago a O Pedrouzo, al revés del sentido de marcha.',
+  puntos:[
+    {nombre:"O Pedrouzo", lat:42.904552, lon:-8.362517, km:0.0, ele:295, kmGuia:0, tipo:'inicio', fiable:true},
+    {nombre:"San Antón", lat:42.902000, lon:-8.375000, km:1.6, ele:286, kmGuia:1.3, tipo:'paso', fiable:true},
+    {nombre:"Amenal", lat:42.904520, lon:-8.391090, km:3.02, ele:260, kmGuia:3.7, tipo:'paso', fiable:false, ajustado:595},
+    {nombre:"Cimadevila", lat:42.905740, lon:-8.403670, km:4.2, ele:319, kmGuia:4, tipo:'paso', fiable:false, ajustado:757},
+    {nombre:"San Paio", lat:42.904360, lon:-8.433730, km:8.2, ele:332, kmGuia:6.7, tipo:'comida', fiable:false, ajustado:802, ficha:"La guía lista San Paio bajo \"comidas\" pero sin ningún establecimiento concreto."},
+    {nombre:"Balizas del aeropuerto", lat:42.901960, lon:-8.438460, km:8.69, ele:316, kmGuia:7.7, tipo:'paso', fiable:false, ajustado:433},
+    {nombre:"Lavacolla", lat:42.899187, lon:-8.444527, km:9.65, ele:298, kmGuia:10, tipo:'taxi', fiable:true, ficha:"Lugar donde los peregrinos se despojaban de sus ropas sucias. Punto de encuentro para hacer juntos los últimos km. También se puede venir en taxi directamente hasta aquí."},
+    {nombre:"Villamaior", lat:42.893000, lon:-8.460000, km:11.74, ele:382, kmGuia:11.5, tipo:'paso', fiable:true},
+    {nombre:"TV Galicia", lat:42.890000, lon:-8.472000, km:13.3, ele:378, kmGuia:13.3, tipo:'paso', fiable:true},
+    {nombre:"RTVE", lat:42.890750, lon:-8.485910, km:14.1, ele:372, kmGuia:14.1, tipo:'paso', fiable:false, ajustado:442},
+    {nombre:"Monte do Gozo", lat:42.885564, lon:-8.500545, km:16.25, ele:326, kmGuia:15.4, tipo:'mirador', fiable:true, ficha:"El mirador más importante de la ruta: primera vista de las torres de la catedral. Cafetería en el complejo. Grupo escultórico de los dos peregrinos."},
+    {nombre:"San Marcos", lat:42.885000, lon:-8.510000, km:17.19, ele:281, kmGuia:15.8, tipo:'paso', fiable:true},
+    {nombre:"Rúa de San Lázaro", lat:42.886170, lon:-8.527840, km:18.68, ele:279, kmGuia:17.3, tipo:'paso', fiable:false, ajustado:422},
+    {nombre:"Catedral de Santiago", lat:42.880688, lon:-8.544395, km:20.43, ele:274, kmGuia:20, tipo:'fin', fiable:true, ficha:"Entrada por la Puerta del Camino, Plaza de Cervantes, Plaza del Obradoiro. Misa del peregrino 19:30. Abierta 7:00-21:00."}
+  ],
+  timing:[
+    {hora:'6:30', texto:'Coche a Santiago. 19 minutos.'},
+    {hora:'7:15', texto:'Salida de O Pedrouzo. Conviene salir temprano: se ve amanecer y no se llega tarde.'},
+    {hora:'9:45', texto:'Llegada a Lavacolla (10 km). Punto de encuentro, más o menos la mitad.'},
+    {hora:'9:45-10:15', texto:'Descanso y desayuno.'},
+    {hora:'11:30', texto:'Llegada a Monte do Gozo (5 km). Primera vista de las torres de la catedral.', destacado:true},
+    {hora:'11:30-12:00', texto:'Descanso.'},
+    {hora:'13:30', texto:'Llegada a Santiago (5 km). Comer juntos y entrar juntos. Recoger la Compostela en la Oficina del Peregrino (cierra 19:00).'},
+    {hora:'19:30', texto:'Misa del peregrino en la catedral. Llegar pronto: hay mucha gente.',
+     dudoso:'Si la misa dura una hora, sale a las 20:30, que es la hora de la cena reservada. Sin margen.'}
+  ],
+  alojamiento:{nombre:'Pensión da Sela', direccion:'Rúa das Fontiñas 82',
+    checkin:null, telefono:null, plazas:12,
+    nota:'6 habitaciones dobles = 12 plazas para 11 personas. Sin teléfono ni hora de check-in en la guía.'},
+  comidas:{
+    comida:['Mesón Cestaños — junto al parque, buen punto de espera. Aprovechar para ver el Mirador de la catedral'],
+    cena:['Parrillada Galaico Argentina Milongas — RESERVADO 20:30, 881 820 820, https://milongasparrilada.com. Junto al Parque de la Alameda',
+          'Restaurante Anoiesa — hay que llamar, sin disponibilidad online. 981565081'],
+    nota:'Choca con la misa de 19:30. Hay que decidir: misa completa o cena puntual.'},
+  cultura:['Lavacolla — donde los peregrinos se lavaban antes de entrar en Santiago.',
+    'Monte do Gozo — colina desde donde se intuye la catedral.',
+    'Catedral de Santiago — Praza do Obradoiro. Abierta 7:00-21:00.'],
+  avisos:['La sección "Pueblos" de esta etapa está vacía en la guía: solo pone "Concello de O Pino" sin texto.',
+    'Las comidas de San Paio, Lavacolla y Monte do Gozo aparecen sin ningún establecimiento asociado.',
+    'Los dos coches quedan en Santiago. Confirmar si hace falta traslado de vuelta a Sarria.']
+}
+];
+
+const GRUPO = {total:12, desde:{fecha:'2026-08-20', momento:'tarde', total:11}};
+function tamanoGrupo(f){ return f >= GRUPO.desde.fecha ? GRUPO.desde.total : GRUPO.total; }
