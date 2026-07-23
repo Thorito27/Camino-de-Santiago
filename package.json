@@ -1,0 +1,13 @@
+{
+  "name": "lolitas-camino",
+  "version": "1.0.0",
+  "description": "Visor del Camino de Santiago de las Lolitas",
+  "private": true,
+  "scripts": {
+    "validar": "node herramientas/validar.js",
+    "test": "node herramientas/probar.js"
+  },
+  "devDependencies": {
+    "jsdom": "^24.0.0"
+  }
+}

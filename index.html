@@ -1,0 +1,2375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Las Lolitas al Camino · Sarria → Santiago 2026</title>
+<meta property="og:type" content="website">
+<meta property="og:title" content="Las Lolitas al Camino · Sarria → Santiago 2026">
+<meta property="og:description" content="Seis etapas del 18 al 23 de agosto, con la guía de la tita Lucila. Mapa, perfil, tiempo, horarios y alojamientos de cada día.">
+<meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Catedral_de_Santiago_de_Compostela%2C_Espa%C3%B1a%2C_2015-09-23%2C_DD_39-41_HDR.JPG/1200px-Catedral_de_Santiago_de_Compostela%2C_Espa%C3%B1a%2C_2015-09-23%2C_DD_39-41_HDR.JPG">
+<meta property="og:locale" content="es_ES">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#1B2A23">
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--tinta:#1B2A23;--pizarra:#2E4038;--musgo:#4A6B52;--piedra:#B5AE9E;
+  --hueso:#EDE8DC;--papel:#F7F4EC;--concha:#D8A33C;--alerta:#B5482F;--radio:3px}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--tinta);color:var(--hueso);
+  overflow:hidden;-webkit-font-smoothing:antialiased}
+#app{display:grid;grid-template-rows:auto auto auto auto 1fr;height:100%}
+header{background:var(--tinta);border-bottom:1px solid rgba(237,232,220,.12);
+  padding:.55rem .9rem .45rem;display:flex;align-items:center;gap:1rem;z-index:20}
+.marca{display:flex;flex-direction:column;line-height:1.05;flex-shrink:0}
+.marca b{font-family:'Fraunces',serif;font-weight:800;font-size:1.02rem;letter-spacing:-.015em}
+.marca span{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--piedra);
+  letter-spacing:.08em;text-transform:uppercase;margin-top:.15rem}
+#btnHoy{margin:0 auto;font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;background:var(--concha);color:var(--tinta);
+  border:none;padding:.5rem 1.15rem;border-radius:var(--radio);cursor:pointer;
+  transition:transform .12s,box-shadow .12s;box-shadow:0 2px 0 rgba(0,0,0,.25)}
+#btnHoy:hover{transform:translateY(-1px);box-shadow:0 3px 0 rgba(0,0,0,.3)}
+#btnHoy:active{transform:translateY(1px);box-shadow:0 1px 0 rgba(0,0,0,.25)}
+#btnHoy:focus-visible{outline:2px solid var(--hueso);outline-offset:2px}
+.cuenta{font-family:'JetBrains Mono',monospace;font-size:.63rem;color:var(--piedra);
+  text-align:right;line-height:1.35;flex-shrink:0}
+.cuenta b{color:var(--concha);font-size:.8rem;display:block}
+nav{display:flex;background:var(--pizarra);overflow-x:auto;scrollbar-width:none;
+  border-bottom:1px solid rgba(237,232,220,.1)}
+nav::-webkit-scrollbar{display:none}
+nav button{flex:1;min-width:88px;background:none;border:none;border-bottom:3px solid transparent;
+  color:var(--piedra);cursor:pointer;padding:.5rem .4rem .45rem;font-family:'Inter',sans-serif;
+  font-size:.7rem;transition:color .15s,background .15s;text-align:center;line-height:1.25}
+nav button .n{display:block;font-family:'JetBrains Mono',monospace;font-size:.58rem;
+  letter-spacing:.1em;opacity:.65}
+nav button .d{display:block;font-weight:500;margin-top:.1rem}
+nav button:hover{color:var(--hueso);background:rgba(237,232,220,.05)}
+nav button[aria-selected="true"]{color:var(--hueso);background:rgba(237,232,220,.08);
+  border-bottom-color:var(--et,var(--concha))}
+nav button:focus-visible{outline:2px solid var(--concha);outline-offset:-2px}
+main{display:grid;grid-template-columns:minmax(310px,400px) 1fr;overflow:hidden}
+#col{display:flex;flex-direction:column;background:var(--papel);overflow:hidden}
+#subnav{display:flex;background:#E8E2D2;border-bottom:1px solid #D5CEBB;flex-shrink:0}
+#subnav button{flex:1;background:none;border:none;border-bottom:2px solid transparent;
+  padding:.48rem .3rem;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:.6rem;
+  letter-spacing:.07em;text-transform:uppercase;color:#7C776B;transition:color .13s,background .13s}
+#subnav button:hover{background:rgba(0,0,0,.04);color:var(--tinta)}
+#subnav button[aria-selected="true"]{color:var(--tinta);background:var(--papel);
+  border-bottom-color:var(--et,var(--musgo));font-weight:600}
+#subnav button:focus-visible{outline:2px solid var(--musgo);outline-offset:-2px}
+#panel{color:var(--tinta);overflow-y:auto;overscroll-behavior:contain;padding:1.1rem 1.15rem 3rem;flex:1}
+#mapa{position:relative;background:var(--pizarra)}
+.et-cab{border-bottom:2px solid var(--et,var(--musgo));padding-bottom:.7rem;margin-bottom:.9rem}
+.et-cab .fecha{font-family:'JetBrains Mono',monospace;font-size:.64rem;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--et,var(--musgo));font-weight:600}
+.et-cab h1{font-family:'Fraunces',serif;font-weight:600;font-size:1.42rem;line-height:1.12;
+  letter-spacing:-.02em;margin:.28rem 0 .45rem}
+.et-cab h1 em{font-style:normal;color:var(--et,var(--musgo))}
+.metricas{display:flex;gap:1.3rem;flex-wrap:wrap}
+.metrica{line-height:1.15}
+.metrica b{font-family:'JetBrains Mono',monospace;font-size:1.02rem;font-weight:600;display:block}
+.metrica span{font-size:.57rem;letter-spacing:.09em;text-transform:uppercase;color:#7C776B}
+.metrica.sube b{color:var(--alerta)}
+.metrica.baja b{color:var(--musgo)}
+h2{font-family:'JetBrains Mono',monospace;font-size:.63rem;letter-spacing:.15em;
+  text-transform:uppercase;color:#7C776B;font-weight:600;margin:1.5rem 0 .55rem;
+  display:flex;align-items:center;gap:.5rem}
+h2:first-child{margin-top:0}
+h2::after{content:'';flex:1;height:1px;background:#DED8C9}
+.perfil{background:#fff;border:1px solid #E2DCCC;border-radius:var(--radio);
+  padding:.6rem .5rem .35rem;position:relative}
+.perfil svg{display:block;width:100%;height:auto}
+.perfil .lbl{font-family:'JetBrains Mono',monospace;font-size:.56rem;fill:#9B958A}
+.perfil .cota{font-family:'JetBrains Mono',monospace;font-size:.54rem;fill:#7C776B}
+.perfil-pie{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;
+  font-size:.57rem;color:#9B958A;padding:.25rem .3rem 0}
+.slider-caja{background:var(--tinta);color:var(--hueso);border-radius:var(--radio);
+  padding:.7rem .8rem;margin-top:.5rem}
+.slider-caja input[type=range]{width:100%;margin:.5rem 0 .3rem;accent-color:var(--concha);cursor:grab}
+.slider-caja input[type=range]:active{cursor:grabbing}
+.slider-datos{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;text-align:center}
+.slider-datos div{line-height:1.2}
+.slider-datos b{font-family:'JetBrains Mono',monospace;font-size:.82rem;display:block}
+.slider-datos span{font-size:.53rem;letter-spacing:.07em;text-transform:uppercase;color:var(--piedra)}
+.timing{list-style:none}
+.timing li{display:grid;grid-template-columns:4.4rem 1fr;gap:.65rem;padding:.42rem 0;
+  border-bottom:1px solid #E5DFD0;font-size:.79rem;line-height:1.42}
+.timing li:last-child{border-bottom:none}
+.timing .h{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:600;
+  color:var(--et,var(--musgo));padding-top:.1rem}
+.timing li.destacado{background:linear-gradient(90deg,rgba(216,163,60,.16),transparent 82%);
+  margin:0 -.5rem;padding:.42rem .5rem;border-radius:var(--radio)}
+.dudoso{display:block;margin-top:.28rem;font-size:.68rem;line-height:1.35;color:var(--alerta);
+  padding-left:.6rem;border-left:2px solid var(--alerta)}
+.hitos{list-style:none;display:flex;flex-direction:column;gap:.3rem}
+.hito{width:100%;text-align:left;background:#fff;border:1px solid #E2DCCC;
+  border-left:3px solid var(--c,var(--piedra));border-radius:var(--radio);padding:.5rem .65rem;
+  cursor:pointer;font-family:inherit;transition:border-color .13s,transform .13s;
+  display:grid;grid-template-columns:1fr auto;gap:.5rem;align-items:baseline}
+.hito:hover{border-color:var(--c,var(--musgo));transform:translateX(2px)}
+.hito:focus-visible{outline:2px solid var(--musgo);outline-offset:1px}
+.hito .nom{font-size:.79rem;font-weight:500;line-height:1.3}
+.hito .km{font-family:'JetBrains Mono',monospace;font-size:.66rem;color:#7C776B;white-space:nowrap}
+.hito .tag{grid-column:1/-1;font-size:.6rem;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--c,#7C776B);font-weight:600;margin-top:.1rem}
+.hito .ficha{grid-column:1/-1;font-size:.71rem;line-height:1.45;color:#4A463D;margin-top:.35rem;display:none}
+.hito[aria-expanded="true"] .ficha{display:block}
+.hito .sello{display:inline-block;font-size:.56rem;font-weight:600;letter-spacing:.08em;
+  background:var(--concha);color:var(--tinta);padding:.08rem .32rem;border-radius:2px;
+  margin-left:.3rem;vertical-align:.05em}
+.hito .llegada{grid-column:1/-1;font-family:'JetBrains Mono',monospace;font-size:.62rem;
+  color:var(--musgo);margin-top:.2rem}
+.bloque{font-size:.78rem;line-height:1.55}
+.bloque ul{list-style:none;display:flex;flex-direction:column;gap:.4rem}
+.bloque li{padding-left:.85rem;position:relative}
+.bloque li::before{content:'';position:absolute;left:0;top:.55em;width:4px;height:4px;
+  border-radius:50%;background:var(--et,var(--musgo))}
+.sub{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:#7C776B;
+  font-weight:600;margin:.8rem 0 .35rem}
+.dl{display:grid;grid-template-columns:auto 1fr;gap:.25rem .7rem;font-size:.76rem}
+.dl dt{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.06em;
+  text-transform:uppercase;color:#7C776B;padding-top:.15rem}
+.dl dd{line-height:1.45}
+.dl a{color:var(--musgo)}
+.nota{font-size:.71rem;line-height:1.45;background:#fff;border:1px solid #E2DCCC;
+  border-left:3px solid var(--piedra);padding:.5rem .65rem;border-radius:var(--radio);margin-top:.45rem}
+.nota.roja{border-left-color:var(--alerta);background:#FCF3F0}
+.nota.roja::before{content:'Sin verificar · ';font-weight:600;color:var(--alerta);
+  font-size:.62rem;letter-spacing:.06em;text-transform:uppercase}
+.nota.km::before{content:'Los km no cuadran · ';font-weight:600;color:var(--alerta);
+  font-size:.62rem;letter-spacing:.06em;text-transform:uppercase}
+.marcha{background:var(--tinta);color:var(--hueso);border-radius:var(--radio);
+  padding:.75rem .8rem;margin-top:.5rem}
+.marcha .fila{display:flex;justify-content:space-between;align-items:baseline;gap:1rem}
+.marcha .fila+.fila{margin-top:.4rem;padding-top:.4rem;border-top:1px solid rgba(237,232,220,.14)}
+.marcha .lbl{font-size:.68rem;color:var(--piedra)}
+.marcha .val{font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:600}
+.marcha .pie{font-size:.62rem;line-height:1.4;color:var(--piedra);margin-top:.6rem;
+  padding-top:.5rem;border-top:1px solid rgba(237,232,220,.14)}
+.marcha code{background:rgba(237,232,220,.12);padding:.05rem .25rem;border-radius:2px;
+  font-family:'JetBrains Mono',monospace;font-size:.95em}
+.meteo-estado{font-size:.73rem;line-height:1.5;background:#fff;border:1px solid #E2DCCC;
+  border-radius:var(--radio);padding:.7rem .75rem;color:#5A554A}
+.meteo-grid{display:flex;flex-direction:column;gap:.3rem}
+.meteo-h{display:grid;grid-template-columns:3.1rem 1.7rem 1fr auto;gap:.5rem;align-items:center;
+  background:#fff;border:1px solid #E2DCCC;border-radius:var(--radio);padding:.42rem .6rem;font-size:.75rem}
+.meteo-h .hh{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:600;color:#7C776B}
+.meteo-h .ic{font-size:1.1rem;text-align:center;line-height:1}
+.meteo-h .tt{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:.86rem}
+.meteo-h .ds{font-size:.67rem;color:#7C776B;line-height:1.3}
+.meteo-h .pp{font-family:'JetBrains Mono',monospace;font-size:.66rem;color:#3D5A73;white-space:nowrap}
+.meteo-h.calor{border-left:3px solid var(--alerta)}
+.meteo-h.moja{border-left:3px solid #3D5A73}
+.meteo-resumen{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.5rem}
+.meteo-resumen div{background:var(--tinta);color:var(--hueso);border-radius:var(--radio);
+  padding:.55rem .4rem;text-align:center;line-height:1.2}
+.meteo-resumen b{font-family:'JetBrains Mono',monospace;font-size:1rem;display:block}
+.meteo-resumen span{font-size:.53rem;letter-spacing:.07em;text-transform:uppercase;color:var(--piedra)}
+.cargando{display:inline-block;width:11px;height:11px;border:2px solid #DED8C9;
+  border-top-color:var(--musgo);border-radius:50%;animation:giro .7s linear infinite;
+  vertical-align:-1px;margin-right:.4rem}
+@keyframes giro{to{transform:rotate(360deg)}}
+.btn-recargar{background:none;border:1px solid #D5CEBB;border-radius:var(--radio);
+  padding:.35rem .7rem;font-family:'JetBrains Mono',monospace;font-size:.62rem;
+  letter-spacing:.06em;text-transform:uppercase;color:#7C776B;cursor:pointer;margin-top:.5rem}
+.btn-recargar:hover{border-color:var(--musgo);color:var(--tinta)}
+.tabla{width:100%;border-collapse:collapse;font-size:.74rem}
+.tabla th{font-family:'JetBrains Mono',monospace;font-size:.56rem;letter-spacing:.08em;
+  text-transform:uppercase;color:#7C776B;font-weight:600;text-align:right;padding:.3rem .35rem;
+  border-bottom:1px solid #DED8C9}
+.tabla th:first-child{text-align:left}
+.tabla td{padding:.38rem .35rem;border-bottom:1px solid #E9E3D4;text-align:right;
+  font-family:'JetBrains Mono',monospace;font-size:.71rem}
+.tabla td:first-child{text-align:left;font-family:'Inter',sans-serif}
+.tabla tr:hover td{background:rgba(74,107,82,.06)}
+.tabla .pt{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:.4rem}
+.tabla tfoot td{font-weight:600;border-top:2px solid #DED8C9;border-bottom:none;padding-top:.5rem}
+.tabla button{background:none;border:none;font:inherit;color:inherit;cursor:pointer;
+  padding:0;text-align:left;width:100%}
+.tabla button:hover{color:var(--musgo);text-decoration:underline}
+.mk{font-family:'JetBrains Mono',monospace;display:flex;align-items:center;
+  justify-content:center;cursor:pointer;user-select:none}
+.mk-et{width:31px;height:31px;border-radius:50%;color:#fff;font-size:.82rem;font-weight:600;
+  border:2.5px solid rgba(255,255,255,.92);box-shadow:0 2px 7px rgba(0,0,0,.42);transition:transform .14s}
+.mk-et:hover{transform:scale(1.14)}
+.mk-pt{width:15px;height:15px;border-radius:50%;border:2.5px solid #fff;
+  box-shadow:0 1px 5px rgba(0,0,0,.45);transition:transform .14s}
+.mk-pt:hover{transform:scale(1.42)}
+.mk-pt.grande{width:21px;height:21px;border-width:3px}
+.mk-pos{width:17px;height:17px;border-radius:50%;background:var(--concha);border:3px solid #fff;
+  box-shadow:0 0 0 3px rgba(216,163,60,.35),0 2px 6px rgba(0,0,0,.5)}
+.mk-lbl{position:absolute;left:50%;top:100%;transform:translateX(-50%);margin-top:3px;
+  white-space:nowrap;font-family:'Inter',sans-serif;font-size:.63rem;font-weight:500;color:#fff;
+  text-shadow:0 1px 3px rgba(0,0,0,.95),0 0 6px rgba(0,0,0,.8);pointer-events:none}
+.attr{position:absolute;bottom:5px;left:8px;z-index:5;font-family:'JetBrains Mono',monospace;
+  font-size:.56rem;color:rgba(255,255,255,.72);text-shadow:0 1px 3px rgba(0,0,0,.9);
+  pointer-events:none;line-height:1.5}
+#verMapa{display:none;position:fixed;bottom:1rem;right:1rem;z-index:30;background:var(--concha);
+  color:var(--tinta);border:none;font-family:'JetBrains Mono',monospace;font-size:.68rem;
+  font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:.7rem 1.1rem;
+  border-radius:var(--radio);box-shadow:0 3px 10px rgba(0,0,0,.35);cursor:pointer}
+
+/* --- Geolocalización --- */
+#btnGeo{font-family:'JetBrains Mono',monospace;font-size:.63rem;font-weight:600;
+  letter-spacing:.07em;text-transform:uppercase;background:none;color:var(--piedra);
+  border:1px solid rgba(237,232,220,.3);padding:.42rem .7rem;border-radius:var(--radio);
+  cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+#btnGeo:hover{border-color:var(--concha);color:var(--hueso)}
+#btnGeo.buscando{border-color:var(--concha);color:var(--concha)}
+#btnGeo.activo{background:var(--musgo);border-color:var(--musgo);color:#fff}
+#btnGeo:focus-visible{outline:2px solid var(--concha);outline-offset:2px}
+#barraGeo{display:none;background:var(--musgo);color:#fff;padding:.55rem .8rem;
+  border-bottom:1px solid rgba(0,0,0,.2);flex-shrink:0}
+.geo-fila{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;text-align:center}
+.geo-dato b{font-family:'JetBrains Mono',monospace;font-size:.95rem;display:block;line-height:1.1}
+.geo-dato span{font-size:.5rem;letter-spacing:.06em;text-transform:uppercase;opacity:.8}
+.geo-sig{margin-top:.5rem;padding-top:.45rem;border-top:1px solid rgba(255,255,255,.25);
+  display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap}
+.geo-sig .lbl{font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;opacity:.75}
+.geo-sig b{font-size:.85rem}
+.geo-sig .det{font-family:'JetBrains Mono',monospace;font-size:.7rem;opacity:.9;margin-left:auto}
+.geo-aviso{background:rgba(181,72,47,.9);margin:-.55rem -.8rem .5rem;padding:.4rem .8rem;
+  font-size:.7rem;line-height:1.35}
+.geo-acciones{display:flex;gap:.35rem;margin-top:.5rem;flex-wrap:wrap}
+.geo-acciones button{flex:1;min-width:90px;background:rgba(255,255,255,.15);border:none;
+  color:#fff;font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.05em;
+  text-transform:uppercase;padding:.35rem .3rem;border-radius:var(--radio);cursor:pointer}
+.geo-acciones button:hover{background:rgba(255,255,255,.28)}
+.mk-yo{width:20px;height:20px;border-radius:50%;background:#2E7D32;border:3px solid #fff;
+  box-shadow:0 2px 8px rgba(0,0,0,.5);position:relative}
+.mk-yo .pulso{position:absolute;inset:-9px;border-radius:50%;border:2px solid #2E7D32;
+  animation:pulsa 2s ease-out infinite}
+@keyframes pulsa{0%{transform:scale(.6);opacity:.9}100%{transform:scale(1.5);opacity:0}}
+
+/* --- Teléfonos --- */
+.tels{display:flex;flex-direction:column;gap:.3rem}
+.tel{display:flex;justify-content:space-between;align-items:center;gap:.6rem;
+  background:#fff;border:1px solid #E2DCCC;border-left:3px solid var(--musgo);
+  border-radius:var(--radio);padding:.5rem .65rem;text-decoration:none;color:var(--tinta);
+  transition:border-color .13s,transform .13s}
+.tel:hover{border-color:var(--musgo);transform:translateX(2px)}
+.tel.sin{border-left-color:var(--piedra);opacity:.65}
+.tel-n{font-size:.76rem;font-weight:500;line-height:1.3}
+.tel-n em{font-style:normal;font-size:.66rem;color:#7C776B;font-weight:400}
+.tel-t{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:600;
+  color:var(--musgo);white-space:nowrap}
+.tel.sin .tel-t{color:#9B958A;font-weight:400;font-size:.68rem}
+
+/* --- Escapes --- */
+.hito.escape{border-left-color:var(--alerta);background:#FDF7F5}
+.hito .restante{color:var(--musgo);font-weight:600}
+.hito .pasado{color:#9B958A;font-style:italic}
+
+/* --- Sellos --- */
+.sellos-estado{display:flex;align-items:center;gap:.7rem;background:var(--tinta);
+  color:var(--hueso);border-radius:var(--radio);padding:.7rem .8rem}
+.sellos-estado b{font-family:'JetBrains Mono',monospace;font-size:1.5rem;
+  color:var(--concha);line-height:1;flex-shrink:0}
+.sellos-estado.ok b{color:#7FBF7F}
+.sellos-estado span{font-size:.71rem;line-height:1.4;color:var(--piedra)}
+.sellos{list-style:none;display:flex;flex-direction:column;gap:.3rem;margin-top:.5rem}
+.sello-item{width:100%;display:flex;align-items:flex-start;gap:.6rem;background:#fff;
+  border:1px solid #E2DCCC;border-radius:var(--radio);padding:.55rem .65rem;cursor:pointer;
+  font-family:inherit;text-align:left;transition:border-color .13s,background .13s}
+.sello-item:hover{border-color:var(--musgo)}
+.sello-item.hecho{background:#F1F6F1;border-color:#B8D4B8}
+.sello-item:focus-visible{outline:2px solid var(--musgo);outline-offset:1px}
+.sello-item .caja{width:20px;height:20px;border:2px solid #C4BCA6;border-radius:3px;
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;
+  font-size:.85rem;font-weight:700;line-height:1;margin-top:.05rem}
+.sello-item.hecho .caja{background:var(--musgo);border-color:var(--musgo)}
+.sello-item .txt{display:flex;flex-wrap:wrap;gap:.25rem .5rem;align-items:baseline}
+.sello-item .txt b{font-size:.78rem;font-weight:500;width:100%;line-height:1.3}
+.sello-item .km,.sello-item .hor{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:#7C776B}
+.sello-item .ofi{font-size:.58rem;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--musgo);font-weight:600}
+.sellos-acciones{display:flex;gap:.4rem;margin-top:.7rem;flex-wrap:wrap}
+.sellos-acciones button{flex:1;min-width:130px}
+.nav-sellos{position:absolute;top:2px;right:3px;font-family:'JetBrains Mono',monospace;
+  font-size:.5rem;background:var(--concha);color:var(--tinta);border-radius:6px;
+  padding:0 .25rem;font-weight:700;line-height:1.5}
+
+/* --- Perfil interactivo --- */
+.perfil svg{cursor:crosshair;touch-action:none}
+.perfil .zona-toque{fill:transparent}
+
+/* --- Compartir --- */
+#btnComp{background:none;border:1px solid rgba(237,232,220,.3);color:var(--piedra);
+  font-family:'JetBrains Mono',monospace;font-size:.63rem;font-weight:600;letter-spacing:.07em;
+  text-transform:uppercase;padding:.42rem .7rem;border-radius:var(--radio);cursor:pointer;
+  white-space:nowrap;flex-shrink:0;transition:all .15s}
+#btnComp:hover{border-color:var(--concha);color:var(--hueso)}
+#btnComp:focus-visible{outline:2px solid var(--concha);outline-offset:2px}
+
+/* --- Avisos --- */
+#aviso{position:fixed;left:50%;bottom:1.4rem;transform:translate(-50%,1.5rem);
+  background:var(--tinta);color:var(--hueso);padding:.7rem 1.1rem;border-radius:var(--radio);
+  font-size:.76rem;line-height:1.4;max-width:min(92vw,420px);box-shadow:0 4px 18px rgba(0,0,0,.4);
+  opacity:0;pointer-events:none;transition:opacity .22s,transform .22s;z-index:60;text-align:center}
+#aviso.visible{opacity:1;transform:translate(-50%,0)}
+
+/* --- Estado sin conexión --- */
+#sinRed{display:none;background:var(--alerta);color:#fff;font-family:'JetBrains Mono',monospace;
+  font-size:.6rem;letter-spacing:.06em;text-transform:uppercase;text-align:center;
+  padding:.3rem;flex-shrink:0}
+body.offline #sinRed{display:block}
+
+/* --- Descarga para sin cobertura --- */
+.descarga{background:var(--tinta);color:var(--hueso);border-radius:var(--radio);
+  padding:.75rem .8rem;margin-top:.5rem}
+.descarga .barra{height:5px;background:rgba(237,232,220,.18);border-radius:3px;
+  margin:.55rem 0 .4rem;overflow:hidden}
+.descarga .barra i{display:block;height:100%;background:var(--concha);width:0;
+  transition:width .3s;border-radius:3px}
+.descarga p{font-size:.68rem;line-height:1.45;color:var(--piedra)}
+.descarga button{width:100%;margin-top:.5rem;background:var(--concha);color:var(--tinta);
+  border:none;font-family:'JetBrains Mono',monospace;font-size:.63rem;font-weight:600;
+  letter-spacing:.07em;text-transform:uppercase;padding:.5rem;border-radius:var(--radio);
+  cursor:pointer}
+.descarga button:disabled{opacity:.5;cursor:default}
+
+/* Tipografía algo mayor en móvil: se lee al sol y con presbicia */
+@media(max-width:860px){
+  .hito .nom,.tel-n{font-size:.85rem}
+  .bloque,.timing li{font-size:.83rem}
+  .dl{font-size:.81rem}
+  .nota{font-size:.76rem}
+  .sello-item .txt b{font-size:.84rem}
+}
+
+@media(max-width:860px){
+  main{grid-template-columns:1fr;grid-template-rows:1fr}
+  #mapa{display:none}
+  main.mapa #col{display:none}
+  main.mapa #mapa{display:block}
+  #verMapa{display:block}
+  .marca b{font-size:.92rem}
+  .cuenta{display:none}
+  .slider-datos{grid-template-columns:repeat(2,1fr);gap:.6rem}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="marca"><b>Las Lolitas al Camino</b><span>Sarria → Santiago · agosto 2026</span></div>
+    <button id="btnHoy">Hoy</button>
+    <button id="btnGeo" onclick="Geo.iniciar()">Dónde estoy</button>
+    <button id="btnComp" onclick="compartir(vistaEtapa)">Compartir</button>
+    <div class="cuenta" id="cuenta"></div>
+  </header>
+  <div id="sinRed">Sin conexión — usando datos guardados</div>
+  <div id="barraGeo"></div>
+  <nav id="nav" role="tablist" aria-label="Etapas"></nav>
+  <main id="main">
+    <div id="col">
+      <div id="subnav" role="tablist" aria-label="Secciones"></div>
+      <section id="panel" role="tabpanel"></section>
+    </div>
+    <div id="mapa">
+      <div class="attr">Imágenes: ESRI World Imagery · Relieve: AWS Terrain<br>Datos meteo: Open-Meteo.com</div>
+    </div>
+  </main>
+</div>
+<button id="verMapa">Ver mapa</button>
+<script>
+/* Trazas GPX simplificadas. Cada punto: [lon, lat, altitud_m, km_acumulado]
+   Origen: seis trazas de Wikiloc.
+   Altitud suavizada con media móvil de 31 puntos; desnivel contado con
+   umbral de 10 m para descartar ruido del GPS. Calibrado contra Gronze:
+   etapa 1 da 403 m de D+ (Gronze publica 398) y etapa 2 da 503 (Gronze 519).
+   Simplificadas con Douglas-Peucker a 12 m de tolerancia. */
+'use strict';
+const TRAZAS = {
+  1: {km:23.51, dPos:403, dNeg:535, minEle:309, maxEle:650, nOrig:3470,
+     linea:[[-7.4163,42.7772,470.4,0.0],[-7.41771,42.77675,473.9,0.147],[-7.41761,42.77712,476.1,0.19],[-7.41829,42.77763,483.5,0.276],[-7.42005,42.77801,480.1,0.433],[-7.42076,42.77852,476.2,0.516],[-7.42227,42.77675,456.6,0.757],[-7.42277,42.77696,449.8,0.806],[-7.42349,42.77839,429.6,0.991],[-7.42396,42.7784,426.8,1.031],[-7.42514,42.77802,422.8,1.14],[-7.42575,42.77733,421.2,1.239],[-7.4267,42.77679,420.3,1.34],[-7.42678,42.77654,419.2,1.369],[-7.42655,42.77633,420.9,1.404],[-7.42721,42.77556,432.4,1.508],[-7.42856,42.77459,439.7,1.665],[-7.43028,42.7741,440.4,1.823],[-7.43112,42.77275,450.9,1.994],[-7.43163,42.77281,451.6,2.037],[-7.43397,42.77239,455.1,2.235],[-7.43419,42.77253,456.2,2.259],[-7.4346,42.77206,462.1,2.322],[-7.43489,42.77233,471.9,2.36],[-7.43636,42.77228,482.0,2.484],[-7.4358,42.77201,494.6,2.543],[-7.43592,42.77143,497.1,2.615],[-7.43769,42.77078,500.7,2.778],[-7.43958,42.76979,497.1,2.974],[-7.44024,42.77036,498.8,3.062],[-7.44331,42.77088,498.1,3.325],[-7.44371,42.77018,498.5,3.413],[-7.44439,42.76957,503.1,3.502],[-7.44414,42.76891,510.7,3.583],[-7.44427,42.76869,512.5,3.61],[-7.44543,42.76846,516.3,3.716],[-7.44719,42.76687,531.7,3.948],[-7.4497,42.76629,543.1,4.17],[-7.45022,42.76573,543.6,4.25],[-7.45045,42.76574,543.5,4.27],[-7.45025,42.7656,542.9,4.303],[-7.45055,42.76518,542.8,4.362],[-7.45026,42.76539,542.0,4.399],[-7.45024,42.76578,541.0,4.455],[-7.45022,42.76549,542.1,4.498],[-7.45025,42.76574,542.8,4.525],[-7.4523,42.76769,555.1,4.807],[-7.45288,42.76856,566.2,4.918],[-7.45376,42.76912,569.0,5.016],[-7.45444,42.76942,567.7,5.083],[-7.45604,42.76959,573.1,5.22],[-7.45712,42.76883,583.9,5.348],[-7.45901,42.76803,599.8,5.53],[-7.45962,42.76858,594.8,5.612],[-7.46092,42.76921,585.7,5.742],[-7.46259,42.76937,589.5,5.883],[-7.4634,42.76925,592.0,5.952],[-7.46383,42.76963,600.3,6.01],[-7.46458,42.76971,604.7,6.074],[-7.4648,42.76958,607.1,6.097],[-7.46534,42.77003,615.2,6.167],[-7.46657,42.77019,621.9,6.275],[-7.46675,42.77077,625.6,6.343],[-7.46734,42.77112,630.3,6.411],[-7.46723,42.77161,630.5,6.469],[-7.46796,42.77229,624.2,6.567],[-7.46892,42.77306,616.5,6.69],[-7.47102,42.77423,609.4,6.935],[-7.4713,42.77465,609.7,6.987],[-7.47196,42.77502,611.5,7.056],[-7.47577,42.77395,606.4,7.413],[-7.47711,42.77314,605.8,7.562],[-7.47817,42.77316,602.8,7.654],[-7.47874,42.77275,597.1,7.723],[-7.47978,42.77255,589.7,7.827],[-7.48004,42.77286,588.0,7.869],[-7.47998,42.77404,589.3,8.003],[-7.48028,42.7747,590.8,8.092],[-7.48075,42.77511,591.3,8.151],[-7.48092,42.77593,596.4,8.246],[-7.48164,42.77705,598.7,8.389],[-7.48189,42.77811,603.3,8.512],[-7.48272,42.77913,609.0,8.653],[-7.48351,42.78083,617.4,8.873],[-7.48411,42.78112,617.0,8.939],[-7.48641,42.78092,620.1,9.133],[-7.4886,42.78112,622.0,9.32],[-7.49137,42.78099,621.5,9.564],[-7.49439,42.78016,623.2,9.835],[-7.49485,42.78063,621.2,9.905],[-7.49569,42.78099,619.4,9.989],[-7.49607,42.7805,619.8,10.056],[-7.4958,42.77996,622.2,10.121],[-7.49605,42.77959,625.1,10.168],[-7.4982,42.77927,629.8,10.352],[-7.49954,42.77882,630.1,10.476],[-7.49946,42.77891,629.6,10.489],[-7.50033,42.77787,622.8,10.627],[-7.50301,42.77724,629.9,10.869],[-7.50408,42.77751,635.1,10.968],[-7.5058,42.77713,626.1,11.118],[-7.50738,42.77781,616.8,11.284],[-7.50808,42.77829,609.6,11.368],[-7.50844,42.77884,605.1,11.442],[-7.50986,42.77829,608.1,11.577],[-7.51186,42.77882,623.7,11.763],[-7.51278,42.77872,628.7,11.841],[-7.51384,42.77906,631.9,11.937],[-7.51443,42.77892,634.1,11.988],[-7.5148,42.77919,637.5,12.032],[-7.51528,42.77919,641.7,12.073],[-7.51579,42.77963,645.8,12.139],[-7.51672,42.77967,644.4,12.219],[-7.51931,42.78044,649.2,12.453],[-7.52013,42.78122,642.1,12.566],[-7.52073,42.78144,638.1,12.621],[-7.52079,42.78186,635.4,12.669],[-7.52123,42.78219,633.1,12.723],[-7.52108,42.78272,630.7,12.784],[-7.52138,42.78359,627.2,12.89],[-7.52104,42.78407,627.0,12.952],[-7.52151,42.78487,628.8,13.05],[-7.52225,42.78531,632.3,13.129],[-7.52557,42.78404,640.0,13.441],[-7.52654,42.78402,637.1,13.523],[-7.52758,42.78359,637.8,13.622],[-7.53054,42.78389,647.0,13.885],[-7.53147,42.78345,645.8,13.985],[-7.53336,42.78361,643.3,14.144],[-7.53494,42.7835,628.6,14.279],[-7.53879,42.78419,620.2,14.612],[-7.53975,42.78417,620.7,14.694],[-7.54236,42.78507,614.9,14.938],[-7.54265,42.78474,610.4,14.984],[-7.54441,42.78492,602.7,15.145],[-7.54604,42.78435,611.9,15.3],[-7.54634,42.78487,622.5,15.369],[-7.54687,42.78493,624.2,15.413],[-7.54725,42.78457,625.5,15.465],[-7.54884,42.78404,617.0,15.611],[-7.55017,42.78398,613.7,15.722],[-7.5513,42.78433,612.9,15.826],[-7.55366,42.78397,618.9,16.034],[-7.55444,42.7837,633.4,16.106],[-7.55573,42.78279,634.8,16.264],[-7.55641,42.78295,623.4,16.324],[-7.55688,42.78333,614.9,16.383],[-7.55744,42.78433,615.0,16.506],[-7.55839,42.78465,617.2,16.595],[-7.55921,42.78456,614.2,16.665],[-7.55945,42.78493,612.2,16.714],[-7.56044,42.78546,603.8,16.818],[-7.56093,42.78604,600.9,16.896],[-7.56253,42.78637,600.2,17.036],[-7.56297,42.78695,584.9,17.115],[-7.56355,42.78699,571.6,17.167],[-7.56669,42.7882,534.9,17.469],[-7.56698,42.78852,534.1,17.514],[-7.56758,42.7885,531.9,17.563],[-7.568,42.78879,528.4,17.611],[-7.56863,42.78863,523.7,17.668],[-7.5705,42.78931,509.1,17.847],[-7.57161,42.79039,509.2,18.0],[-7.57252,42.79093,519.8,18.106],[-7.57423,42.79104,521.9,18.254],[-7.57519,42.79089,521.2,18.341],[-7.57623,42.79107,528.0,18.43],[-7.57916,42.79075,540.4,18.68],[-7.58255,42.79115,520.7,18.972],[-7.58372,42.79158,511.4,19.08],[-7.58413,42.79248,501.1,19.19],[-7.58478,42.79317,494.3,19.287],[-7.58596,42.79351,483.1,19.393],[-7.58673,42.79401,470.8,19.48],[-7.588,42.79392,459.8,19.592],[-7.59,42.79436,454.9,19.772],[-7.59142,42.79432,450.6,19.892],[-7.59367,42.79487,439.9,20.089],[-7.59621,42.79531,428.8,20.312],[-7.59697,42.79518,423.6,20.377],[-7.59844,42.79557,405.4,20.506],[-7.59944,42.79548,398.6,20.59],[-7.60071,42.79561,400.1,20.696],[-7.60195,42.79544,398.5,20.803],[-7.60236,42.79567,396.1,20.849],[-7.60291,42.7957,395.3,20.897],[-7.6035,42.79558,395.6,20.948],[-7.60412,42.79513,398.8,21.023],[-7.60467,42.79509,401.0,21.074],[-7.60912,42.79604,394.8,21.461],[-7.60931,42.7963,394.6,21.495],[-7.6091,42.7966,395.1,21.537],[-7.6108,42.79647,387.5,21.678],[-7.61257,42.79803,369.7,21.913],[-7.61328,42.79906,359.8,22.048],[-7.61417,42.79931,355.7,22.129],[-7.61477,42.79995,355.2,22.217],[-7.61613,42.80064,347.8,22.355],[-7.61694,42.80069,343.4,22.428],[-7.61724,42.80091,335.3,22.469],[-7.61565,42.80208,321.2,22.661],[-7.61512,42.80214,316.3,22.707],[-7.61692,42.80512,316.6,23.074],[-7.61726,42.80538,319.6,23.118],[-7.61669,42.80611,333.2,23.221],[-7.61624,42.80618,335.7,23.278],[-7.61532,42.80685,340.7,23.39],[-7.61585,42.80732,343.6,23.462],[-7.61629,42.80708,344.5,23.508]]},
+  2: {km:27.58, dPos:503, dNeg:321, minEle:354, maxEle:706, nOrig:3973,
+     linea:[[-7.61667,42.80667,380.6,0.0],[-7.61793,42.8062,380.2,0.122],[-7.61963,42.80659,366.1,0.278],[-7.6208,42.80644,366.5,0.381],[-7.62078,42.80627,368.3,0.405],[-7.61965,42.80628,372.4,0.501],[-7.61899,42.80575,360.0,0.587],[-7.61987,42.80529,354.4,0.676],[-7.62046,42.80554,361.0,0.737],[-7.62099,42.80522,366.3,0.796],[-7.62216,42.8052,368.5,0.903],[-7.62353,42.8047,368.2,1.03],[-7.62486,42.80487,364.6,1.143],[-7.62526,42.80475,367.0,1.181],[-7.62535,42.80493,371.1,1.203],[-7.62791,42.80537,383.4,1.43],[-7.62824,42.80557,385.2,1.465],[-7.62927,42.80556,387.1,1.548],[-7.62964,42.80589,393.5,1.596],[-7.63058,42.80594,395.7,1.674],[-7.63149,42.80637,398.0,1.762],[-7.63208,42.80699,411.7,1.849],[-7.63321,42.80758,421.4,1.962],[-7.6343,42.80756,440.3,2.056],[-7.63456,42.8073,444.3,2.093],[-7.63675,42.80666,442.0,2.307],[-7.63796,42.80667,435.6,2.42],[-7.63876,42.8069,438.2,2.493],[-7.63948,42.80745,438.5,2.578],[-7.63954,42.80781,442.5,2.621],[-7.64033,42.80833,449.5,2.717],[-7.6411,42.80751,450.3,2.838],[-7.64241,42.80733,447.8,2.958],[-7.64276,42.80745,448.1,2.99],[-7.64312,42.80791,448.3,3.048],[-7.64471,42.81112,443.1,3.452],[-7.64591,42.81168,442.0,3.574],[-7.64851,42.81188,446.1,3.8],[-7.64917,42.81178,446.1,3.856],[-7.64977,42.81195,446.8,3.913],[-7.65146,42.81188,444.1,4.059],[-7.65179,42.81204,445.9,4.093],[-7.65691,42.81194,471.4,4.533],[-7.65716,42.81212,473.2,4.562],[-7.66024,42.81219,489.0,4.839],[-7.66102,42.81256,492.6,4.929],[-7.66156,42.81244,494.5,4.976],[-7.66199,42.81265,496.3,5.019],[-7.66271,42.81265,496.9,5.079],[-7.66282,42.81287,497.7,5.107],[-7.66377,42.81276,500.3,5.19],[-7.66512,42.81367,505.1,5.355],[-7.66617,42.81399,516.7,5.455],[-7.66754,42.81473,522.5,5.601],[-7.66971,42.81539,523.2,5.803],[-7.67004,42.81573,528.2,5.851],[-7.67086,42.81569,531.3,5.921],[-7.67164,42.81609,532.1,5.998],[-7.67398,42.81635,535.7,6.199],[-7.67483,42.81701,531.9,6.301],[-7.67662,42.81923,530.0,6.596],[-7.67709,42.81919,530.1,6.636],[-7.67641,42.81938,530.0,6.707],[-7.67913,42.8211,527.6,7.084],[-7.68192,42.82137,524.1,7.326],[-7.68226,42.82156,521.3,7.363],[-7.6825,42.82146,520.2,7.387],[-7.68261,42.82164,519.6,7.409],[-7.68318,42.82141,521.2,7.471],[-7.68392,42.82184,524.6,7.554],[-7.68458,42.8218,528.4,7.613],[-7.68475,42.82195,529.0,7.635],[-7.68609,42.82208,526.4,7.756],[-7.68766,42.82288,519.3,7.925],[-7.68807,42.82337,519.8,7.993],[-7.68859,42.82341,519.1,8.039],[-7.68952,42.82393,521.1,8.144],[-7.68972,42.82388,522.2,8.178],[-7.69003,42.82438,524.8,8.252],[-7.69024,42.82433,525.9,8.271],[-7.69064,42.82466,528.0,8.323],[-7.69124,42.82474,525.8,8.375],[-7.69237,42.82525,521.6,8.487],[-7.69329,42.82539,520.5,8.567],[-7.69437,42.82589,524.9,8.674],[-7.69583,42.82606,532.2,8.81],[-7.69716,42.82698,544.0,8.967],[-7.698,42.8267,545.9,9.045],[-7.69847,42.82682,545.5,9.087],[-7.69935,42.82757,545.9,9.202],[-7.70058,42.82816,565.0,9.333],[-7.70082,42.8281,575.2,9.374],[-7.70091,42.82859,588.8,9.43],[-7.70167,42.82856,603.6,9.501],[-7.70217,42.82963,585.7,9.649],[-7.70269,42.82967,576.3,9.692],[-7.70304,42.8299,570.9,9.731],[-7.70356,42.82979,571.1,9.777],[-7.7046,42.83019,572.3,9.879],[-7.70563,42.83091,573.9,10.009],[-7.7065,42.83105,573.5,10.084],[-7.70672,42.8313,573.5,10.121],[-7.7072,42.83122,573.2,10.163],[-7.70779,42.8315,574.4,10.228],[-7.70849,42.8315,576.0,10.286],[-7.70913,42.83185,577.8,10.365],[-7.70958,42.83184,580.1,10.408],[-7.71061,42.83245,592.2,10.524],[-7.71077,42.83239,594.5,10.541],[-7.71108,42.83277,599.5,10.595],[-7.71298,42.83363,618.6,10.79],[-7.71374,42.83383,619.1,10.859],[-7.71456,42.83357,621.0,10.935],[-7.71727,42.83357,643.9,11.168],[-7.71746,42.83379,652.4,11.206],[-7.71863,42.83415,666.3,11.333],[-7.72087,42.83422,665.4,11.531],[-7.72125,42.83405,664.3,11.568],[-7.72174,42.83453,663.4,11.644],[-7.72328,42.83537,666.4,11.807],[-7.72339,42.8357,667.5,11.846],[-7.72435,42.83603,666.8,11.939],[-7.72494,42.83657,664.3,12.024],[-7.73052,42.83832,670.2,12.54],[-7.73107,42.83908,667.9,12.65],[-7.73182,42.83926,667.7,12.716],[-7.73218,42.83982,665.1,12.795],[-7.73386,42.84054,655.9,12.973],[-7.73471,42.84152,666.6,13.112],[-7.73375,42.84186,666.7,13.207],[-7.73371,42.84206,666.4,13.23],[-7.73415,42.8423,670.1,13.276],[-7.73435,42.84237,670.8,13.294],[-7.73478,42.84204,669.2,13.345],[-7.7356,42.84193,662.4,13.42],[-7.73646,42.84221,648.3,13.499],[-7.73701,42.84214,648.3,13.549],[-7.73726,42.84251,649.9,13.6],[-7.74055,42.84271,674.0,13.877],[-7.74224,42.84321,677.1,14.027],[-7.74525,42.84338,687.7,14.28],[-7.7482,42.84439,689.6,14.562],[-7.7488,42.84424,688.0,14.623],[-7.74897,42.84394,684.9,14.685],[-7.74923,42.84435,676.4,14.83],[-7.75162,42.84513,685.5,15.047],[-7.75583,42.84586,698.7,15.408],[-7.75731,42.84704,696.4,15.598],[-7.75799,42.84796,695.8,15.72],[-7.75837,42.84808,696.1,15.755],[-7.76038,42.84969,705.2,16.016],[-7.76206,42.85006,690.8,16.17],[-7.76407,42.85096,683.1,16.375],[-7.76749,42.85164,660.0,16.689],[-7.76957,42.85243,645.6,16.885],[-7.77031,42.85259,644.4,16.948],[-7.77143,42.85253,635.9,17.043],[-7.77126,42.85236,633.0,17.072],[-7.77167,42.85233,630.5,17.106],[-7.77234,42.85268,626.0,17.18],[-7.77268,42.85267,625.6,17.21],[-7.7732,42.85294,627.0,17.266],[-7.7738,42.8537,624.6,17.371],[-7.77494,42.85428,619.3,17.5],[-7.77507,42.85455,618.8,17.533],[-7.77672,42.85496,617.1,17.688],[-7.77738,42.8553,615.5,17.758],[-7.77786,42.85582,612.9,17.832],[-7.77818,42.85669,609.5,17.939],[-7.77923,42.85779,611.0,18.104],[-7.77915,42.85813,610.8,18.145],[-7.77965,42.85885,614.2,18.239],[-7.78078,42.85949,621.9,18.359],[-7.78158,42.86012,612.3,18.461],[-7.78141,42.86017,611.0,18.476],[-7.78155,42.86008,609.0,18.505],[-7.78152,42.86046,603.9,18.556],[-7.78264,42.86148,591.7,18.712],[-7.78309,42.86166,586.3,18.759],[-7.78323,42.86203,583.5,18.811],[-7.78361,42.86231,580.9,18.856],[-7.78507,42.86273,586.5,18.992],[-7.78542,42.86354,600.6,19.094],[-7.78729,42.86539,612.9,19.361],[-7.78851,42.86566,615.1,19.466],[-7.79076,42.86562,612.9,19.656],[-7.79148,42.86599,610.9,19.731],[-7.79298,42.86606,611.1,19.86],[-7.79478,42.86668,617.5,20.037],[-7.79562,42.86734,616.4,20.145],[-7.79631,42.86753,617.3,20.207],[-7.79777,42.86834,629.2,20.36],[-7.80125,42.87116,621.3,20.788],[-7.80399,42.8721,594.4,21.063],[-7.80431,42.87255,589.4,21.123],[-7.80458,42.87255,587.5,21.146],[-7.80468,42.87308,583.8,21.212],[-7.80503,42.87318,583.8,21.247],[-7.80528,42.87365,585.0,21.305],[-7.80576,42.87381,581.5,21.351],[-7.80747,42.87347,571.5,21.502],[-7.80751,42.87371,569.6,21.528],[-7.80755,42.87349,569.3,21.558],[-7.80882,42.87372,565.7,21.679],[-7.80981,42.8734,567.9,21.775],[-7.8115,42.87246,575.8,21.954],[-7.81361,42.87216,575.6,22.134],[-7.81428,42.87217,578.3,22.191],[-7.81454,42.8726,582.6,22.248],[-7.81505,42.87265,585.6,22.294],[-7.81588,42.87324,591.6,22.39],[-7.81665,42.87335,596.3,22.456],[-7.81685,42.87322,596.6,22.48],[-7.81667,42.87313,597.5,22.513],[-7.81687,42.8732,597.9,22.532],[-7.81808,42.87412,605.1,22.682],[-7.81999,42.87373,608.8,22.845],[-7.82167,42.87312,616.3,23.001],[-7.82482,42.87294,617.0,23.264],[-7.82736,42.87377,622.4,23.51],[-7.82748,42.87409,621.7,23.551],[-7.82832,42.87423,616.8,23.631],[-7.82962,42.87524,605.4,23.81],[-7.83008,42.87522,604.9,23.85],[-7.83084,42.87559,602.5,23.928],[-7.83284,42.87601,596.1,24.115],[-7.83428,42.87603,598.8,24.244],[-7.83719,42.87574,610.1,24.611],[-7.83949,42.8745,614.9,24.847],[-7.84005,42.87444,613.5,24.895],[-7.843,42.87426,617.3,25.154],[-7.84338,42.8744,618.9,25.19],[-7.84889,42.87432,621.8,25.646],[-7.85105,42.87491,616.1,25.84],[-7.85304,42.87427,611.3,26.021],[-7.85488,42.87402,610.5,26.178],[-7.85754,42.87394,596.9,26.396],[-7.85759,42.87342,594.6,26.467],[-7.8579,42.87387,592.0,26.527],[-7.86144,42.87359,591.5,26.824],[-7.86266,42.87328,594.6,26.929],[-7.86368,42.87343,594.2,27.016],[-7.86544,42.87282,574.4,27.177],[-7.86684,42.87289,561.6,27.294],[-7.86753,42.8728,560.0,27.354],[-7.86809,42.87248,557.7,27.413],[-7.8688,42.87325,556.9,27.522],[-7.86948,42.87333,556.0,27.579]]},
+  3: {km:15.63, dPos:224, dNeg:348, minEle:407, maxEle:581, nOrig:2757,
+     linea:[[-7.86718,42.87268,581.5,0.0],[-7.86744,42.87277,579.4,0.024],[-7.86808,42.87242,574.5,0.093],[-7.8683,42.87304,571.6,0.165],[-7.86893,42.87333,569.1,0.25],[-7.87011,42.87327,557.1,0.355],[-7.87047,42.87347,552.9,0.394],[-7.87249,42.87331,536.1,0.573],[-7.87304,42.87417,538.0,0.682],[-7.87446,42.87427,536.7,0.799],[-7.87562,42.87371,530.7,0.917],[-7.87569,42.87344,528.1,0.949],[-7.87614,42.87333,525.5,0.987],[-7.87952,42.87271,515.0,1.274],[-7.88122,42.87258,510.5,1.414],[-7.88209,42.87268,508.8,1.488],[-7.88283,42.87184,511.1,1.602],[-7.88487,42.87134,523.7,1.783],[-7.88633,42.87137,533.3,1.905],[-7.88734,42.87166,531.8,1.999],[-7.88955,42.87169,536.4,2.189],[-7.89013,42.87194,541.3,2.247],[-7.89021,42.87168,541.6,2.282],[-7.8895,42.87091,538.2,2.387],[-7.88945,42.87019,534.1,2.468],[-7.89124,42.87031,528.4,2.616],[-7.89363,42.87085,512.1,2.828],[-7.89522,42.87093,506.9,2.96],[-7.89761,42.87162,503.0,3.178],[-7.89991,42.87364,487.4,3.475],[-7.90102,42.87404,482.9,3.577],[-7.90175,42.87461,477.6,3.664],[-7.90311,42.87441,467.5,3.785],[-7.90359,42.87455,465.4,3.828],[-7.90421,42.87427,461.8,3.893],[-7.9041,42.87435,460.8,3.909],[-7.90467,42.87494,454.9,3.992],[-7.90798,42.87551,453.5,4.272],[-7.90895,42.8759,455.9,4.363],[-7.90992,42.87674,450.3,4.488],[-7.91198,42.87738,432.5,4.675],[-7.91287,42.8779,417.3,4.771],[-7.9141,42.87807,414.3,4.877],[-7.91497,42.87898,419.5,5.005],[-7.91663,42.87919,426.7,5.145],[-7.91843,42.87982,435.0,5.31],[-7.92176,42.88,452.4,5.586],[-7.92441,42.87928,462.4,5.821],[-7.92546,42.87931,460.5,5.922],[-7.92715,42.87881,465.5,6.073],[-7.9287,42.87876,476.4,6.201],[-7.93102,42.8792,496.3,6.399],[-7.93211,42.8801,499.5,6.536],[-7.93454,42.88079,491.4,6.752],[-7.93708,42.8804,480.1,6.967],[-7.93818,42.88106,463.4,7.088],[-7.93898,42.88116,462.3,7.166],[-7.94297,42.88024,433.0,7.514],[-7.94412,42.88061,426.8,7.616],[-7.94487,42.88055,427.2,7.681],[-7.94668,42.88167,437.2,7.878],[-7.94847,42.88179,445.8,8.026],[-7.94994,42.88143,452.5,8.155],[-7.95301,42.8816,469.0,8.429],[-7.95398,42.8823,471.0,8.541],[-7.95454,42.88237,471.4,8.594],[-7.95549,42.88287,473.6,8.696],[-7.95672,42.88386,476.6,8.85],[-7.95811,42.88446,476.1,8.983],[-7.95843,42.88477,476.5,9.028],[-7.95965,42.88499,479.3,9.146],[-7.96349,42.88659,463.5,9.508],[-7.96415,42.88669,459.4,9.564],[-7.96588,42.88793,449.0,9.764],[-7.96563,42.88808,449.1,9.791],[-7.96596,42.88797,449.2,9.823],[-7.96631,42.88818,449.1,9.861],[-7.96703,42.88954,440.1,10.028],[-7.96894,42.89013,439.4,10.209],[-7.96965,42.89087,445.2,10.312],[-7.97351,42.89386,461.3,10.777],[-7.97439,42.89419,461.2,10.858],[-7.97587,42.89356,463.2,10.999],[-7.97622,42.89361,463.1,11.029],[-7.98091,42.89772,454.7,11.637],[-7.98608,42.90028,459.9,12.155],[-7.98656,42.90078,461.0,12.224],[-7.98967,42.90232,448.0,12.535],[-7.98989,42.90227,448.1,12.556],[-7.98982,42.90243,447.9,12.577],[-7.99027,42.90271,448.0,12.626],[-7.9908,42.9028,448.1,12.671],[-7.99135,42.90267,448.4,12.72],[-7.99309,42.90377,449.0,12.909],[-7.99481,42.90427,455.7,13.068],[-7.99617,42.90554,453.1,13.249],[-7.9972,42.90758,426.8,13.498],[-7.99792,42.90805,417.1,13.578],[-7.99877,42.90813,411.0,13.65],[-7.99873,42.9086,409.6,13.705],[-7.99912,42.90905,407.8,13.81],[-8.00038,42.90928,408.3,13.919],[-8.00188,42.90906,410.0,14.047],[-8.00247,42.90914,410.1,14.098],[-8.00326,42.90989,416.9,14.206],[-8.00794,42.91177,441.3,14.651],[-8.00975,42.91212,445.6,14.806],[-8.01108,42.91271,449.4,14.934],[-8.01141,42.9132,449.8,14.996],[-8.01179,42.91338,450.3,15.054],[-8.01456,42.91388,456.1,15.307],[-8.01512,42.91439,458.5,15.387],[-8.01641,42.91417,459.6,15.497],[-8.01667,42.91443,457.6,15.536],[-8.01706,42.91439,456.2,15.568],[-8.01724,42.91465,454.1,15.603],[-8.0175,42.91464,452.8,15.625]]},
+  4: {km:15.44, dPos:245, dNeg:318, minEle:300, maxEle:470, nOrig:2743,
+     linea:[[-8.01756,42.9147,456.2,0.0],[-8.01834,42.91452,455.4,0.068],[-8.01809,42.91396,456.7,0.135],[-8.01887,42.91375,462.8,0.207],[-8.01878,42.91345,466.3,0.245],[-8.0185,42.91346,467.7,0.273],[-8.01889,42.91381,469.5,0.337],[-8.01936,42.91373,469.0,0.376],[-8.02214,42.91252,444.0,0.645],[-8.02441,42.91117,433.5,0.885],[-8.02642,42.91166,424.0,1.062],[-8.02726,42.91205,421.1,1.147],[-8.0293,42.9122,423.6,1.317],[-8.03384,42.91206,425.8,1.694],[-8.03591,42.91254,428.5,1.872],[-8.03699,42.91262,427.5,1.961],[-8.03922,42.91349,433.3,2.183],[-8.04063,42.91485,427.6,2.375],[-8.04204,42.91549,419.5,2.538],[-8.04265,42.91632,425.7,2.644],[-8.04248,42.91638,427.2,2.661],[-8.04307,42.91623,431.7,2.728],[-8.04467,42.91641,442.0,2.864],[-8.0464,42.91604,454.3,3.013],[-8.0479,42.91673,454.8,3.158],[-8.04885,42.9166,455.5,3.24],[-8.04996,42.91742,456.7,3.37],[-8.0515,42.9176,459.3,3.498],[-8.05171,42.91759,459.3,3.515],[-8.05217,42.91691,460.0,3.604],[-8.05506,42.9158,463.2,3.88],[-8.05753,42.91536,460.8,4.092],[-8.06043,42.91561,455.9,4.332],[-8.06195,42.91626,449.6,4.478],[-8.06365,42.91657,436.5,4.622],[-8.06421,42.91705,426.6,4.697],[-8.06573,42.91659,418.3,4.846],[-8.07001,42.91575,425.1,5.212],[-8.0715,42.91577,425.1,5.335],[-8.07223,42.91596,423.5,5.399],[-8.07352,42.91551,417.8,5.517],[-8.07435,42.91597,411.9,5.605],[-8.07784,42.91611,398.6,5.906],[-8.07797,42.91622,398.4,5.922],[-8.07767,42.91631,397.5,5.95],[-8.07802,42.91629,396.1,5.988],[-8.07897,42.91683,392.5,6.09],[-8.07909,42.91764,387.7,6.181],[-8.07943,42.91795,383.4,6.226],[-8.08048,42.91818,375.9,6.317],[-8.08075,42.91847,372.9,6.361],[-8.08084,42.91826,371.5,6.39],[-8.08189,42.91845,362.9,6.485],[-8.08219,42.91833,360.8,6.515],[-8.08326,42.91844,353.0,6.604],[-8.08436,42.91798,348.7,6.71],[-8.08504,42.91807,346.4,6.768],[-8.08486,42.91821,345.9,6.799],[-8.08539,42.91819,342.8,6.843],[-8.08602,42.91851,334.0,6.918],[-8.08759,42.91877,331.8,7.053],[-8.08833,42.91855,334.5,7.123],[-8.08915,42.91853,335.6,7.193],[-8.08898,42.91919,344.7,7.282],[-8.09106,42.91957,366.6,7.459],[-8.09249,42.92051,389.5,7.618],[-8.09332,42.92037,394.3,7.692],[-8.09372,42.91987,391.0,7.76],[-8.09627,42.91927,376.9,7.987],[-8.09771,42.91985,386.7,8.122],[-8.09918,42.92082,398.3,8.285],[-8.09948,42.92218,408.8,8.44],[-8.1,42.92296,412.9,8.537],[-8.10065,42.92323,413.0,8.599],[-8.1014,42.92315,411.8,8.662],[-8.10297,42.92426,405.3,8.84],[-8.10331,42.92513,398.2,8.942],[-8.10409,42.92571,388.9,9.035],[-8.10424,42.92647,380.3,9.123],[-8.10454,42.92672,379.0,9.161],[-8.10981,42.9282,395.9,9.624],[-8.11107,42.92809,403.4,9.728],[-8.11266,42.92713,421.5,9.9],[-8.11303,42.92749,426.3,9.951],[-8.11303,42.92788,429.3,9.996],[-8.11397,42.92866,423.4,10.113],[-8.11886,42.92953,386.4,10.529],[-8.1199,42.9296,380.3,10.614],[-8.12031,42.92946,379.0,10.653],[-8.12057,42.92967,378.5,10.686],[-8.12293,42.93019,369.0,10.889],[-8.1251,42.93029,349.6,11.067],[-8.12698,42.93104,335.6,11.244],[-8.12709,42.93115,334.9,11.26],[-8.12683,42.93139,332.5,11.319],[-8.12708,42.93108,329.7,11.366],[-8.12993,42.93103,302.9,11.603],[-8.13157,42.9305,302.3,11.788],[-8.13463,42.93096,328.0,12.044],[-8.13527,42.93047,334.2,12.12],[-8.13555,42.9293,332.2,12.255],[-8.136,42.92928,331.9,12.294],[-8.13634,42.92892,334.7,12.344],[-8.13606,42.92988,345.2,12.457],[-8.13618,42.93066,350.5,12.547],[-8.13765,42.931,354.4,12.677],[-8.14014,42.93073,360.7,12.884],[-8.14219,42.92995,372.9,13.076],[-8.15097,42.9301,385.3,13.797],[-8.15307,42.92992,387.7,13.97],[-8.15387,42.92976,388.5,14.038],[-8.15546,42.92897,387.9,14.196],[-8.15946,42.92754,388.5,14.566],[-8.15941,42.92773,390.8,14.623],[-8.15935,42.92749,390.6,14.654],[-8.15913,42.92787,390.5,14.704],[-8.15942,42.92777,390.4,14.732],[-8.16001,42.92738,388.1,14.798],[-8.16301,42.92626,382.0,15.077],[-8.16342,42.9263,383.3,15.111],[-8.16345,42.92649,384.6,15.132],[-8.16305,42.92644,386.2,15.176],[-8.16306,42.92661,386.7,15.197],[-8.16388,42.92692,386.3,15.279],[-8.16387,42.92826,392.3,15.443]]},
+  5: {km:19.55, dPos:245, dNeg:369, minEle:259, maxEle:418, nOrig:3410,
+     linea:[[-8.16343,42.92624,385.3,0.0],[-8.16543,42.92629,375.0,0.184],[-8.16691,42.92677,364.0,0.318],[-8.16813,42.92678,352.5,0.418],[-8.16985,42.92712,340.2,0.566],[-8.17169,42.92699,347.4,0.72],[-8.17346,42.92751,355.4,0.877],[-8.1739,42.92713,354.8,0.934],[-8.17421,42.92637,353.0,1.022],[-8.17596,42.92565,347.5,1.187],[-8.17775,42.9252,336.5,1.344],[-8.17916,42.92523,328.1,1.459],[-8.18023,42.92553,320.4,1.554],[-8.18053,42.92475,314.1,1.65],[-8.18435,42.92412,333.5,1.979],[-8.18524,42.9227,334.3,2.157],[-8.18687,42.92258,343.9,2.296],[-8.18783,42.92282,351.5,2.38],[-8.18822,42.92313,355.6,2.43],[-8.18849,42.92301,357.7,2.457],[-8.18868,42.92314,359.0,2.479],[-8.19012,42.92613,369.5,2.835],[-8.19294,42.92614,382.5,3.066],[-8.19515,42.92668,388.2,3.259],[-8.19588,42.92659,389.6,3.319],[-8.19781,42.92576,384.3,3.505],[-8.19949,42.92703,359.7,3.704],[-8.20099,42.92764,357.7,3.847],[-8.20089,42.92771,359.7,3.875],[-8.20114,42.92755,362.1,3.903],[-8.20214,42.92774,369.8,3.988],[-8.2041,42.92738,384.5,4.157],[-8.20596,42.92735,393.0,4.309],[-8.20799,42.92758,397.3,4.482],[-8.20922,42.92816,401.0,4.602],[-8.21085,42.9286,402.1,4.744],[-8.21362,42.92875,398.3,4.982],[-8.21433,42.9286,398.2,5.043],[-8.21807,42.92688,391.6,5.411],[-8.22176,42.9259,384.5,5.734],[-8.22302,42.92583,387.3,5.838],[-8.22403,42.92548,388.4,5.93],[-8.22593,42.92471,384.8,6.108],[-8.22706,42.92381,383.3,6.246],[-8.22888,42.92282,396.7,6.434],[-8.23132,42.92198,393.7,6.656],[-8.23267,42.92121,387.4,6.798],[-8.23478,42.92069,389.2,6.982],[-8.23544,42.9203,388.9,7.052],[-8.23676,42.92032,382.1,7.161],[-8.23713,42.92019,378.7,7.195],[-8.23741,42.91974,373.1,7.251],[-8.23944,42.91902,366.6,7.437],[-8.24017,42.91843,361.0,7.527],[-8.24068,42.91851,358.2,7.646],[-8.2403,42.91846,357.2,7.68],[-8.24048,42.91811,355.9,7.727],[-8.24154,42.9177,350.1,7.826],[-8.24321,42.91822,341.9,7.978],[-8.24347,42.91793,339.7,8.019],[-8.24577,42.91774,340.9,8.215],[-8.25079,42.91872,360.3,8.641],[-8.25277,42.91959,373.0,8.832],[-8.25407,42.9211,379.3,9.033],[-8.25691,42.92222,377.3,9.297],[-8.25812,42.92242,378.2,9.399],[-8.25973,42.9222,377.5,9.541],[-8.26155,42.92243,371.0,9.692],[-8.26515,42.9236,366.3,10.018],[-8.26698,42.92341,367.0,10.172],[-8.26785,42.92382,370.1,10.257],[-8.26902,42.92486,378.0,10.409],[-8.27378,42.92575,372.1,10.814],[-8.27528,42.92637,369.4,10.958],[-8.27683,42.92649,365.4,11.087],[-8.2777,42.92623,362.5,11.164],[-8.28045,42.92643,361.2,11.392],[-8.28373,42.92541,375.0,11.686],[-8.28453,42.9255,380.7,11.752],[-8.28749,42.92511,385.6,12.002],[-8.29018,42.9242,387.6,12.247],[-8.2913,42.92336,395.0,12.382],[-8.29371,42.92248,402.6,12.604],[-8.29593,42.9214,396.3,12.823],[-8.2973,42.92041,387.9,12.982],[-8.29891,42.92023,376.4,13.121],[-8.29978,42.9194,373.8,13.238],[-8.30109,42.91886,376.2,13.364],[-8.30374,42.91932,380.2,13.591],[-8.30512,42.91907,377.5,13.709],[-8.30531,42.91881,375.5,13.743],[-8.30579,42.91901,372.8,13.79],[-8.30677,42.91901,368.8,13.872],[-8.30795,42.9185,366.4,13.985],[-8.31051,42.91838,370.5,14.2],[-8.31068,42.9183,370.5,14.218],[-8.31063,42.91752,369.9,14.312],[-8.31543,42.91701,379.9,14.71],[-8.31577,42.9168,380.5,14.747],[-8.31841,42.91635,388.6,14.97],[-8.32035,42.91561,402.2,15.149],[-8.32164,42.91534,402.8,15.26],[-8.32325,42.91533,405.2,15.394],[-8.32309,42.9152,405.8,15.414],[-8.323,42.91534,406.4,15.431],[-8.32357,42.91535,407.4,15.51],[-8.32351,42.91653,414.0,15.648],[-8.32548,42.91632,417.5,15.813],[-8.32678,42.91647,409.4,15.92],[-8.33041,42.91746,375.9,16.244],[-8.3308,42.91683,375.5,16.323],[-8.33149,42.91681,374.1,16.382],[-8.33327,42.91778,366.4,16.567],[-8.33428,42.91812,363.8,16.659],[-8.33849,42.91849,345.7,17.007],[-8.34294,42.91704,340.6,17.412],[-8.34322,42.91652,333.2,17.48],[-8.34403,42.91655,327.0,17.548],[-8.34417,42.91629,323.2,17.582],[-8.34517,42.91609,314.6,17.668],[-8.3477,42.91461,309.1,17.937],[-8.34896,42.91432,297.1,18.046],[-8.34952,42.9147,289.2,18.109],[-8.34986,42.91468,286.0,18.138],[-8.35256,42.91376,272.5,18.383],[-8.35381,42.91284,269.5,18.531],[-8.35751,42.91216,261.2,18.847],[-8.35828,42.91023,263.0,19.076],[-8.35846,42.90901,268.2,19.224],[-8.359,42.90918,269.5,19.297],[-8.35845,42.9093,269.5,19.395],[-8.3589,42.90921,269.0,19.449],[-8.35848,42.90902,269.1,19.492],[-8.35876,42.90917,269.5,19.552]]},
+  6: {km:20.55, dPos:203, dNeg:219, minEle:252, maxEle:386, nOrig:754,
+     linea:[[-8.3624,42.9046,294.7,0.0],[-8.36285,42.90493,294.9,0.052],[-8.36418,42.90734,295.3,0.342],[-8.36564,42.90833,294.5,0.505],[-8.3702,42.90665,282.3,0.924],[-8.37055,42.90624,280.5,0.979],[-8.37102,42.90647,279.2,1.025],[-8.37182,42.90577,277.8,1.126],[-8.37246,42.90613,277.0,1.196],[-8.37427,42.90564,277.5,1.354],[-8.37584,42.90423,284.3,1.557],[-8.37634,42.90402,285.7,1.604],[-8.37899,42.90358,287.0,1.826],[-8.38125,42.90375,288.5,2.011],[-8.38162,42.90354,290.1,2.056],[-8.38594,42.90485,278.6,2.437],[-8.38654,42.90445,276.4,2.508],[-8.38711,42.90322,272.4,2.652],[-8.38895,42.90372,268.5,2.812],[-8.38998,42.90438,264.5,2.924],[-8.39109,42.90452,259.9,3.018],[-8.39159,42.90532,253.4,3.126],[-8.39336,42.90594,252.3,3.287],[-8.39776,42.90547,277.1,3.656],[-8.39855,42.90605,285.4,3.749],[-8.39967,42.90637,293.3,3.849],[-8.40136,42.90605,305.0,3.992],[-8.40233,42.90617,311.4,4.074],[-8.40294,42.9058,315.8,4.139],[-8.40367,42.90574,318.7,4.199],[-8.40447,42.90591,321.4,4.268],[-8.40766,42.90587,332.9,4.529],[-8.40863,42.90572,339.8,4.61],[-8.41018,42.9062,350.2,4.752],[-8.41136,42.90747,359.0,4.929],[-8.41476,42.90833,367.9,5.223],[-8.41408,42.91364,361.5,5.819],[-8.41941,42.91367,348.0,6.256],[-8.42038,42.91344,341.8,6.343],[-8.42214,42.91343,335.3,6.486],[-8.4235,42.91265,334.7,6.631],[-8.424,42.91206,334.8,6.708],[-8.42416,42.91117,335.4,6.81],[-8.42442,42.91098,335.5,6.839],[-8.42366,42.90878,336.0,7.093],[-8.42554,42.90899,335.3,7.253],[-8.42636,42.90886,336.3,7.321],[-8.42647,42.90898,337.0,7.337],[-8.42621,42.90877,338.5,7.382],[-8.42631,42.90848,339.1,7.415],[-8.427,42.90816,340.4,7.483],[-8.42788,42.90719,342.1,7.613],[-8.42944,42.90651,343.2,7.761],[-8.43033,42.90571,342.7,7.877],[-8.43203,42.90523,338.6,8.029],[-8.43373,42.90436,332.3,8.199],[-8.43511,42.9042,327.5,8.316],[-8.43846,42.90196,315.5,8.686],[-8.44234,42.90157,309.1,9.005],[-8.44427,42.90086,306.3,9.183],[-8.44681,42.90029,302.1,9.403],[-8.44686,42.89989,300.9,9.449],[-8.44649,42.89957,299.6,9.505],[-8.44482,42.89924,298.5,9.647],[-8.44417,42.8983,297.6,9.768],[-8.44447,42.89835,298.0,9.794],[-8.44457,42.89815,300.9,9.82],[-8.44506,42.89813,306.5,9.862],[-8.44757,42.89709,314.9,10.1],[-8.44756,42.89594,321.3,10.228],[-8.44782,42.8952,329.9,10.317],[-8.44713,42.8947,336.1,10.398],[-8.44715,42.89447,338.3,10.423],[-8.44856,42.89301,343.1,10.628],[-8.44985,42.89212,348.0,10.773],[-8.44971,42.89156,354.2,10.842],[-8.45256,42.89135,362.2,11.078],[-8.45308,42.89097,364.6,11.138],[-8.4548,42.89085,368.0,11.279],[-8.4563,42.89017,371.1,11.424],[-8.45715,42.89012,374.4,11.494],[-8.46007,42.89058,382.2,11.74],[-8.46195,42.89035,384.4,11.896],[-8.46397,42.89046,385.4,12.061],[-8.4759,42.89208,383.3,13.05],[-8.47648,42.89229,382.1,13.102],[-8.47618,42.89062,377.7,13.301],[-8.47646,42.89049,376.3,13.332],[-8.48591,42.89075,371.5,14.102],[-8.48628,42.89059,370.6,14.14],[-8.48735,42.89079,369.6,14.23],[-8.48775,42.89153,368.8,14.321],[-8.49133,42.89077,367.1,14.626],[-8.49431,42.88953,371.1,14.907],[-8.49416,42.88954,371.1,14.919],[-8.49425,42.88918,370.2,14.962],[-8.49394,42.88896,369.2,14.997],[-8.4937,42.88926,368.1,15.041],[-8.49394,42.88752,362.5,15.242],[-8.49464,42.8864,357.4,15.385],[-8.49456,42.88576,355.2,15.457],[-8.49534,42.8847,351.2,15.592],[-8.49517,42.88494,347.9,15.639],[-8.49582,42.88629,343.4,15.8],[-8.49766,42.88684,339.5,15.963],[-8.49863,42.88815,331.1,16.128],[-8.49998,42.88773,325.7,16.25],[-8.50177,42.88788,312.0,16.397],[-8.5044,42.88729,301.9,16.623],[-8.50453,42.88681,297.6,16.68],[-8.50483,42.88697,293.7,16.711],[-8.50563,42.88672,290.4,16.783],[-8.50983,42.88647,283.7,17.127],[-8.51046,42.88617,280.6,17.191],[-8.51166,42.88641,278.7,17.298],[-8.51696,42.88623,286.8,17.74],[-8.51739,42.88642,287.9,17.783],[-8.52002,42.88665,289.3,18.005],[-8.52255,42.88719,287.6,18.223],[-8.52482,42.88721,283.6,18.409],[-8.52563,42.88706,281.4,18.477],[-8.52784,42.88617,279.0,18.683],[-8.53021,42.88586,278.0,18.879],[-8.53162,42.88502,277.3,19.028],[-8.53289,42.88523,276.4,19.137],[-8.53368,42.88473,276.4,19.223],[-8.53436,42.88248,276.5,19.483],[-8.53507,42.88185,276.2,19.575],[-8.53797,42.88125,274.5,19.822],[-8.53996,42.882,274.5,20.006],[-8.54161,42.88163,273.6,20.149],[-8.5423,42.88138,272.8,20.213],[-8.54238,42.88116,273.2,20.238],[-8.54448,42.88114,274.5,20.425],[-8.5455,42.88093,274.0,20.512],[-8.5458,42.88067,273.7,20.55]]},
+};
+
+</script>
+<script>
+/* ============================================================
+   DATOS DEL VIAJE — Camino Francés, últimos 100 km
+   Sarria → Santiago de Compostela, 18–23 agosto 2026
+   Grupo: 12 personas (11 desde el jueves 20 por la tarde)
+
+   PROCEDENCIA
+   - Horarios, alojamientos, comidas, cultura: PDFs de la guía que
+     preparó la tita Lucila para el grupo.
+   - Coordenadas: Google Places, julio 2026.
+   - Altitudes (ele): cotas escritas en los perfiles de la guía.
+     Solo hay cota de los pueblos; entre uno y otro se interpola en
+     línea recta, así que el desnivel real será MAYOR que el calculado.
+   - Kilometrajes: de la guía. Sin verificar contra GPX.
+
+   Cada dato dudoso lleva `fiable: false` y una `nota` visible.
+   ============================================================ */
+'use strict';
+
+const ANIO_VIAJE = 2026;
+
+const CONFIG_MARCHA = {
+  V_BASE: 4.0,
+  ASCENSO_M_POR_HORA: 600,
+  UMBRAL_BAJADA_SUAVE: 0.05,
+  UMBRAL_BAJADA_FUERTE: 0.12,
+  BONIF_BAJADA_H_POR_300M: 0.166,
+  PENAL_BAJADA_H_POR_300M: 0.166,
+  FACTOR_FATIGA: 1.0,
+  MIN_DESCANSO_POR_HORA: 0
+};
+
+const COLORES_ETAPA = ['#C1462B','#8A6D3B','#4A6B52','#3D5A73','#7B4B6B','#B8860B'];
+
+const ETAPAS = [
+{
+  num:1, fecha:'2026-08-18', diaSemana:'martes',
+  origen:'Sarria', destino:'Portomarín', salida:'08:00',
+  km:{guia:22.4, sumaTramos:22.0, gpx:23.51,
+      nota:'El perfil dice 22,4 km; los tramos del timing suman 22,0 (4,2 + 9,1 + 8,7).'},
+  perfilNota:'El gráfico de la guía va de Portomarín a Sarria, al revés del sentido de marcha.',
+  puntos:[
+    {nombre:"Sarria", lat:42.772750, lon:-7.431120, km:1.99, ele:451, kmGuia:0, tipo:'inicio', fiable:false, ajustado:1850},
+    {nombre:"As Paredes", lat:42.769790, lon:-7.439580, km:2.97, ele:497, kmGuia:2.9, tipo:'paso', fiable:false, ajustado:943},
+    {nombre:"Iglesia de Santiago de Barbadelo", lat:42.765205, lon:-7.450386, km:4.36, ele:543, kmGuia:4.2, tipo:'iglesia', sellar:true, horario:"8:30-12:30", fiable:true, ficha:"Románica del s. XII. Primer punto de interés. Google recoge 8:00-12:00; la guía dice 8:30-12:30. Sin verificar."},
+    {nombre:"Barbadelo", lat:42.764284, lon:-7.453674, km:4.36, ele:543, kmGuia:4.4, tipo:'taxi', fiable:true, ficha:"Punto de escape. Taxis: Alberto 649850117, David 669087722. Tramo Sarria-Barbadelo: dificultad ALTA según la guía."},
+    {nombre:"Rente", lat:42.770000, lon:-7.462000, km:5.88, ele:590, kmGuia:5.6, tipo:'paso', fiable:true},
+    {nombre:"Mercado da Serra", lat:42.773000, lon:-7.470000, km:6.69, ele:616, kmGuia:6.4, tipo:'comida', fiable:true, ficha:"Taberna da Serra. Punto de desayuno propuesto en la guía."},
+    {nombre:"Peruscallo", lat:42.777050, lon:-7.481640, km:8.39, ele:599, kmGuia:8.6, tipo:'comida', fiable:false, ajustado:453, ficha:"Rest in Peruscallo. Desayuno alternativo."},
+    {nombre:"Cortiñas", lat:42.779000, lon:-7.499000, km:10.49, ele:630, kmGuia:9.6, tipo:'paso', fiable:true},
+    {nombre:"Brea", lat:42.780000, lon:-7.509000, km:11.44, ele:605, kmGuia:11.1, tipo:'cultura', fiable:true, ficha:"Entre Brea y Morgade está el mojón clásico del km 100."},
+    {nombre:"Morgade", lat:42.782435, lon:-7.521222, km:12.72, ele:633, kmGuia:11.9, tipo:'comida', fiable:true, ficha:"Bar Casa Morgade. Abre 7:30-21:30."},
+    {nombre:"Ferreiros", lat:42.783195, lon:-7.532830, km:14.14, ele:643, kmGuia:13.3, tipo:'taxi', fiable:true, ficha:"Punto de escape principal. Desde Casa Cruceiro (LU-633) o Iglesia de San Salvador (LU-P-5707). Veña Café Bar: miles de botellines firmados."},
+    {nombre:"Mirallos", lat:42.785000, lon:-7.539000, km:14.61, ele:620, kmGuia:13.9, tipo:'iglesia', fiable:true, ficha:"Iglesia de Santa María, románica s. XII-XIII. Suele estar cerrada, a 300 m de la salida del pueblo."},
+    {nombre:"A Pena", lat:42.787000, lon:-7.547000, km:15.41, ele:624, kmGuia:14.5, tipo:'cultura', fiable:true, ficha:"Cerca está el mojón del km 100 oficial actual."},
+    {nombre:"Couto", lat:42.783970, lon:-7.553660, km:16.03, ele:619, kmGuia:15, tipo:'paso', fiable:false, ajustado:560},
+    {nombre:"Rozas", lat:42.786950, lon:-7.562970, km:17.11, ele:585, kmGuia:15.5, tipo:'paso', fiable:false, ajustado:375},
+    {nombre:"Moimentos", lat:42.792000, lon:-7.570000, km:18.0, ele:509, kmGuia:16.6, tipo:'paso', fiable:true},
+    {nombre:"Mercadoiro", lat:42.793000, lon:-7.577000, km:18.43, ele:528, kmGuia:17.3, tipo:'paso', fiable:true},
+    {nombre:"Moutras", lat:42.794000, lon:-7.590000, km:19.77, ele:455, kmGuia:19, tipo:'paso', fiable:true},
+    {nombre:"Parrocha", lat:42.795000, lon:-7.597000, km:20.38, ele:424, kmGuia:19.7, tipo:'paso', fiable:true},
+    {nombre:"Vilachá", lat:42.795377, lon:-7.603628, km:20.95, ele:396, kmGuia:21, tipo:'comida', fiable:true, ficha:"Los Andantes. Última parada antes de la bajada final."},
+    {nombre:"Iglesia-fortaleza de San Nicolás", lat:42.807745, lon:-7.615707, km:23.46, ele:344, kmGuia:22.3, tipo:'iglesia', sellar:true, horario:"10:00-20:00", fiable:true, ficha:"S. XII, orden de San Juan de Jerusalén. Trasladada piedra a piedra al construirse el embalse."},
+    {nombre:"Portomarín", lat:42.807428, lon:-7.615830, km:23.46, ele:344, kmGuia:22.4, tipo:'fin', fiable:true}
+  ],
+  timing:[
+    {hora:'7:00', texto:'Coche a Portomarín. Dos personas llevan los dos coches y regresan con uno.'},
+    {hora:'8:00', texto:'Salida tras café. El hotel en Sarria (Baixo a Lua) está junto al camino.'},
+    {hora:'9:00', texto:'Llegada a Barbadelo (4,2 km). Dificultad ALTA.'},
+    {hora:'9:00-9:30', texto:'Desayuno en Mercado da Serra, o más adelante en Peruscallo.'},
+    {hora:'9:30-12:00', texto:'Barbadelo-Ferreiros (9,1 km). Dificultad BAJA. El mejor tramo: sombreado, pendientes moderadas, incluye el km 100.', destacado:true},
+    {hora:'12:00-12:30', texto:'Parada en Ferreiros. Buen punto para taxi a Portomarín.'},
+    {hora:'13:30 / 14:30', texto:'Llegada a Mercadeiro / Vilachá.', dudoso:'Dos horas sin criterio claro: ¿dos hitos o una horquilla?'},
+    {hora:'15:00', texto:'Llegada a Portomarín. Los 3 últimos km son bajada MUY IMPORTANTE. Ojo con las rodillas.'}
+  ],
+  alojamiento:{nombre:'Casa Grande do Costureiro', direccion:'Rúa Sánchez Carro, 8',
+    checkin:'15:00', telefono:'678503693', reserva:'Directa', plazas:21,
+    nota:'El desglose de la guía suma hasta 21 plazas (8 dobles + 4 individuales + sofá cama). Muy por encima del grupo.',
+    extra:'Sin piscina, pero hay embalse y piscina municipal en el pueblo.'},
+  comidas:{
+    comida:['Cervecería El Origen — ambiente peregrino, no cocina gallega',
+            'Restaurante Pérez — menú 17 € / 20 € con pulpo. Reservar: 982 54 50 40',
+            'Xoanes Raciones — reservar'],
+    cena:['O Mirador — RESERVADO 20:30. Lorena López, omiradorportomarin@gmail.com, 982 545323'],
+    nota:'El mapa de la guía marca Restaurante Pérez y Dgusta como "cerrado temporalmente", pero el texto lo recomienda. Capturas de fechas distintas. Sin verificar.',
+    otros:'Supermercado Claudio cierra a las 14:00. Covirán no cierra. Hay italiano con pizzas para llevar.'},
+  cultura:['Ponte da Aspera — se ve al salir de Sarria.',
+    'Iglesia de Santa María en Mirallos (s. XII-XIII). Suele estar cerrada, a 300 m de la salida del pueblo.',
+    'Mojón km 100 — el clásico entre Brea y Morgade; el oficial actual cerca de A Pena, después de Ferreiros.',
+    'Escalinata y capilla de la Virgen de las Nieves, Portomarín.',
+    'Palacio de Berbetoros (s. XVII), Crucero de la Casa del Conde de la Maza, Iglesia de San Pedro (1182).'],
+  avisos:['La guía deja anotado: "Falta incluir los puntos de interés cultural de la DIAPO 4".',
+    'Distancia de Mirallos a Sarria: el PDF dice "a __ km", falta el número.',
+    'La bajada final a Portomarín pierde unos 130 m en 3 km. Es lo más exigente para las rodillas de todo el viaje.']
+},
+{
+  num:2, fecha:'2026-08-19', diaSemana:'miércoles',
+  origen:'Portomarín', destino:'Palas de Rei', salida:'07:30',
+  km:{guia:25.0, sumaTramos:25.2, gpx:27.58,
+      nota:'El título dice 25 km; las dos ramas del timing (vía Gonzar o vía Castromaior) suman 25,2 ambas.'},
+  perfilNota:'El gráfico va de Palas de Rei a Portomarín, al revés del sentido de marcha.',
+  puntos:[
+    {nombre:"Portomarín", lat:42.807428, lon:-7.615830, km:0.0, ele:381, kmGuia:0, tipo:'inicio', fiable:true},
+    {nombre:"Fábrica de ladrillos", lat:42.811120, lon:-7.644710, km:3.45, ele:443, kmGuia:3, tipo:'paso', fiable:false, ajustado:437},
+    {nombre:"Toxibo", lat:42.812560, lon:-7.661020, km:4.93, ele:493, kmGuia:4.8, tipo:'paso', fiable:false, ajustado:611},
+    {nombre:"Gonzar", lat:42.824976, lon:-7.695852, km:8.81, ele:532, kmGuia:8.2, tipo:'taxi', fiable:true, ficha:"Iglesia de Santa María. Punto de escape. Bar/Albergue de Gonzar, Hostería de Gonzar. Fin del tramo más duro del día."},
+    {nombre:"Castro de Castromaior", lat:42.833336, lon:-7.719796, km:11.33, ele:666, kmGuia:9.5, tipo:'cultura', fiable:true, ficha:"Restos prerromanos celtas, más de 2400 años. Desvío de 5-10 min. Abierto 24 h, gratuito. Centro de interpretación al aire libre."},
+    {nombre:"Hospital da Cruz", lat:42.840426, lon:-7.734032, km:12.97, ele:656, kmGuia:12, tipo:'comida', fiable:true, ficha:"Taberna do Camiño — tortillas de patata famosas."},
+    {nombre:"Ventas de Narón", lat:42.844284, lon:-7.748630, km:14.62, ele:688, kmGuia:13.5, tipo:'iglesia', sellar:true, fiable:true, ficha:"Ermita de la Magdalena. SELLAR si está abierta, pero abre poco tiempo. Albergue."},
+    {nombre:"Sierra de Ligonde", lat:42.850000, lon:-7.762000, km:16.17, ele:691, kmGuia:15, tipo:'mirador', fiable:true, ficha:"Punto más alto de toda la ruta: 722 m."},
+    {nombre:"Cruceiro de Lameiros", lat:42.855155, lon:-7.777397, km:17.76, ele:616, kmGuia:16, tipo:'cultura', fiable:true, ficha:"Uno de los más famosos del camino, doble cara, mucha simbología. FECHA EN DISPUTA: la guía dice 1674 en una diapositiva y 1670 en otra. Google recoge 1670."},
+    {nombre:"Ligonde", lat:42.858655, lon:-7.780045, km:18.24, ele:614, kmGuia:16.5, tipo:'taxi', fiable:true, ficha:"Punto de escape. Bar Restaurante Ligonde, Casa Mariluz, Trisquel. Cementerio de peregrinos."},
+    {nombre:"Airexe", lat:42.865620, lon:-7.790760, km:19.66, ele:613, kmGuia:17.4, tipo:'iglesia', fiable:false, ajustado:407, ficha:"Iglesia de Santiago de Airexe. Bares y albergue público."},
+    {nombre:"Portos", lat:42.868340, lon:-7.797770, km:20.36, ele:629, kmGuia:18.9, tipo:'paso', fiable:false, ajustado:767, ficha:"Entre Portos y Lestedo sale el desvío a Vilar de Donas: 2,5 km de ida y otros tantos de vuelta."},
+    {nombre:"Lestedo", lat:42.872170, lon:-7.814280, km:22.19, ele:578, kmGuia:20, tipo:'paso', fiable:false, ajustado:554},
+    {nombre:"Os Valos", lat:42.873770, lon:-7.827360, km:23.51, ele:622, kmGuia:21.1, tipo:'paso', fiable:false, ajustado:471},
+    {nombre:"A Brea", lat:42.874260, lon:-7.843000, km:25.15, ele:617, kmGuia:22.2, tipo:'paso', fiable:false, ajustado:397},
+    {nombre:"Avenostre", lat:42.872000, lon:-7.856000, km:26.47, ele:595, kmGuia:23.4, tipo:'paso', fiable:true},
+    {nombre:"Palas de Rei", lat:42.873467, lon:-7.868759, km:27.52, ele:557, kmGuia:25, tipo:'fin', fiable:true}
+  ],
+  timing:[
+    {hora:'6:30', texto:'Coche a Palas de Rei.'},
+    {hora:'7:30', texto:'Salida tras desayuno importante. Cruzar el puente sobre el Miño al amanecer es bonito.'},
+    {hora:'9:30', texto:'Llegada a Gonzar / Castromaior (8,2 / 9,5 km). Dificultad MEDIA-ALTA, lo más duro del día.'},
+    {hora:'9:15-13:00', texto:'Gonzar/Castromaior-Ligonde (8,5 / 7,2 km). El tramo más interesante del día.',
+     dudoso:'La hora de inicio (9:15) es anterior a la de llegada a Gonzar (9:30). Probable errata.'},
+    {hora:'13:00-13:30', texto:'Parada en Ligonde. Taxi para quien quiera. Lo malo ya ha pasado.'},
+    {hora:'13:30-15:30', texto:'Ligonde-Palas de Rei (8,5 km).'}
+  ],
+  alojamiento:{nombre:'A Casa de Chelo', direccion:'Rúa do Cruceiro, 2',
+    checkin:null, telefono:null, plazas:null,
+    nota:'6 habitaciones, solo dos baños para el grupo. Lavadora/secadora gratuita. Sin datos de check-in ni teléfono en la guía.'},
+  comidas:{
+    comida:['Casa Curro — a 1 min del alojamiento, menú 16 €, 982 38 00 44. No cierra cocina',
+            'Pulpería A Nosa Terra — sin reservas, buenos comentarios',
+            'Restaurante Ultreya — menú 15 €','Restaurante Castro','Albergue Mesón de Benito','Quinto Carallo'],
+    cena:['Mesón A Lareira — RESERVADO 21:00. Menús de 16 € y 22 €, o a la carta. Vanesa Vilela, vanesavilelacastro@gmail.com'],
+    nota:'FECHA LÍMITE: hay que comunicar a A Lareira qué va a cenar cada uno una semana antes, es decir antes del 12 de agosto de 2026.'},
+  cultura:['Iglesia de Santa María, en Gonzar.','Iglesia de Santiago de Airexe, después de Portos.',
+    'Cementerio de Ligonde — anexo a un desaparecido hospital de la Orden de Santiago.',
+    'Iglesia de San Tirso, Palas de Rei. SELLAR.',
+    'Iglesia de Vilar de Donas — fuera del camino, a 7 km de Palas de Rei. Abierta 16:00-20:00.',
+    'Castillo de Pambre — a 10 km de Palas de Rei, fuera del camino.'],
+  avisos:['Vilar de Donas: la guía dice "10 min en coche" tanto desde Palas de Rei como desde Melide (etapa 3). Ambas no pueden ser ciertas.',
+    'Castillo de Pambre aparece también como "Pombre" y con tres distancias distintas: 10 km, 15 min, 20 min desde Melide.',
+    'Es la etapa más larga y con más desnivel del viaje. La Sierra de Ligonde (722 m) es el punto más alto de toda la ruta.']
+},
+{
+  num:3, fecha:'2026-08-20', diaSemana:'jueves',
+  origen:'Palas de Rei', destino:'Melide', salida:'09:30',
+  km:{guia:14.5, guiaAlt:14.8, sumaTramos:14.7, gpx:15.63,
+      nota:'TRES cifras distintas en el mismo PDF: 14,8 (perfil), 14,5 (timing) y 14,7 (suma de tramos: 3,5 + 5,7 + 4 + 1,5).'},
+  perfilNota:'La guía usa aquí el perfil de Arzúa-Palas de Rei (28,8 km), que cubre las etapas 3 y 4 juntas. No es el perfil de esta etapa.',
+  puntos:[
+    {nombre:"Palas de Rei", lat:42.873467, lon:-7.868759, km:0.25, ele:569, kmGuia:0, tipo:'inicio', fiable:true},
+    {nombre:"Carballal", lat:42.872680, lon:-7.882090, km:1.49, ele:509, kmGuia:2.1, tipo:'paso', fiable:false, ajustado:439},
+    {nombre:"San Xulián do Camiño", lat:42.873677, lon:-7.907957, km:4.27, ele:454, kmGuia:3.5, tipo:'comida', fiable:true, ficha:"The Essential Coffee Home — muchas tostadas, tarta de Santiago. Iglesia románica s. XII y cementerio. Coordenada aproximada."},
+    {nombre:"Pontecampaña", lat:42.879000, lon:-7.920000, km:5.31, ele:435, kmGuia:4.7, tipo:'comida', fiable:true, ficha:"Mesón A Pontecampaña."},
+    {nombre:"Casanova", lat:42.882000, lon:-7.935000, km:6.75, ele:491, kmGuia:6, tipo:'paso', fiable:true},
+    {nombre:"Límite Lugo / A Coruña", lat:42.881790, lon:-7.948470, km:8.03, ele:446, kmGuia:7.2, tipo:'cultura', fiable:false, ajustado:378, ficha:"Se entra en la provincia de A Coruña, la última del Camino."},
+    {nombre:"O Leboreiro", lat:42.888079, lon:-7.970460, km:10.21, ele:439, kmGuia:9.2, tipo:'taxi', fiable:true, ficha:"Aldea medieval. Cabazo (granero-canasta para maíz). Iglesia de Santa María, románico de transición. Punto de escape: taxi desde la iglesia. Taberna de Leboreiro."},
+    {nombre:"Parque empresarial", lat:42.900000, lon:-7.985000, km:12.15, ele:460, kmGuia:11.2, tipo:'paso', fiable:true},
+    {nombre:"Furelos", lat:42.909487, lon:-7.999141, km:13.81, ele:408, kmGuia:13, tipo:'cultura', fiable:true, ficha:"Puente medieval. Sitio agradable junto al río."},
+    {nombre:"Melide", lat:42.914640, lon:-8.017500, km:15.62, ele:453, kmGuia:14.5, tipo:'fin', fiable:false, ajustado:620}
+  ],
+  timing:[
+    {hora:'8:30', texto:'Coche a Melide.'},
+    {hora:'9:30', texto:'Salida de Palas de Rei.'},
+    {hora:'10:15-10:45', texto:'Desayuno en San Julián de Camiño (3,5 km).'},
+    {hora:'12:30', texto:'Llegada a Leboreiro (5,7 km más). Acumulado: 9,2 km.'},
+    {hora:'12:30-13:00', texto:'Parada en Leboreiro. Merece la pena dar una vuelta. Se puede volver en taxi desde la Iglesia de Santa María.',
+     destacado:true, dudoso:'Llegada y comienzo de la parada a la misma hora: sin margen.'},
+    {hora:'14:30', texto:'Llegada a Melide (1,5 km más). Etapa corta: tarde libre para visita turística.'}
+  ],
+  alojamiento:{nombre:'Albergue y pensión San Antón', direccion:'Rúa San Anton',
+    checkin:'13:00 albergue / 13:30 pensión', reserva:'33630', plazas:11,
+    web:['https://albergueanton.com','https://pensionsananton.com'],
+    nota:'Albergue: habitación de 6. Pensión: una doble y una triple. Total 11 plazas — justo para las 11 personas desde esta tarde. Las dos URLs difieren (anton vs sananton): posible errata en la primera. Sin verificar.'},
+  comidas:{
+    comida:['Pulpería Ezequiel — la más famosa, algo más económica','Pulpería A Garnacha — 605833268'],
+    cena:['Restaurante O Codeseira — RESERVADO 20:30. Pedro Ultrich, 691605015'],
+    nota:'CONFLICTO: la misa de Sancti Spiritus es a las 20:00 y la cena a las 20:30. Además A Garnacha aparece bajo "comida" pero el texto dice que está reservada para cenar: dos cenas el mismo día. El nombre baila entre O Codeseira y A Codeseira (la URL).',
+    otros:'El pulpo a feira es la especialidad. Pedir cachelos. Repostería: ricos y melindres.'},
+  cultura:['San Xulián do Camiño — iglesia románica s. XII y cementerio.',
+    'Leboreiro — aldea medieval, cabazo, puente del s. XIV sobre el río Seco.',
+    'Furelos — puente medieval.',
+    'Melide: Iglesia de Sancti Spiritus / San Pedro (misa 20:00), Museo da Terra de Melide, Capilla de San Antonio — todo en la Plaza del Convento.',
+    'Capilla de San Roque (s. XX) con portada románica del s. XII de la antigua San Pedro.',
+    'Iglesia de Santa María — Monumento Nacional s. XII, a las afueras. SELLAR.',
+    'Cruceiro del s. XIV — el más antiguo de Galicia, Rúa Cantón San Roque 38.'],
+  avisos:['La guía se contradice sobre Melide: en un sitio equipara Sancti Spiritus con San Pedro, en otro dice que San Pedro es hoy la capilla de San Roque. Son edificios distintos.',
+    'Alternativa apuntada en la guía: hay quien hace Palas de Rei-Arzúa directamente.',
+    'Plan B por la tarde: Iglesia de Vilar de Donas, 10 min en coche, abierta 16:00-20:00.']
+},
+{
+  num:4, fecha:'2026-08-21', diaSemana:'viernes',
+  origen:'Melide', destino:'Arzúa', salida:'09:00',
+  km:{guia:14.5, sumaTramos:14.1, gpx:15.44,
+      nota:'El título dice 14,5 km; los tramos suman 14,1 (5,8 + 5,3 + 3).'},
+  perfilNota:'Mismo problema que la etapa 3: la guía reutiliza el perfil de Arzúa-Palas de Rei (28,8 km). Las etapas 3 y 4 comparten gráfico.',
+  puntos:[
+    {nombre:"Melide", lat:42.912834, lon:-8.024700, km:0.89, ele:434, kmGuia:0, tipo:'inicio', fiable:true},
+    {nombre:"Santa María de Melide", lat:42.915000, lon:-8.040000, km:2.38, ele:428, kmGuia:1.8, tipo:'iglesia', fiable:true, ficha:"Monumento Nacional s. XII, a las afueras de Melide. SELLAR."},
+    {nombre:"Raido", lat:42.916000, lon:-8.055000, km:3.88, ele:463, kmGuia:3.2, tipo:'paso', fiable:true},
+    {nombre:"Parabispo", lat:42.917000, lon:-8.065000, km:4.7, ele:427, kmGuia:4, tipo:'paso', fiable:true},
+    {nombre:"Boente", lat:42.916050, lon:-8.078803, km:5.99, ele:396, kmGuia:5.8, tipo:'iglesia', horario:"7:30-14:30", fiable:true, ficha:"Iglesia de Santiago. Cafetería El Alemán, Panadería A Castellana, Albergue Boente enfrente de la iglesia."},
+    {nombre:"Castañeda", lat:42.923230, lon:-8.100650, km:8.6, ele:413, kmGuia:8, tipo:'cultura', fiable:false, ajustado:351, ficha:"Aquí hubo un horno de cal para la catedral de Santiago. Tradición: llevar una piedra desde Triacastela. Bar No Camino. COORDENADA APROXIMADA: la búsqueda devolvió A Fraga Alta, localidad vecina."},
+    {nombre:"Ribadiso da Baixo", lat:42.929920, lon:-8.153070, km:13.97, ele:388, kmGuia:11.1, tipo:'taxi', fiable:false, ajustado:933, ficha:"Puente medieval sobre el río Iso. Hospital de San Antón (s. XV) hoy albergue. Playa fluvial. Punto de escape junto al Albergue Público, a la entrada."},
+    {nombre:"Arzúa", lat:42.929688, lon:-8.160784, km:14.73, ele:390, kmGuia:14.1, tipo:'fin', fiable:true}
+  ],
+  timing:[
+    {hora:'8:00', texto:'Coche a Arzúa. Carretera paralela al camino, 16 minutos.'},
+    {hora:'9:00', texto:'Salida de Melide.'},
+    {hora:'10:30', texto:'Llegada a Boente (5,8 km).'},
+    {hora:'10:30-11:00', texto:'Desayuno. Iglesia de Santiago.'},
+    {hora:'12:00', texto:'Llegada a Ribadiso da Baixo (5,3 km). Buen punto para taxi: los 3 km que faltan son en subida.'},
+    {hora:'12:00-13:00', texto:'Parada en Ribadiso. Desvío a la playa fluvial: a la salida del pueblo, a la derecha, unos 9 min.',
+     destacado:true, dudoso:'La guía dice "creo que" y advierte de que NO está señalizado.'},
+    {hora:'14:00', texto:'Llegada a Arzúa (3 km). Tarde libre. Posible misa del peregrino.'}
+  ],
+  alojamiento:{nombre:'Albergue San Francisco', direccion:'Rúa do Carme 7',
+    checkin:'13:30', telefono:'881979304', plazas:13, web:['https://alberguesanfrancisco.com'],
+    nota:'Habitación de 12 + una individual = 13 plazas para 11 personas. Sobra sitio. El correo de la guía (29 sept 2025) confirma cambio a entrada el 21 y salida el 22 de agosto.'},
+  comidas:{
+    comida:['El Pequeño Oasis — a 4 km de Melide, frutas, smoothies, tarta de frambuesa y de Santiago',
+            'Mesón Ribadiso — junto al río, después del puente','Chiringuito de la Playa Fluvial'],
+    cena:['Casa Nené — RESERVADO 20:30 para 8 pax + reserva adicional de 4 pax a las 20:00. 981 508107, https://casanene.es/',
+          'Restaurante Casa Chelo — 981 50 82 48, por si queréis reservar'],
+    nota:'Las dos reservas de Casa Nené suman 12, pero desde el jueves sois 11. Probablemente se hizo antes de saberlo. Conviene ajustar y unificar la hora.',
+    otros:'Hay que probar el queso DO Arzúa-Ulloa.'},
+  cultura:['Melide — Iglesia de Santa María.','Boente — Iglesia de Santiago, 7:30-14:30.',
+    'Castañeda — hórreo.','Ribadiso — puente medieval sobre el río Iso, playa fluvial.',
+    'Arzúa — convento de la Magdalena (s. XIV, en ruinas), iglesia parroquial de Santiago con Apóstol Peregrino y Matamoros. SELLAR.',
+    'Fiesta del queso desde 1975.'],
+  avisos:['El desvío a la playa fluvial de Ribadiso NO está señalizado y la propia guía duda de dónde está.',
+    'Los últimos 3 km son en subida: +80 m desde Ribadiso. Poco según el modelo, pero se notan al final.']
+},
+{
+  num:5, fecha:'2026-08-22', diaSemana:'sábado',
+  origen:'Arzúa', destino:'O Pedrouzo', salida:'08:30',
+  km:{guia:19.1, sumaTramos:19.1, gpx:19.55,
+      nota:'El total y la suma de tramos del gráfico coinciden (19,1). Pero el timing solo detalla 10 + 3 km: no cierra la etapa.'},
+  perfilNota:'El gráfico va de O Pedrouzo a Arzúa, al revés del sentido de marcha.',
+  puntos:[
+    {nombre:"Arzúa", lat:42.926240, lon:-8.163430, km:0.0, ele:385, kmGuia:0, tipo:'inicio', fiable:false, ajustado:440},
+    {nombre:"As Barrosas", lat:42.928000, lon:-8.172000, km:0.72, ele:347, kmGuia:0.9, tipo:'paso', fiable:true},
+    {nombre:"Preguntoño", lat:42.927000, lon:-8.186000, km:1.98, ele:334, kmGuia:2.2, tipo:'paso', fiable:true},
+    {nombre:"A Peroxa", lat:42.926000, lon:-8.200000, km:3.7, ele:360, kmGuia:3.3, tipo:'paso', fiable:true},
+    {nombre:"Taberna Vella", lat:42.925000, lon:-8.220000, km:5.73, ele:384, kmGuia:5.2, tipo:'paso', fiable:true},
+    {nombre:"A Calzada", lat:42.920190, lon:-8.237130, km:7.2, ele:379, kmGuia:5.8, tipo:'taxi', fiable:false, ajustado:445, ficha:"Bar Casa Calzada. Punto de escape: aquí se puede quedar con el taxi desde Arzúa. COORDENADA ESTIMADA: la búsqueda devolvió un bar homónimo en Santiago. El timing de la guía la sitúa a 10 km, el perfil hacia el 5,8."},
+    {nombre:"A Calle", lat:42.923000, lon:-8.256000, km:9.3, ele:377, kmGuia:7.8, tipo:'paso', fiable:true},
+    {nombre:"Boavista", lat:42.922500, lon:-8.266000, km:10.17, ele:367, kmGuia:9.3, tipo:'comida', fiable:true, ficha:"Café Bar Veña, el de los botellines, está entre A Calle y Boavista. OJO: la guía menciona un Veña Café Bar con la misma descripción en Ferreiros (etapa 1), a 60 km. O son dos locales homónimos, o uno está mal situado."},
+    {nombre:"Salceda", lat:42.925750, lon:-8.273780, km:10.81, ele:372, kmGuia:11.1, tipo:'comida', fiable:false, ajustado:435, ficha:"Casa Tía Teresa (más para descansar) u O Curro. Después de Salceda está el monumento al peregrino Guillermo Watt."},
+    {nombre:"O Xen", lat:42.923360, lon:-8.291300, km:12.38, ele:395, kmGuia:12.5, tipo:'paso', fiable:false, ajustado:388},
+    {nombre:"Ras", lat:42.919000, lon:-8.301000, km:13.36, ele:376, kmGuia:13.1, tipo:'paso', fiable:true},
+    {nombre:"A Brea", lat:42.918500, lon:-8.308000, km:13.98, ele:366, kmGuia:13.7, tipo:'paso', fiable:true},
+    {nombre:"Rabiña", lat:42.918000, lon:-8.316000, km:14.71, ele:380, kmGuia:15, tipo:'paso', fiable:true},
+    {nombre:"Santa Irene", lat:42.916964, lon:-8.331945, km:16.38, ele:374, kmGuia:16, tipo:'iglesia', sellar:true, fiable:true, ficha:"Ermita de Santa Irene (SELLAR, normalmente cerrada) y fuente barroca, llamada de la eterna juventud. Desvío señalizado de 1-2 min a la izquierda, antes del núcleo. Restaurante O Ceadoiro: tortilla de patatas."},
+    {nombre:"O Empalme", lat:42.914610, lon:-8.347700, km:17.94, ele:309, kmGuia:17, tipo:'mirador', fiable:false, ajustado:418, ficha:"Desde aquí se atisba el horizonte hacia las costas gallegas."},
+    {nombre:"A Rúa", lat:42.909010, lon:-8.358460, km:19.22, ele:268, kmGuia:17.9, tipo:'paso', fiable:false, ajustado:380},
+    {nombre:"O Pedrouzo", lat:42.909180, lon:-8.359000, km:19.3, ele:270, kmGuia:19.1, tipo:'fin', fiable:false, ajustado:589}
+  ],
+  timing:[
+    {hora:'7:30', texto:'Coche a O Pedrouzo. 19 minutos.'},
+    {hora:'8:30', texto:'Salida de Arzúa.'},
+    {hora:'10:45', texto:'Llegada a A Calzada (10 km).'},
+    {hora:'10:45-11:15', texto:'Descanso en Bar Casa Calzada. Punto de encuentro con el taxi desde Arzúa.'},
+    {hora:'11:15-13:30', texto:'Café Bar Veña (el de los botellines) y monumento al peregrino Guillermo Watt tras Salceda.'},
+    {hora:'13:30-14:00', texto:'Parada en Santa Irene. Ver la fuente barroca. Desvío señalizado de 1-2 min.', destacado:true},
+    {hora:'14:45', texto:'Llegada a O Pedrouzo (3 km).'}
+  ],
+  alojamiento:{nombre:'Villa Xardín', direccion:'Rúa Nova 26', checkin:null,
+    telefono:'600427167', plazas:10,
+    nota:'PROBLEMA SIN RESOLVER: 5 dormitorios dobles = 10 plazas, pero sois 11. Falta una cama. Tampoco consta hora de check-in.'},
+  comidas:{
+    comida:['Trebol Arca — mucho ambiente de peregrino',
+            'Km19 — comida rápida, mucho ambiente; por la noche bar de copas',
+            'Buenas pizzerías en el pueblo; también se puede cocinar en la casa'],
+    cena:['Restaurante O Ceadoiro (Cerceda) — RESERVA SOLICITADA 20:00, 981313354, rafatrasmallo@gmail.com'],
+    nota:'Única cena del viaje SIN CONFIRMAR. Además la guía sitúa O Ceadoiro en Santa Irene y en Cerceda: ¿mismo restaurante o dos distintos?'},
+  cultura:['Santa Irene — ermita y fuente barroca de aguas curativas.',
+    'Piedra del camino con mensajes, después de Santa Irene.',
+    'O Pedrouzo — Iglesia de Santa Eulalia de Arca. SELLAR. Misa 19:00.'],
+  avisos:['Conflicto de horas: misa a las 19:00 en Santa Eulalia y cena a las 20:00 en Cerceda. Ajustado.',
+    'O Pedrouzo tiene todos los servicios: albergues, pensiones, cajero, restaurantes, farmacia, centro de salud.',
+    'El timing sitúa A Calzada a 10 km, pero el perfil de la guía la coloca hacia el km 5,8. Discrepancia sin resolver.']
+},
+{
+  num:6, fecha:'2026-08-23', diaSemana:'domingo',
+  origen:'O Pedrouzo', destino:'Santiago de Compostela', salida:'07:15',
+  km:{guia:20.0, sumaTramos:20.0, sumaGrafico:19.3, gpx:20.55,
+      nota:'El timing suma 20 km (10 + 5 + 5), coherente con el título. Pero los tramos del gráfico del perfil suman 19,3.'},
+  perfilNota:'El gráfico va de Santiago a O Pedrouzo, al revés del sentido de marcha.',
+  puntos:[
+    {nombre:"O Pedrouzo", lat:42.904552, lon:-8.362517, km:0.0, ele:295, kmGuia:0, tipo:'inicio', fiable:true},
+    {nombre:"San Antón", lat:42.902000, lon:-8.375000, km:1.6, ele:286, kmGuia:1.3, tipo:'paso', fiable:true},
+    {nombre:"Amenal", lat:42.904520, lon:-8.391090, km:3.02, ele:260, kmGuia:3.7, tipo:'paso', fiable:false, ajustado:595},
+    {nombre:"Cimadevila", lat:42.905740, lon:-8.403670, km:4.2, ele:319, kmGuia:4, tipo:'paso', fiable:false, ajustado:757},
+    {nombre:"San Paio", lat:42.904360, lon:-8.433730, km:8.2, ele:332, kmGuia:6.7, tipo:'comida', fiable:false, ajustado:802, ficha:"La guía lista San Paio bajo \"comidas\" pero sin ningún establecimiento concreto."},
+    {nombre:"Balizas del aeropuerto", lat:42.901960, lon:-8.438460, km:8.69, ele:316, kmGuia:7.7, tipo:'paso', fiable:false, ajustado:433},
+    {nombre:"Lavacolla", lat:42.899187, lon:-8.444527, km:9.65, ele:298, kmGuia:10, tipo:'taxi', fiable:true, ficha:"Lugar donde los peregrinos se despojaban de sus ropas sucias. Punto de encuentro para hacer juntos los últimos km. También se puede venir en taxi directamente hasta aquí."},
+    {nombre:"Villamaior", lat:42.893000, lon:-8.460000, km:11.74, ele:382, kmGuia:11.5, tipo:'paso', fiable:true},
+    {nombre:"TV Galicia", lat:42.890000, lon:-8.472000, km:13.3, ele:378, kmGuia:13.3, tipo:'paso', fiable:true},
+    {nombre:"RTVE", lat:42.890750, lon:-8.485910, km:14.1, ele:372, kmGuia:14.1, tipo:'paso', fiable:false, ajustado:442},
+    {nombre:"Monte do Gozo", lat:42.885564, lon:-8.500545, km:16.25, ele:326, kmGuia:15.4, tipo:'mirador', fiable:true, ficha:"El mirador más importante de la ruta: primera vista de las torres de la catedral. Cafetería en el complejo. Grupo escultórico de los dos peregrinos."},
+    {nombre:"San Marcos", lat:42.885000, lon:-8.510000, km:17.19, ele:281, kmGuia:15.8, tipo:'paso', fiable:true},
+    {nombre:"Rúa de San Lázaro", lat:42.886170, lon:-8.527840, km:18.68, ele:279, kmGuia:17.3, tipo:'paso', fiable:false, ajustado:422},
+    {nombre:"Catedral de Santiago", lat:42.880688, lon:-8.544395, km:20.43, ele:274, kmGuia:20, tipo:'fin', fiable:true, ficha:"Entrada por la Puerta del Camino, Plaza de Cervantes, Plaza del Obradoiro. Misa del peregrino 19:30. Abierta 7:00-21:00."}
+  ],
+  timing:[
+    {hora:'6:30', texto:'Coche a Santiago. 19 minutos.'},
+    {hora:'7:15', texto:'Salida de O Pedrouzo. Conviene salir temprano: se ve amanecer y no se llega tarde.'},
+    {hora:'9:45', texto:'Llegada a Lavacolla (10 km). Punto de encuentro, más o menos la mitad.'},
+    {hora:'9:45-10:15', texto:'Descanso y desayuno.'},
+    {hora:'11:30', texto:'Llegada a Monte do Gozo (5 km). Primera vista de las torres de la catedral.', destacado:true},
+    {hora:'11:30-12:00', texto:'Descanso.'},
+    {hora:'13:30', texto:'Llegada a Santiago (5 km). Comer juntos y entrar juntos. Recoger la Compostela en la Oficina del Peregrino (cierra 19:00).'},
+    {hora:'19:30', texto:'Misa del peregrino en la catedral. Llegar pronto: hay mucha gente.',
+     dudoso:'Si la misa dura una hora, sale a las 20:30, que es la hora de la cena reservada. Sin margen.'}
+  ],
+  alojamiento:{nombre:'Pensión da Sela', direccion:'Rúa das Fontiñas 82',
+    checkin:null, telefono:null, plazas:12,
+    nota:'6 habitaciones dobles = 12 plazas para 11 personas. Sin teléfono ni hora de check-in en la guía.'},
+  comidas:{
+    comida:['Mesón Cestaños — junto al parque, buen punto de espera. Aprovechar para ver el Mirador de la catedral'],
+    cena:['Parrillada Galaico Argentina Milongas — RESERVADO 20:30, 881 820 820, https://milongasparrilada.com. Junto al Parque de la Alameda',
+          'Restaurante Anoiesa — hay que llamar, sin disponibilidad online. 981565081'],
+    nota:'Choca con la misa de 19:30. Hay que decidir: misa completa o cena puntual.'},
+  cultura:['Lavacolla — donde los peregrinos se lavaban antes de entrar en Santiago.',
+    'Monte do Gozo — colina desde donde se intuye la catedral.',
+    'Catedral de Santiago — Praza do Obradoiro. Abierta 7:00-21:00.'],
+  avisos:['La sección "Pueblos" de esta etapa está vacía en la guía: solo pone "Concello de O Pino" sin texto.',
+    'Las comidas de San Paio, Lavacolla y Monte do Gozo aparecen sin ningún establecimiento asociado.',
+    'Los dos coches quedan en Santiago. Confirmar si hace falta traslado de vuelta a Sarria.']
+}
+];
+
+const GRUPO = {total:12, desde:{fecha:'2026-08-20', momento:'tarde', total:11}};
+function tamanoGrupo(f){ return f >= GRUPO.desde.fecha ? GRUPO.desde.total : GRUPO.total; }
+
+</script>
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script>
+'use strict';
+
+/* ============================================================
+   MOTOR DE MARCHA — Naismith con corrección Langmuir
+   ============================================================ */
+const Marcha = {
+  distancia(a,b){
+    const R=6371, rad=Math.PI/180;
+    const dLat=(b.lat-a.lat)*rad, dLon=(b.lon-a.lon)*rad;
+    const s=Math.sin(dLat/2)**2+Math.cos(a.lat*rad)*Math.cos(b.lat*rad)*Math.sin(dLon/2)**2;
+    return 2*R*Math.asin(Math.sqrt(s));
+  },
+  tramo(dist, dh){
+    const c = CONFIG_MARCHA;
+    if(dist <= 0) return 0;
+    const pend = Math.abs(dh)/(dist*1000);
+    let h = dist/c.V_BASE;
+    if(dh > 0) h += dh/c.ASCENSO_M_POR_HORA;
+    else if(dh < 0){
+      const baja = -dh;
+      if(pend >= c.UMBRAL_BAJADA_FUERTE)     h += (baja/300)*c.PENAL_BAJADA_H_POR_300M;
+      else if(pend >= c.UMBRAL_BAJADA_SUAVE) h -= (baja/300)*c.BONIF_BAJADA_H_POR_300M;
+    }
+    h *= c.FACTOR_FATIGA;
+    h += (h*c.MIN_DESCANSO_POR_HORA)/60;
+    return Math.max(h, dist/8);
+  },
+  /* Si hay traza GPX la usa; si no, cae a los puntos de la guía. */
+  perfilTraza(n){
+    const t = (typeof TRAZAS!=='undefined') ? TRAZAS[n] : null;
+    if(!t) return null;
+    const pts = t.linea.map(function(q){ return {lon:q[0], lat:q[1], ele:q[2], km:q[3]}; });
+    return {puntos:pts, tramos:null, dPos:t.dPos, dNeg:t.dNeg, horas:null,
+            maxEle:t.maxEle, minEle:t.minEle, km:t.km, esGpx:true, nOrig:t.nOrig};
+  },
+  perfil(puntos){
+    const con = puntos.filter(p => typeof p.ele==='number' && typeof p.km==='number');
+    if(con.length < 2) return null;
+    let dPos=0, dNeg=0, horas=0, maxEle=-Infinity, minEle=Infinity;
+    const tramos=[];
+    for(let i=1;i<con.length;i++){
+      const d  = con[i].km - con[i-1].km;
+      const dh = con[i].ele - con[i-1].ele;
+      if(dh>0) dPos+=dh; else dNeg+=-dh;
+      const h = this.tramo(d, dh);
+      horas += h;
+      tramos.push({desde:con[i-1], hasta:con[i], km:d, dh, horas:h,
+                   pendiente: d>0 ? (dh/(d*1000))*100 : 0});
+    }
+    con.forEach(p=>{ maxEle=Math.max(maxEle,p.ele); minEle=Math.min(minEle,p.ele); });
+    return {puntos:con, tramos, dPos:Math.round(dPos), dNeg:Math.round(dNeg),
+            horas, maxEle, minEle, km:con[con.length-1].km};
+  },
+  horarios(etapa){
+    const p = this.perfil(etapa.puntos);
+    if(!p || !etapa.salida) return null;
+    const [hh,mm] = etapa.salida.split(':').map(Number);
+    let min = hh*60+mm;
+    const res = [{punto:p.puntos[0], minutos:min}];
+    p.tramos.forEach(t=>{ min += t.horas*60; res.push({punto:t.hasta, minutos:min}); });
+    return res;
+  },
+  enKm(perfil, km){
+    if(!perfil) return null;
+    const p = perfil.puntos;
+    if(km <= p[0].km) return {ele:p[0].ele, pendiente:0, nombre:p[0].nombre};
+    const ult = p[p.length-1];
+    if(km >= ult.km) return {ele:ult.ele, pendiente:0, nombre:ult.nombre};
+    for(let i=1;i<p.length;i++){
+      if(km <= p[i].km){
+        const d = p[i].km - p[i-1].km;
+        const f = d>0 ? (km-p[i-1].km)/d : 0;
+        return {ele: p[i-1].ele + (p[i].ele-p[i-1].ele)*f,
+                pendiente: d>0 ? ((p[i].ele-p[i-1].ele)/(d*1000))*100 : 0,
+                nombre:p[i-1].nombre, siguiente:p[i].nombre};
+      }
+    }
+    return null;
+  },
+  coordEnKm(puntos, km){
+    if(km <= puntos[0].km) return puntos[0];
+    const ult = puntos[puntos.length-1];
+    if(km >= ult.km) return ult;
+    for(let i=1;i<puntos.length;i++){
+      if(km <= puntos[i].km){
+        const d = puntos[i].km - puntos[i-1].km;
+        const f = d>0 ? (km-puntos[i-1].km)/d : 0;
+        return {lat: puntos[i-1].lat + (puntos[i].lat-puntos[i-1].lat)*f,
+                lon: puntos[i-1].lon + (puntos[i].lon-puntos[i-1].lon)*f};
+      }
+    }
+    return ult;
+  },
+  formato(h){
+    if(h==null || !isFinite(h)) return '—';
+    const t = Math.round(h*60);
+    return Math.floor(t/60) + ' h ' + String(t%60).padStart(2,'0') + ' min';
+  },
+  hora(min){
+    const m = ((Math.round(min)%1440)+1440)%1440;
+    return String(Math.floor(m/60)).padStart(2,'0') + ':' + String(m%60).padStart(2,'0');
+  }
+};
+
+/* ============================================================
+   METEOROLOGÍA — Open-Meteo, API pública sin clave
+   ============================================================ */
+const Meteo = {
+  cache: new Map(),
+  LIMITE_DIAS: 9,
+  diasHasta(fechaISO){
+    const hoy = new Date(); hoy.setHours(0,0,0,0);
+    const [a,m,d] = fechaISO.split('-').map(Number);
+    return Math.round((new Date(a,m-1,d) - hoy)/86400000);
+  },
+  disponible(fechaISO){
+    const d = this.diasHasta(fechaISO);
+    return d >= 0 && d <= this.LIMITE_DIAS;
+  },
+  async pedir(lat, lon, fecha){
+    const clave = lat.toFixed(3)+','+lon.toFixed(3)+','+fecha;
+    if(this.cache.has(clave)) return this.cache.get(clave);
+    const url = 'https://api.open-meteo.com/v1/forecast?latitude='+lat.toFixed(4)
+      + '&longitude='+lon.toFixed(4)
+      + '&hourly=temperature_2m,precipitation_probability,weather_code,wind_speed_10m,apparent_temperature'
+      + '&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,sunrise,sunset'
+      + '&timezone=Europe%2FMadrid&start_date='+fecha+'&end_date='+fecha;
+    const r = await fetch(url);
+    if(!r.ok) throw new Error('Open-Meteo respondió '+r.status);
+    const j = await r.json();
+    this.cache.set(clave, j);
+    return j;
+  },
+  describir(c){
+    const t = {
+      0:['Despejado','\u2600'], 1:['Casi despejado','\uD83C\uDF24'], 2:['Nubes y claros','\u26C5'],
+      3:['Nublado','\u2601'], 45:['Niebla','\uD83C\uDF2B'], 48:['Niebla helada','\uD83C\uDF2B'],
+      51:['Llovizna débil','\uD83C\uDF26'], 53:['Llovizna','\uD83C\uDF26'], 55:['Llovizna intensa','\uD83C\uDF26'],
+      61:['Lluvia débil','\uD83C\uDF27'], 63:['Lluvia','\uD83C\uDF27'], 65:['Lluvia fuerte','\uD83C\uDF27'],
+      66:['Lluvia helada','\uD83C\uDF27'], 67:['Lluvia helada fuerte','\uD83C\uDF27'],
+      71:['Nieve débil','\uD83C\uDF28'], 73:['Nieve','\uD83C\uDF28'], 75:['Nieve intensa','\uD83C\uDF28'],
+      80:['Chubascos','\uD83C\uDF26'], 81:['Chubascos','\uD83C\uDF26'], 82:['Chubascos fuertes','\u26C8'],
+      95:['Tormenta','\u26C8'], 96:['Tormenta con granizo','\u26C8'], 99:['Tormenta fuerte','\u26C8']
+    };
+    return t[c] || ['Sin datos','\u00B7'];
+  }
+};
+
+/* ============================================================
+   MAPA
+   ============================================================ */
+const ESTILO = {
+  version:8,
+  sources:{
+    sat:{type:'raster',
+      tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+      tileSize:256, maxzoom:19, attribution:'ESRI World Imagery'},
+    relieve:{type:'raster-dem',
+      tiles:['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+      encoding:'terrarium', tileSize:256, maxzoom:15}
+  },
+  layers:[{id:'sat', type:'raster', source:'sat'}],
+  terrain:{source:'relieve', exaggeration:1.35}
+};
+
+let mapa=null, marcadores=[], marcadorPos=null, mapaListo=false;
+
+function iniciarMapa(){
+  if(typeof maplibregl === 'undefined'){
+    document.getElementById('mapa').innerHTML =
+      '<div style="padding:2rem;color:#B5AE9E;font-size:.8rem;line-height:1.6">'
+      + 'No se ha podido cargar la librería del mapa. Comprueba la conexión y recarga la página.</div>';
+    return;
+  }
+  mapa = new maplibregl.Map({container:'mapa', style:ESTILO, center:[-7.98,42.86],
+    zoom:8.4, attributionControl:false, maxPitch:72});
+  mapa.addControl(new maplibregl.NavigationControl({visualizePitch:true}), 'top-right');
+  mapa.addControl(new maplibregl.ScaleControl({unit:'metric'}), 'bottom-right');
+  mapa.on('load', function(){
+    mapaListo = true;
+    try{ mapa.setTerrain({source:'relieve', exaggeration:1.35}); }catch(e){}
+    dibujar(vistaEtapa);
+  });
+  mapa.on('error', function(e){
+    console.warn('Mapa:', e && e.error && e.error.message);
+  });
+}
+
+function limpiarMarcadores(){
+  marcadores.forEach(function(m){ try{ m.remove(); }catch(e){} });
+  marcadores = [];
+  if(marcadorPos){ try{ marcadorPos.remove(); }catch(e){} marcadorPos = null; }
+}
+
+function marcador(lat, lon, html, clases){
+  const el = document.createElement('div');
+  el.className = 'mk ' + clases;
+  el.innerHTML = html;
+  const m = new maplibregl.Marker({element:el, anchor:'center'})
+    .setLngLat([lon,lat]).addTo(mapa);
+  marcadores.push(m);
+  return el;
+}
+
+function dibujarIndice(){
+  limpiarMarcadores();
+  quitarCapas();
+  const b = new maplibregl.LngLatBounds();
+  if(typeof TRAZAS!=='undefined'){
+    for(let i=1;i<=6;i++){
+      if(!TRAZAS[i]) continue;
+      const coords = TRAZAS[i].linea.map(function(q){ return [q[0],q[1]]; });
+      mapa.addSource('idx-'+i, {type:'geojson',
+        data:{type:'Feature', geometry:{type:'LineString', coordinates:coords}}});
+      mapa.addLayer({id:'idx-linea-'+i, type:'line', source:'idx-'+i,
+        layout:{'line-join':'round','line-cap':'round'},
+        paint:{'line-color':COLORES_ETAPA[i-1],'line-width':3,'line-opacity':.92}});
+      coords.forEach(function(c){ b.extend(c); });
+    }
+  }
+  ETAPAS.forEach(function(et,i){
+    const p = et.puntos[0];
+    const el = marcador(p.lat, p.lon,
+      '<span>'+et.num+'</span><span class="mk-lbl">'+esc(et.origen)+'</span>', 'mk-et');
+    el.style.background = COLORES_ETAPA[i];
+    el.title = 'Etapa '+et.num+': '+et.origen+' → '+et.destino;
+    el.onclick = function(){ irA(et.num); };
+    b.extend([p.lon, p.lat]);
+  });
+  const f = ETAPAS[5].puntos[ETAPAS[5].puntos.length-1];
+  const el = marcador(f.lat, f.lon, '<span>\u2605</span><span class="mk-lbl">Santiago</span>', 'mk-et');
+  el.style.background = COLORES_ETAPA[5];
+  el.title = 'Llegada';
+  b.extend([f.lon, f.lat]);
+  mapa.fitBounds(b,{padding:70, maxZoom:9.6, duration:600});
+  setTimeout(function(){ try{ mapa.fitBounds(b,{padding:70,maxZoom:9.6,duration:400}); }catch(e){} }, 350);
+}
+
+function quitarCapas(){
+  ['traza-linea','traza-borde'].forEach(function(id){
+    if(mapa.getLayer(id)) mapa.removeLayer(id);
+  });
+  if(mapa.getSource('traza')) mapa.removeSource('traza');
+  for(let i=1;i<=6;i++){
+    ['idx-linea-'+i].forEach(function(id){ if(mapa.getLayer(id)) mapa.removeLayer(id); });
+    if(mapa.getSource('idx-'+i)) mapa.removeSource('idx-'+i);
+  }
+}
+
+function dibujarTraza(n, color){
+  if(typeof TRAZAS==='undefined' || !TRAZAS[n]) return;
+  const coords = TRAZAS[n].linea.map(function(q){ return [q[0], q[1]]; });
+  mapa.addSource('traza', {type:'geojson',
+    data:{type:'Feature', geometry:{type:'LineString', coordinates:coords}}});
+  mapa.addLayer({id:'traza-borde', type:'line', source:'traza',
+    layout:{'line-join':'round','line-cap':'round'},
+    paint:{'line-color':'#FFFFFF','line-width':6,'line-opacity':.75}});
+  mapa.addLayer({id:'traza-linea', type:'line', source:'traza',
+    layout:{'line-join':'round','line-cap':'round'},
+    paint:{'line-color':color,'line-width':3.2}});
+}
+
+function dibujarEtapa(n){
+  limpiarMarcadores();
+  quitarCapas();
+  const et = ETAPAS[n-1], color = COLORES_ETAPA[n-1];
+  dibujarTraza(n, color);
+  const b = new maplibregl.LngLatBounds();
+  et.puntos.forEach(function(p){
+    const extremo = p.tipo==='inicio' || p.tipo==='fin';
+    const menor = p.tipo==='paso' && !extremo;
+    const el = marcador(p.lat, p.lon,
+      menor ? '' : '<span class="mk-lbl">'+esc(p.nombre)+'</span>',
+      'mk-pt' + (extremo ? ' grande' : ''));
+    el.style.background = extremo ? color : (p.fiable ? '#fff' : '#B5AE9E');
+    if(!extremo && !p.fiable) el.style.borderStyle = 'dashed';
+    if(menor){ el.style.width='10px'; el.style.height='10px'; el.style.opacity='.75'; }
+    el.title = p.nombre + ' · km ' + p.km + (p.fiable ? '' : ' — ubicación aproximada');
+    el.onclick = function(){ abrirHito(p.nombre); };
+    b.extend([p.lon, p.lat]);
+  });
+  mapa.fitBounds(b,{padding:80, maxZoom:13.2, duration:600});
+  setTimeout(function(){ try{ mapa.fitBounds(b,{padding:80,maxZoom:13.2,duration:400}); }catch(e){} }, 350);
+}
+
+function dibujar(v){
+  if(!mapa || !mapaListo) return;
+  try{ v===0 ? dibujarIndice() : dibujarEtapa(v); }
+  catch(e){ console.warn('No se ha podido dibujar el mapa:', e.message); }
+}
+
+function moverPosicion(lat, lon){
+  if(!mapa || !mapaListo) return;
+  if(!marcadorPos){
+    const el = document.createElement('div');
+    el.className = 'mk mk-pos';
+    marcadorPos = new maplibregl.Marker({element:el, anchor:'center'})
+      .setLngLat([lon,lat]).addTo(mapa);
+  } else {
+    marcadorPos.setLngLat([lon,lat]);
+  }
+}
+
+/* ============================================================
+   UTILIDADES
+   ============================================================ */
+const ICONO = {inicio:'Salida', fin:'Llegada', iglesia:'Iglesia', comida:'Comer',
+  taxi:'Punto de escape', cultura:'Patrimonio', mirador:'Mirador',
+  fuente:'Fuente', albergue:'Dormir', paso:'De paso'};
+
+function esc(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+/* CSS.escape no existe en navegadores antiguos */
+function escSel(s){
+  return (window.CSS && CSS.escape) ? CSS.escape(s) : String(s).replace(/["\\]/g,'\\$&');
+}
+function fechaLarga(iso){
+  const p = iso.split('-').map(Number);
+  const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto',
+                 'septiembre','octubre','noviembre','diciembre'];
+  return p[2] + ' de ' + meses[p[1]-1] + ' de ' + p[0];
+}
+function isoHoy(){
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+/* ============================================================
+   GRÁFICO DE PERFIL — SVG generado a mano, sin librerías
+   ============================================================ */
+function svgPerfil(perfil, color, kmActual){
+  if(!perfil) return '<div class="nota">Sin altitudes para esta etapa.</div>';
+  const W=340, H=112, mI=32, mD=8, mS=10, mB=20;
+  const gW = W-mI-mD, gH = H-mS-mB;
+  const kmMax = perfil.km;
+  const eMin = Math.floor((perfil.minEle-30)/50)*50;
+  const eMax = Math.ceil((perfil.maxEle+30)/50)*50;
+  const x = function(km){ return mI + (km/kmMax)*gW; };
+  const y = function(e){ return mS + gH - ((e-eMin)/(eMax-eMin))*gH; };
+
+  const pts = perfil.puntos.map(function(p){
+    return x(p.km).toFixed(1)+','+y(p.ele).toFixed(1); }).join(' ');
+  const area = mI+','+(mS+gH)+' '+pts+' '+x(kmMax).toFixed(1)+','+(mS+gH);
+
+  let rejilla='';
+  for(let e=eMin; e<=eMax; e+=100){
+    const yy = y(e).toFixed(1);
+    rejilla += '<line x1="'+mI+'" y1="'+yy+'" x2="'+(W-mD)+'" y2="'+yy
+             + '" stroke="#EDE7D8" stroke-width="1"/>'
+             + '<text class="cota" x="'+(mI-4)+'" y="'+(Number(yy)+3).toFixed(1)
+             + '" text-anchor="end">'+e+'</text>';
+  }
+
+  /* Los círculos marcan los hitos con nombre, no cada vértice de la traza */
+  const marcables = perfil.hitos ? perfil.hitos.filter(function(p){ return p.tipo!=='paso'; })
+                                 : perfil.puntos.filter(function(p){ return p.tipo!=='paso'; });
+  const hitos = marcables.map(function(p){
+      return '<circle cx="'+x(p.km).toFixed(1)+'" cy="'+y(p.ele).toFixed(1)
+        + '" r="2.6" fill="#fff" stroke="'+color+'" stroke-width="1.6"><title>'
+        + esc(p.nombre)+' \u00B7 km '+p.km+' \u00B7 '+Math.round(p.ele)+' m</title></circle>';
+    }).join('');
+
+  let marca='';
+  if(typeof kmActual === 'number'){
+    const info = Marcha.enKm(perfil, kmActual);
+    if(info){
+      const xx = x(kmActual).toFixed(1), yy = y(info.ele).toFixed(1);
+      marca = '<line x1="'+xx+'" y1="'+mS+'" x2="'+xx+'" y2="'+(mS+gH)
+            + '" stroke="#D8A33C" stroke-width="1.5" stroke-dasharray="3 2"/>'
+            + '<circle cx="'+xx+'" cy="'+yy+'" r="4.5" fill="#D8A33C" stroke="#fff" stroke-width="2"/>';
+    }
+  }
+
+  /* Rectángulo transparente que captura toques y clics: al pulsar
+     el gráfico el marcador salta a ese kilómetro. */
+  const zona = '<rect class="zona-toque" x="'+mI+'" y="'+mS+'" width="'+gW+'" height="'+gH
+    + '" onclick="tocarPerfil(event,'+kmMax+','+mI+','+gW+')"'
+    + ' onpointermove="arrastrarPerfil(event,'+kmMax+','+mI+','+gW+')"/>';
+
+  return '<div class="perfil"><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Perfil: sube '
+    + perfil.dPos+' metros y baja '+perfil.dNeg+' metros. Pulsa para moverte por la etapa.">'
+    + rejilla
+    + '<polygon points="'+area+'" fill="'+color+'" opacity=".16"/>'
+    + '<polyline points="'+pts+'" fill="none" stroke="'+color
+    + '" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>'
+    + hitos + marca + zona
+    + '<text class="lbl" x="'+mI+'" y="'+(H-5)+'">0 km</text>'
+    + '<text class="lbl" x="'+(W-mD)+'" y="'+(H-5)+'" text-anchor="end">'+kmMax+' km</text>'
+    + '</svg><div class="perfil-pie"><span>Mínimo '+perfil.minEle
+    + ' m</span><span>Máximo '+perfil.maxEle+' m</span></div></div>';
+}
+
+/* ============================================================
+   ESTADO Y SUB-PESTAÑAS
+   ============================================================ */
+const SECCIONES = [
+  {id:'ruta',    nom:'Ruta'},
+  {id:'perfil',  nom:'Perfil'},
+  {id:'paradas', nom:'Paradas'},
+  {id:'sellos',  nom:'Sellos'},
+  {id:'tiempo',  nom:'Tiempo'},
+  {id:'dia',     nom:'El día'}
+];
+let vistaEtapa = 0;
+let seccionActual = 'ruta';
+let kmSlider = 0;
+
+function pintarSubnav(){
+  const sn = document.getElementById('subnav');
+  if(vistaEtapa === 0){ sn.style.display='none'; sn.innerHTML=''; return; }
+  sn.style.display='flex';
+  const color = COLORES_ETAPA[vistaEtapa-1];
+  const cs = (typeof Sellos!=='undefined' && vistaEtapa>=1)
+    ? Sellos.cuenta(vistaEtapa) : {hechos:0,total:0};
+  sn.innerHTML = SECCIONES.map(function(s){
+    const badge = (s.id==='sellos' && cs.hechos>0)
+      ? '<span class="nav-sellos">'+cs.hechos+'</span>' : '';
+    return '<button role="tab" aria-selected="'+(seccionActual===s.id)+'" style="--et:'+color
+      + ';position:relative" onclick="irASeccion(\''+s.id+'\')">'+s.nom+badge+'</button>';
+  }).join('');
+}
+
+function irASeccion(id){
+  seccionActual = id;
+  pintarSubnav();
+  pintarPanel();
+  document.getElementById('panel').scrollTop = 0;
+}
+
+/* ============================================================
+   PANEL — ÍNDICE
+   ============================================================ */
+function panelIndice(){
+  const perfiles = ETAPAS.map(function(e){ return perfilEtapa(e.num); });
+  const totKm  = perfiles.reduce(function(s,p,i){
+    return s + (p && p.esGpx ? p.km : ETAPAS[i].km.guia); }, 0);
+  const totPos = perfiles.reduce(function(s,p){ return s+(p?p.dPos:0); }, 0);
+  const totNeg = perfiles.reduce(function(s,p){ return s+(p?p.dNeg:0); }, 0);
+  const totH   = perfiles.reduce(function(s,p){ return s+(p?p.horas:0); }, 0);
+
+  const filas = ETAPAS.map(function(e,i){
+    const p = perfiles[i];
+    return '<tr><td><button onclick="irA('+e.num+')"><span class="pt" style="background:'
+      + COLORES_ETAPA[i]+'"></span>'+esc(e.destino)+'</button></td>'
+      + '<td>'+(p&&p.esGpx?p.km.toFixed(1):e.km.guia)+'</td>'
+      + '<td style="color:#B5482F">+'+(p?p.dPos:'—')+'</td>'
+      + '<td style="color:#4A6B52">\u2212'+(p?p.dNeg:'—')+'</td>'
+      + '<td>'+(p?Marcha.formato(p.horas):'—')+'</td></tr>';
+  }).join('');
+
+  return '<div class="et-cab" style="--et:#D8A33C">'
+    + '<div class="fecha">18 \u2013 23 de agosto de 2026 \u00B7 seis etapas</div>'
+    + '<h1>De Sarria a <em>Santiago</em></h1>'
+    + '<div class="metricas">'
+    + '<div class="metrica"><b>'+totKm.toFixed(1)+'</b><span>km</span></div>'
+    + '<div class="metrica sube"><b>+'+totPos+'</b><span>m de subida</span></div>'
+    + '<div class="metrica baja"><b>\u2212'+totNeg+'</b><span>m de bajada</span></div>'
+    + '<div class="metrica"><b>'+Marcha.formato(totH)+'</b><span>de marcha</span></div>'
+    + '</div></div>'
+
+    + '<h2>Resumen por etapas</h2>'
+    + '<table class="tabla"><thead><tr><th>Etapa</th><th>km</th><th>D+</th><th>D\u2212</th>'
+    + '<th>Marcha</th></tr></thead><tbody>'+filas+'</tbody>'
+    + '<tfoot><tr><td>Total</td><td>'+totKm.toFixed(1)+'</td>'
+    + '<td style="color:#B5482F">+'+totPos+'</td>'
+    + '<td style="color:#4A6B52">\u2212'+totNeg+'</td>'
+    + '<td>'+Marcha.formato(totH)+'</td></tr></tfoot></table>'
+    + '<div class="nota">Kilómetros y desnivel medidos sobre las trazas GPX de Wikiloc. '
+    + 'Salen algo más largos que los de la tita Lucila porque el GPS sigue cada curva. El desnivel '
+    + 'lleva filtro de ruido calibrado contra Gronze.</div>'
+
+    + '<h2>El tiempo, día a día</h2><div id="meteoIndice" class="meteo-grid"></div>'
+
+    + '<h2>Cómo camina el grupo</h2><div class="marcha">'
+    + '<div class="fila"><span class="lbl">Velocidad base en llano</span>'
+    + '<span class="val">'+CONFIG_MARCHA.V_BASE+' km/h</span></div>'
+    + '<div class="fila"><span class="lbl">Coste de la subida</span>'
+    + '<span class="val">+1 h / '+CONFIG_MARCHA.ASCENSO_M_POR_HORA+' m</span></div>'
+    + '<div class="fila"><span class="lbl">Factor de fatiga</span>'
+    + '<span class="val">\u00D7'+CONFIG_MARCHA.FACTOR_FATIGA+'</span></div>'
+    + '<p class="pie">Naismith con corrección Langmuir: la bajada suave descuenta tiempo y la '
+    + 'fuerte lo suma. No cuenta paradas. Error típico \u00B120 %, y aquí más, porque falta el '
+    + 'sube-y-baja entre pueblos. Tras el primer día, ajusta <code>FACTOR_FATIGA</code> '
+    + 'dividiendo el tiempo real entre el estimado.</p></div>'
+
+    + '<h2>Antes de salir</h2><div class="bloque"><ul>'
+    + '<li><b>Antes del 12 de agosto:</b> comunicar a Mesón A Lareira (Palas de Rei) qué va a '
+    + 'cenar cada uno. Lo piden con una semana de antelación.</li>'
+    + '<li><b>O Pedrouzo, 22 de agosto:</b> Villa Xardín tiene 10 plazas y sois 11. Falta una cama.</li>'
+    + '<li><b>Cerceda, 22 de agosto:</b> la cena en O Ceadoiro está solicitada pero no confirmada. '
+    + 'Es la única del viaje sin cerrar.</li>'
+    + '<li><b>Arzúa, 21 de agosto:</b> Casa Nené tiene dos reservas (8 + 4 = 12) a horas distintas. '
+    + 'Conviene unificar y ajustar a 11.</li>'
+    + '<li><b>Santiago, 23 de agosto:</b> la misa de 19:30 y la cena de 20:30 no caben las dos.</li>'
+    + '</ul></div>'
+
+    + panelTelefonos()
+
+    + '<h2>Para cuando no haya cobertura</h2>'
+    + '<div class="descarga"><p>Entre Ferreiros y Portomarín, o cruzando la Sierra de Ligonde, '
+    + 'no hay señal. Que cada Lolita pulse aquí con wifi antes de salir: se guardan los mapas de '
+    + 'las seis etapas en el móvil y después funciona todo sin conexión.</p>'
+    + '<div class="barra"><i id="barraDesc"></i></div>'
+    + '<p id="estadoDesc">Sin descargar todavía.</p>'
+    + '<button id="btnDesc" onclick="descargarMapas()">Guardar mapas para sin cobertura</button>'
+    + '</div>'
+
+    + '<h2>Sobre los datos</h2><div class="nota">Las seis trazas son de Wikiloc, de cuatro '
+    + 'autores distintos, y encadenan sin huecos: el final de cada una coincide con el inicio '
+    + 'de la siguiente. Los horarios, alojamientos y comidas vienen de la guía que preparó '
+    + 'la tita Lucila. Donde las '
+    + 'dos fuentes discrepan se muestran ambas en vez de elegir una.</div>';
+}
+
+/* ============================================================
+   PANEL — SECCIONES DE ETAPA
+   ============================================================ */
+function seccionRuta(et, color){
+  const horarios = Marcha.horarios(et);
+  const hMap = {};
+  if(horarios) horarios.forEach(function(h){ hMap[h.punto.nombre] = h.minutos; });
+  const u = Geo.ultima;
+  const enRuta = u && u.etapa === et.num;
+
+  const lista = et.puntos.map(function(p){
+    const min = hMap[p.nombre];
+    return '<li><button class="hito" style="--c:'+color+'" data-nombre="'+esc(p.nombre)
+      + '" data-km="'+p.km+'" onclick="alternarHito(this,'+p.lat+','+p.lon+','+p.km+')" '
+      + 'aria-expanded="false">'
+      + '<span class="nom">'+esc(p.nombre)+(p.sellar?'<span class="sello">Sellar</span>':'')+'</span>'
+      + '<span class="km">km '+p.km+(p.kmGuia!=null&&Math.abs(p.kmGuia-p.km)>=0.3
+          ? '<br><span style="opacity:.6;font-size:.9em">guía '+p.kmGuia+'</span>' : '')+'</span>'
+      + '<span class="tag">'+(ICONO[p.tipo]||p.tipo)
+      + (p.horario?' \u00B7 '+esc(p.horario):'')
+      + (p.ajustado?' \u00B7 situado sobre la traza':'')+'</span>'
+      + (enRuta ? (function(){
+            const dd = p.km - u.km;
+            if(dd < -0.1) return '<span class="llegada" style="opacity:.55">ya has pasado</span>';
+            const hh = Marcha.tramo(dd, (p.ele||u.ele) - u.ele);
+            return '<span class="llegada"><b>a '+dd.toFixed(1)+' km</b> desde donde estás \u00B7 '
+                 + Marcha.formato(hh)+'</span>';
+          })()
+        : (min!=null?'<span class="llegada">Paso estimado: '+Marcha.hora(min)
+           + (p.ele!=null?' \u00B7 '+Math.round(p.ele)+' m':'')+'</span>':''))
+      + (p.ficha?'<span class="ficha">'+esc(p.ficha)+'</span>':'')
+      + '</button></li>';
+  }).join('');
+
+  return '<h2>Puntos del recorrido</h2><ul class="hitos">'+lista+'</ul>'
+    + '<div class="nota">Los kilómetros son los de la traza GPX. Cuando difieren de los de la '
+    + 'tita Lucila '
+    + 'en más de 300 m se muestran ambos. Las horas salen del modelo de marcha partiendo de una '
+    + 'salida a las '+esc(et.salida||'—')+', sin contar paradas: el horario de la tita Lucila '
+    + 'está en «El día».</div>';
+}
+
+function seccionPerfil(et, color, perfil){
+  if(!perfil) return '<div class="nota">Sin datos de altitud para esta etapa.</div>';
+  const esGpx = !!perfil.esGpx;
+  const info = Marcha.enKm(perfil, kmSlider);
+  const rest = Math.max(0, perfil.km - kmSlider);
+
+  const duros = perfil.tramos.slice().filter(function(t){ return t.dh>0; })
+    .sort(function(a,b){ return b.pendiente-a.pendiente; }).slice(0,3);
+  const bajadas = perfil.tramos.slice().filter(function(t){ return t.dh<0; })
+    .sort(function(a,b){ return a.pendiente-b.pendiente; }).slice(0,3);
+
+  let html = '<h2>Altimetría</h2>' + svgPerfil(perfil, color, kmSlider)
+    + '<div class="slider-caja">'
+    + '<input type="range" min="0" max="'+perfil.km+'" step="0.1" value="'+kmSlider
+    + '" oninput="moverSlider(this.value)" aria-label="Punto del recorrido">'
+    + '<div class="slider-datos">'
+    + '<div><b>'+kmSlider.toFixed(1)+'</b><span>km hechos</span></div>'
+    + '<div><b>'+rest.toFixed(1)+'</b><span>km quedan</span></div>'
+    + '<div><b>'+(info?Math.round(info.ele):'—')+'</b><span>metros</span></div>'
+    + '<div><b>'+(info?(info.pendiente>=0?'+':'')+info.pendiente.toFixed(1):'—')
+    + '%</b><span>inclinación</span></div></div></div>'
+
+    + '<h2>Desnivel acumulado</h2><div class="metricas" style="padding:.3rem 0 .2rem">'
+    + '<div class="metrica sube"><b>+'+perfil.dPos+'</b><span>metros de subida</span></div>'
+    + '<div class="metrica baja"><b>\u2212'+perfil.dNeg+'</b><span>metros de bajada</span></div>'
+    + '<div class="metrica"><b>'+perfil.maxEle+'</b><span>cota máxima</span></div>'
+    + '<div class="metrica"><b>'+perfil.minEle+'</b><span>cota mínima</span></div></div>';
+
+  if(duros.length){
+    html += '<h2>Las subidas que se notan</h2><div class="bloque"><ul>'
+      + duros.map(function(t){
+        return '<li><b>'+esc(t.desde.nombre)+' \u2192 '+esc(t.hasta.nombre)+'</b> \u00B7 +'
+          + Math.round(t.dh)+' m en '+t.km.toFixed(1)+' km \u00B7 '
+          + t.pendiente.toFixed(1)+' % de media</li>';
+      }).join('') + '</ul></div>';
+  }
+  if(bajadas.length){
+    html += '<h2>Las bajadas fuertes</h2><div class="bloque"><ul>'
+      + bajadas.map(function(t){
+        return '<li><b>'+esc(t.desde.nombre)+' \u2192 '+esc(t.hasta.nombre)+'</b> \u00B7 '
+          + Math.round(t.dh)+' m en '+t.km.toFixed(1)+' km \u00B7 '+t.pendiente.toFixed(1)+' %'
+          + (t.pendiente < -12 ? ' \u2014 castiga las rodillas' : '')+'</li>';
+      }).join('') + '</ul></div>';
+  }
+
+  if(esGpx){
+    html += '<div class="nota">Perfil trazado sobre '+perfil.nOrig.toLocaleString('es-ES')
+      + ' puntos GPS de una traza de Wikiloc. La altitud está suavizada con media móvil de 31 '
+      + 'puntos y el desnivel se cuenta con umbral de 10 m, para descartar el ruido del GPS: sin '
+      + 'ese filtro el D+ saldría más del triple de lo real. Calibrado contra las cifras que '
+      + 'publica Gronze.</div>';
+  } else {
+    if(et.perfilNota) html += '<div class="nota roja">'+esc(et.perfilNota)+'</div>';
+    html += '<div class="nota">El perfil une las cotas de la tita Lucila pueblo a pueblo, en línea '
+      + 'recta, así que el sube-y-baja intermedio no aparece.</div>';
+  }
+  return html;
+}
+
+function seccionTiempo(et){
+  const dias = Meteo.diasHasta(et.fecha);
+  let estado;
+  if(Meteo.disponible(et.fecha)){
+    estado = '<div class="meteo-estado"><span class="cargando"></span>Consultando Open-Meteo\u2026</div>';
+  } else if(dias < 0){
+    estado = '<div class="meteo-estado"><b>Etapa pasada.</b><br>Open-Meteo solo da previsión '
+      + 'hacia adelante.</div>';
+  } else {
+    estado = '<div class="meteo-estado"><b>Previsión aún no disponible.</b><br>Faltan '+dias
+      + ' días para esta etapa y la previsión fiable llega a '+Meteo.LIMITE_DIAS
+      + '. Mostrar un dato ahora sería inventarlo.</div>';
+  }
+  return '<h2>Previsión de la etapa</h2><div id="meteoEtapa">'+estado+'</div>'
+    + '<div class="nota">Agosto en Galicia interior: mañanas frescas y con niebla en los valles, '
+    + 'tardes calurosas. La previsión se pide para el punto medio de la etapa y para las horas '
+    + 'en que estaréis caminando.</div>';
+}
+
+function seccionDia(et, color, perfil){
+  const pax = tamanoGrupo(et.fecha);
+  const a = et.alojamiento;
+
+  let html = '<h2>Horario de la tita Lucila</h2><ul class="timing" style="--et:'+color+'">'
+    + et.timing.map(function(t){
+        return '<li class="'+(t.destacado?'destacado':'')+'"><span class="h">'+esc(t.hora)
+          + '</span><span>'+esc(t.texto)
+          + (t.dudoso?'<span class="dudoso">'+esc(t.dudoso)+'</span>':'')+'</span></li>';
+      }).join('') + '</ul>';
+
+  html += '<h2>Dónde dormimos</h2><dl class="dl">'
+    + '<dt>Sitio</dt><dd><b>'+esc(a.nombre)+'</b></dd>'
+    + '<dt>Dirección</dt><dd>'+esc(a.direccion)+'</dd>'
+    + (a.checkin?'<dt>Entrada</dt><dd>'+esc(a.checkin)+'</dd>':'')
+    + (a.telefono?'<dt>Teléfono</dt><dd><a href="tel:'+esc(a.telefono)+'">'+esc(a.telefono)+'</a></dd>':'')
+    + (a.reserva?'<dt>Reserva</dt><dd>'+esc(a.reserva)+'</dd>':'')
+    + (a.plazas?'<dt>Plazas</dt><dd>'+a.plazas+' para '+pax+' personas</dd>':'')
+    + (a.web?'<dt>Web</dt><dd>'+a.web.map(function(u){
+        return '<a href="'+esc(u)+'" target="_blank" rel="noopener">'
+          + esc(u.replace('https://',''))+'</a>'; }).join('<br>')+'</dd>':'')
+    + '</dl>';
+  if(a.nota) html += '<div class="nota '+(a.plazas&&a.plazas<pax?'roja':'')+'">'+esc(a.nota)+'</div>';
+  if(a.extra) html += '<div class="nota">'+esc(a.extra)+'</div>';
+
+  html += '<h2>Comer y cenar</h2><div class="bloque">';
+  if(et.comidas.comida && et.comidas.comida.length)
+    html += '<p class="sub">Comida</p><ul>'+et.comidas.comida.map(function(c){
+      return '<li>'+esc(c)+'</li>'; }).join('')+'</ul>';
+  if(et.comidas.cena && et.comidas.cena.length)
+    html += '<p class="sub">Cena</p><ul>'+et.comidas.cena.map(function(c){
+      return '<li>'+esc(c)+'</li>'; }).join('')+'</ul>';
+  if(et.comidas.otros) html += '<p style="margin-top:.7rem">'+esc(et.comidas.otros)+'</p>';
+  html += '</div>';
+  if(et.comidas.nota) html += '<div class="nota roja">'+esc(et.comidas.nota)+'</div>';
+
+  html += '<h2>Qué ver</h2><div class="bloque"><ul>'
+    + et.cultura.map(function(c){ return '<li>'+esc(c)+'</li>'; }).join('')+'</ul></div>';
+
+  if(et.avisos && et.avisos.length)
+    html += '<h2>Avisos</h2><div class="bloque"><ul>'
+      + et.avisos.map(function(v){ return '<li>'+esc(v)+'</li>'; }).join('')+'</ul></div>';
+
+  html += '<h2>Estimación de marcha</h2><div class="marcha">'
+    + '<div class="fila"><span class="lbl">Tiempo caminando</span><span class="val">'
+    + (perfil?Marcha.formato(perfil.horas):'—')+'</span></div>'
+    + '<div class="fila"><span class="lbl">Salida prevista</span><span class="val">'
+    + esc(et.salida||'—')+'</span></div>';
+  if(perfil && et.salida){
+    const s = et.salida.split(':').map(Number);
+    html += '<div class="fila"><span class="lbl">Llegada sin paradas</span><span class="val">'
+      + Marcha.hora(s[0]*60+s[1]+perfil.horas*60)+'</span></div>';
+  }
+  html += '<p class="pie">El horario de la tita Lucila es más tardío porque incluye paradas '
+    + 'largas. '
+    + 'Esta cifra es solo marcha efectiva.</p></div>';
+  return html;
+}
+
+/* Perfil de una etapa: prefiere la traza GPX, con el tiempo calculado
+   sobre los hitos (que es donde el modelo Naismith tiene sentido). */
+function perfilEtapa(n){
+  const et = ETAPAS[n-1];
+  const gpx = Marcha.perfilTraza(n);
+  const guia = Marcha.perfil(et.puntos);
+  if(!gpx) return guia;
+  return {puntos: gpx.puntos, tramos: guia ? guia.tramos : null,
+          dPos: gpx.dPos, dNeg: gpx.dNeg,
+          horas: guia ? guia.horas : null,
+          maxEle: gpx.maxEle, minEle: gpx.minEle, km: gpx.km,
+          esGpx:true, nOrig: gpx.nOrig, hitos: et.puntos};
+}
+
+function panelEtapa(n){
+  const et = ETAPAS[n-1], color = COLORES_ETAPA[n-1];
+  const perfil = perfilEtapa(n);
+  const pax = tamanoGrupo(et.fecha);
+  const kmDisputa = et.km.sumaTramos !== et.km.guia || et.km.guiaAlt;
+
+  let cab = '<div class="et-cab" style="--et:'+color+'">'
+    + '<div class="fecha">Etapa '+et.num+' \u00B7 '+et.diaSemana+' '+fechaLarga(et.fecha)+'</div>'
+    + '<h1>'+esc(et.origen)+' \u2192 <em>'+esc(et.destino)+'</em></h1>'
+    + '<div class="metricas">'
+    + '<div class="metrica"><b>'+(perfil&&perfil.esGpx?perfil.km.toFixed(1):et.km.guia)+'</b><span>km</span></div>'
+    + '<div class="metrica sube"><b>+'+(perfil?perfil.dPos:'—')+'</b><span>subida</span></div>'
+    + '<div class="metrica baja"><b>\u2212'+(perfil?perfil.dNeg:'—')+'</b><span>bajada</span></div>'
+    + '<div class="metrica"><b>'+(perfil?Marcha.formato(perfil.horas):'—')+'</b><span>marcha</span></div>'
+    + '<div class="metrica"><b>'+pax+'</b><span>personas</span></div>'
+    + '</div></div>';
+  if(kmDisputa) cab += '<div class="nota km">'+esc(et.km.nota)+'</div>';
+
+  let cuerpo;
+  if(seccionActual==='perfil')       cuerpo = seccionPerfil(et, color, perfil);
+  else if(seccionActual==='paradas') cuerpo = seccionParadas(et, color, perfil);
+  else if(seccionActual==='sellos')  cuerpo = seccionSellos(et, color);
+  else if(seccionActual==='tiempo')  cuerpo = seccionTiempo(et);
+  else if(seccionActual==='dia')     cuerpo = seccionDia(et, color, perfil);
+  else                               cuerpo = seccionRuta(et, color);
+
+  return cab + cuerpo;
+}
+
+function pintarPanel(){
+  const p = document.getElementById('panel');
+  p.innerHTML = vistaEtapa===0 ? panelIndice() : panelEtapa(vistaEtapa);
+  p.style.setProperty('--et', vistaEtapa===0 ? '#D8A33C' : COLORES_ETAPA[vistaEtapa-1]);
+  if(vistaEtapa===0) cargarMeteoIndice();
+  else if(seccionActual==='tiempo') cargarMeteoEtapa(vistaEtapa);
+}
+
+/* ============================================================
+   CARGA DE METEOROLOGÍA
+   ============================================================ */
+function cargarMeteoIndice(){
+  const cont = document.getElementById('meteoIndice');
+  if(!cont) return;
+  const conPrevision = ETAPAS.filter(function(e){ return Meteo.disponible(e.fecha); });
+
+  if(!conPrevision.length){
+    const d = Meteo.diasHasta(ETAPAS[0].fecha);
+    cont.innerHTML = '<div class="meteo-estado"><b>Previsión aún no disponible.</b><br>'
+      + (d>0 ? 'Faltan '+d+' días para la primera etapa y Open-Meteo llega a '
+               + Meteo.LIMITE_DIAS+'. Aparecerá aquí sola cuando entre en plazo.'
+             : 'El viaje ya ha pasado.')+'</div>';
+    return;
+  }
+
+  cont.innerHTML = '<div class="meteo-estado"><span class="cargando"></span>Consultando Open-Meteo\u2026</div>';
+  const promesas = conPrevision.map(function(et){
+    const medio = et.puntos[Math.floor(et.puntos.length/2)];
+    return Meteo.pedir(medio.lat, medio.lon, et.fecha)
+      .then(function(j){ return {et:et, j:j}; })
+      .catch(function(){ return {et:et, j:null}; });
+  });
+
+  Promise.all(promesas).then(function(res){
+    const filas = res.map(function(r){
+      if(!r.j) return '<div class="meteo-h"><span class="hh">'+r.et.fecha.slice(8)
+        + ' ago</span><span class="ic">\u00B7</span><span class="ds">No se ha podido consultar</span><span></span></div>';
+      const dd = r.j.daily;
+      const cod = r.j.hourly.weather_code[13];
+      const d = Meteo.describir(cod);
+      const clases = (dd.temperature_2m_max[0]>=30?'calor ':'')
+                   + (dd.precipitation_sum[0]>=1?'moja':'');
+      return '<div class="meteo-h '+clases+'"><span class="hh">'+r.et.fecha.slice(8)+' ago</span>'
+        + '<span class="ic">'+d[1]+'</span>'
+        + '<span><b class="tt">'+Math.round(dd.temperature_2m_max[0])+'\u00B0</b>'
+        + '<span class="ds"> / '+Math.round(dd.temperature_2m_min[0])+'\u00B0 \u00B7 '+esc(d[0])+'</span><br>'
+        + '<span class="ds">'+esc(r.et.destino)+'</span></span>'
+        + '<span class="pp">'+dd.precipitation_sum[0].toFixed(1)+' mm</span></div>';
+    }).join('');
+    const fuera = ETAPAS.length - conPrevision.length;
+    cont.innerHTML = filas + (fuera>0
+      ? '<div class="meteo-estado">Las otras '+fuera+' etapas están a más de '
+        + Meteo.LIMITE_DIAS+' días: su previsión aún no es fiable.</div>' : '');
+  });
+}
+
+function cargarMeteoEtapa(n){
+  const et = ETAPAS[n-1];
+  const cont = document.getElementById('meteoEtapa');
+  if(!cont || !Meteo.disponible(et.fecha)) return;
+  const medio = et.puntos[Math.floor(et.puntos.length/2)];
+
+  Meteo.pedir(medio.lat, medio.lon, et.fecha).then(function(j){
+    const h = j.hourly, dd = j.daily;
+    const horarios = Marcha.horarios(et);
+    const desde = horarios ? Math.max(0, Math.floor(horarios[0].minutos/60)) : 8;
+    const hasta = horarios ? Math.min(23, Math.ceil(horarios[horarios.length-1].minutos/60)) : 15;
+    let filas = '';
+    for(let hh=desde; hh<=hasta; hh++){
+      const d = Meteo.describir(h.weather_code[hh]);
+      const t = h.temperature_2m[hh], st = h.apparent_temperature[hh];
+      const pp = h.precipitation_probability[hh], v = h.wind_speed_10m[hh];
+      filas += '<div class="meteo-h '+(t>=30?'calor ':'')+(pp>=50?'moja':'')+'">'
+        + '<span class="hh">'+String(hh).padStart(2,'0')+':00</span>'
+        + '<span class="ic">'+d[1]+'</span>'
+        + '<span><b class="tt">'+Math.round(t)+'\u00B0</b><span class="ds"> sensación '
+        + Math.round(st)+'\u00B0 \u00B7 '+esc(d[0])+' \u00B7 viento '+Math.round(v)+' km/h</span></span>'
+        + '<span class="pp">'+pp+' %</span></div>';
+    }
+    cont.innerHTML = '<div class="meteo-resumen">'
+      + '<div><b>'+Math.round(dd.temperature_2m_max[0])+'\u00B0</b><span>máxima</span></div>'
+      + '<div><b>'+Math.round(dd.temperature_2m_min[0])+'\u00B0</b><span>mínima</span></div>'
+      + '<div><b>'+dd.precipitation_sum[0].toFixed(1)+'</b><span>mm de lluvia</span></div></div>'
+      + '<div class="meteo-grid">'+filas+'</div>'
+      + '<div class="nota">Amanece a las '+dd.sunrise[0].slice(11,16)+' y anochece a las '
+      + dd.sunset[0].slice(11,16)+'. Datos para el punto medio de la etapa ('
+      + esc(medio.nombre)+'), hora peninsular.</div>'
+      + '<button class="btn-recargar" onclick="Meteo.cache.clear();cargarMeteoEtapa('+n+')">Actualizar</button>';
+  }).catch(function(e){
+    cont.innerHTML = '<div class="meteo-estado"><b>No se ha podido consultar la previsión.</b><br>'
+      + esc(e.message)+'. Comprueba la conexión.<br>'
+      + '<button class="btn-recargar" onclick="cargarMeteoEtapa('+n+')">Reintentar</button></div>';
+  });
+}
+
+
+/* ============================================================
+   GEOLOCALIZACIÓN
+   Sitúa al peregrino sobre la traza y calcula lo hecho y lo que
+   queda de verdad, no según el slider.
+   ============================================================ */
+const Geo = {
+  activo: false,
+  watchId: null,
+  ultima: null,      // {lat, lon, precision, km, desvio, etapa}
+  marcador: null,
+
+  soportado: function(){
+    return 'geolocation' in navigator;
+  },
+
+  /* Proyecta una coordenada sobre la traza: devuelve el km
+     acumulado del vértice más cercano y a qué distancia está. */
+  proyectar: function(lat, lon, n){
+    if(typeof TRAZAS==='undefined' || !TRAZAS[n]) return null;
+    const linea = TRAZAS[n].linea;
+    let mejor = null;
+    for(let i=0;i<linea.length;i++){
+      const q = linea[i];
+      const d = Marcha.distancia({lat:lat,lon:lon},{lat:q[1],lon:q[0]});
+      if(mejor===null || d<mejor.d) mejor = {d:d, km:q[3], ele:q[2], i:i};
+    }
+    return mejor;
+  },
+
+  /* Busca en qué etapa estás: la que te pilla más cerca */
+  etapaMasCercana: function(lat, lon){
+    let mejor = null;
+    for(let n=1;n<=6;n++){
+      const p = this.proyectar(lat, lon, n);
+      if(p && (mejor===null || p.d<mejor.p.d)) mejor = {n:n, p:p};
+    }
+    return mejor;
+  },
+
+  iniciar: function(){
+    if(!this.soportado()){
+      avisar('Este navegador no permite geolocalización.');
+      return;
+    }
+    if(this.activo){ this.parar(); return; }
+
+    const btn = document.getElementById('btnGeo');
+    if(btn){ btn.classList.add('buscando'); btn.textContent = 'Buscando…'; }
+
+    this.watchId = navigator.geolocation.watchPosition(
+      this.alRecibir.bind(this),
+      this.alFallar.bind(this),
+      {enableHighAccuracy:true, timeout:15000, maximumAge:5000}
+    );
+    this.activo = true;
+  },
+
+  parar: function(){
+    if(this.watchId!==null) navigator.geolocation.clearWatch(this.watchId);
+    this.watchId = null;
+    this.activo = false;
+    this.ultima = null;
+    if(this.marcador){ try{ this.marcador.remove(); }catch(e){} this.marcador = null; }
+    const btn = document.getElementById('btnGeo');
+    if(btn){ btn.classList.remove('buscando','activo'); btn.textContent = 'Dónde estoy'; }
+    pintarBarraGeo();
+  },
+
+  alRecibir: function(pos){
+    const lat = pos.coords.latitude, lon = pos.coords.longitude;
+    const prec = pos.coords.accuracy;
+
+    /* Si estás viendo una etapa concreta, proyecta sobre ella;
+       si estás en el índice, busca la etapa más cercana. */
+    let n = vistaEtapa, p;
+    if(n>=1 && n<=6){
+      p = this.proyectar(lat, lon, n);
+    } else {
+      const m = this.etapaMasCercana(lat, lon);
+      if(m){ n = m.n; p = m.p; }
+    }
+    if(!p) return;
+
+    this.ultima = {lat:lat, lon:lon, precision:prec, km:p.km,
+                   desvio:p.d, ele:p.ele, etapa:n};
+
+    const btn = document.getElementById('btnGeo');
+    if(btn){ btn.classList.remove('buscando'); btn.classList.add('activo');
+             btn.textContent = 'Siguiendo'; }
+
+    if(mapa && mapaListo){
+      if(!this.marcador){
+        const el = document.createElement('div');
+        el.className = 'mk mk-yo';
+        el.innerHTML = '<span class="pulso"></span>';
+        this.marcador = new maplibregl.Marker({element:el, anchor:'center'})
+          .setLngLat([lon,lat]).addTo(mapa);
+      } else {
+        this.marcador.setLngLat([lon,lat]);
+      }
+    }
+    pintarBarraGeo();
+    /* Si estás mirando la ruta o las paradas de tu etapa, refresca
+       las distancias para que reflejen dónde estás ahora. */
+    if(vistaEtapa === n && (seccionActual === 'ruta' || seccionActual === 'paradas')){
+      pintarPanel();
+    }
+  },
+
+  alFallar: function(err){
+    const btn = document.getElementById('btnGeo');
+    if(btn){ btn.classList.remove('buscando','activo'); btn.textContent = 'Dónde estoy'; }
+    this.activo = false;
+    const msg = err.code===1 ? 'Has denegado el permiso de ubicación. Actívalo en los ajustes del navegador.'
+              : err.code===2 ? 'No se ha podido determinar la posición. Prueba a salir a cielo abierto.'
+              : 'La búsqueda de posición ha tardado demasiado.';
+    avisar(msg);
+  },
+
+  centrar: function(){
+    if(this.ultima && mapa && mapaListo){
+      mapa.flyTo({center:[this.ultima.lon, this.ultima.lat], zoom:15, duration:800});
+      mostrarMapa(true);
+    }
+  }
+};
+
+/* Barra fija con la posición actual y el siguiente hito */
+function pintarBarraGeo(){
+  const barra = document.getElementById('barraGeo');
+  if(!barra) return;
+  const u = Geo.ultima;
+
+  if(!u){ barra.style.display='none'; barra.innerHTML=''; return; }
+
+  const et = ETAPAS[u.etapa-1];
+  const traza = TRAZAS[u.etapa];
+  const quedan = Math.max(0, traza.km - u.km);
+  const sig = siguienteHito(u.etapa, u.km);
+
+  let aviso = '';
+  if(u.desvio > 0.25){
+    aviso = '<div class="geo-aviso">Estás a '+Math.round(u.desvio*1000)
+          + ' m de la traza. ¿Te has salido del camino?</div>';
+  }
+
+  let bloqueSig = '';
+  if(sig){
+    const dist = sig.km - u.km;
+    const horas = Marcha.tramo(dist, (sig.ele||u.ele) - u.ele);
+    bloqueSig = '<div class="geo-sig"><span class="lbl">Siguiente</span>'
+      + '<b>'+esc(sig.nombre)+'</b>'
+      + '<span class="det">a '+dist.toFixed(1)+' km \u00B7 '+Marcha.formato(horas)+'</span></div>';
+  } else {
+    bloqueSig = '<div class="geo-sig"><span class="lbl">Siguiente</span>'
+      + '<b>Ya has llegado</b><span class="det">'+esc(et.destino)+'</span></div>';
+  }
+
+  barra.style.display='block';
+  barra.innerHTML = aviso
+    + '<div class="geo-fila">'
+    + '<div class="geo-dato"><b>'+u.km.toFixed(1)+'</b><span>km hechos</span></div>'
+    + '<div class="geo-dato"><b>'+quedan.toFixed(1)+'</b><span>km quedan</span></div>'
+    + '<div class="geo-dato"><b>'+Math.round(u.ele)+'</b><span>altitud</span></div>'
+    + '<div class="geo-dato"><b>\u00B1'+Math.round(u.precision)+'</b><span>precisión m</span></div>'
+    + '</div>' + bloqueSig
+    + '<div class="geo-acciones">'
+    + '<button onclick="Geo.centrar()">Ver en el mapa</button>'
+    + '<button onclick="irA('+u.etapa+')">Ir a la etapa '+u.etapa+'</button>'
+    + '<button onclick="Geo.parar()">Dejar de seguir</button>'
+    + '</div>';
+}
+
+/* El primer hito con nombre que queda por delante */
+function siguienteHito(n, km){
+  const et = ETAPAS[n-1];
+  for(let i=0;i<et.puntos.length;i++){
+    const p = et.puntos[i];
+    if(p.km > km + 0.05 && p.tipo!=='paso') return p;
+  }
+  return null;
+}
+
+/* ============================================================
+   SELLOS
+   La Compostela exige dos sellos por día en los últimos 100 km.
+   Se guardan en el navegador de cada uno: son marcas personales,
+   no datos del viaje. Si se pierden no pasa nada, y hay botón
+   para copiarlos como texto.
+   ============================================================ */
+const Sellos = {
+  CLAVE: 'lolitas2026-sellos',
+  datos: null,
+
+  cargar: function(){
+    if(this.datos) return this.datos;
+    try{
+      const s = localStorage.getItem(this.CLAVE);
+      this.datos = s ? JSON.parse(s) : {};
+    }catch(e){ this.datos = {}; }
+    return this.datos;
+  },
+
+  guardar: function(){
+    try{ localStorage.setItem(this.CLAVE, JSON.stringify(this.datos)); }
+    catch(e){ /* modo privado o sin espacio: se pierde al cerrar, no es grave */ }
+  },
+
+  marcado: function(id){
+    return !!this.cargar()[id];
+  },
+
+  alternar: function(id){
+    this.cargar();
+    if(this.datos[id]) delete this.datos[id];
+    else this.datos[id] = new Date().toISOString().slice(0,16).replace('T',' ');
+    this.guardar();
+    if(seccionActual==='sellos') pintarPanel();
+    pintarSubnav();
+  },
+
+  cuenta: function(n){
+    const et = ETAPAS[n-1];
+    const lugares = this.lugares(n);
+    let hechos = 0;
+    lugares.forEach(function(l){ if(Sellos.marcado(l.id)) hechos++; });
+    return {hechos:hechos, total:lugares.length};
+  },
+
+  /* Sitios donde sellar en una etapa: los marcados con sellar,
+     más el alojamiento (todos sellan) y los bares del recorrido. */
+  lugares: function(n){
+    const et = ETAPAS[n-1];
+    const out = [];
+    et.puntos.forEach(function(p){
+      if(p.sellar || p.tipo==='iglesia' || p.tipo==='comida' || p.tipo==='taxi'){
+        /* El km desambigua nombres que se truncan igual, como
+           "Iglesia de Santiago de Barbadelo" y "...de Boente" */
+        out.push({id:'e'+n+'-'+p.km+'-'+p.nombre.replace(/[^\wáéíóúñ]/gi,'').slice(0,20),
+                  nombre:p.nombre, km:p.km, tipo:p.tipo,
+                  oficial:!!p.sellar, horario:p.horario});
+      }
+    });
+    out.push({id:'e'+n+'-aloj', nombre:et.alojamiento.nombre, km:null,
+              tipo:'albergue', oficial:true,
+              horario:et.alojamiento.checkin?'desde '+et.alojamiento.checkin:null});
+    return out;
+  },
+
+  comoTexto: function(){
+    const d = this.cargar();
+    let t = 'Sellos del Camino \u2014 Las Lolitas, agosto 2026\n\n';
+    for(let n=1;n<=6;n++){
+      const et = ETAPAS[n-1];
+      t += 'Etapa '+n+' \u2014 '+et.fecha+' \u2014 '+et.origen+' a '+et.destino+'\n';
+      const ls = this.lugares(n);
+      ls.forEach(function(l){
+        t += (d[l.id] ? '  [x] ' : '  [ ] ') + l.nombre
+           + (d[l.id] ? '  ('+d[l.id]+')' : '') + '\n';
+      });
+      t += '\n';
+    }
+    return t;
+  },
+
+  copiar: function(){
+    const t = this.comoTexto();
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(t).then(function(){
+        avisar('Sellos copiados al portapapeles.');
+      }).catch(function(){ avisar('No se ha podido copiar.'); });
+    } else {
+      avisar('Este navegador no permite copiar automáticamente.');
+    }
+  },
+
+  borrar: function(){
+    if(!confirm('¿Borrar todos los sellos marcados? No se puede deshacer.')) return;
+    this.datos = {};
+    this.guardar();
+    pintarPanel();
+    pintarSubnav();
+  }
+};
+
+/* ============================================================
+   AVISOS BREVES
+   ============================================================ */
+let avisoTimer = null;
+function avisar(texto){
+  let el = document.getElementById('aviso');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'aviso';
+    document.body.appendChild(el);
+  }
+  el.textContent = texto;
+  el.classList.add('visible');
+  clearTimeout(avisoTimer);
+  avisoTimer = setTimeout(function(){ el.classList.remove('visible'); }, 4200);
+}
+
+/* ============================================================
+   COMPARTIR
+   ============================================================ */
+function compartir(n){
+  const base = location.origin + location.pathname;
+  const url = n>0 ? base + '?etapa=' + n : base;
+  const et = n>0 ? ETAPAS[n-1] : null;
+  const texto = et
+    ? 'Las Lolitas al Camino \u2014 Etapa '+n+': '+et.origen+' a '+et.destino
+      + ' ('+(TRAZAS[n]?TRAZAS[n].km.toFixed(1):et.km.guia)+' km), '+et.diaSemana+' '+et.fecha.slice(8)+' de agosto'
+    : 'Las Lolitas al Camino \u2014 Sarria a Santiago, del 18 al 23 de agosto de 2026';
+
+  if(navigator.share){
+    navigator.share({title:'Las Lolitas al Camino', text:texto, url:url})
+      .catch(function(){});
+  } else if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(texto+'\n'+url).then(function(){
+      avisar('Enlace copiado. Ya puedes pegarlo en WhatsApp.');
+    }).catch(function(){ avisar('No se ha podido copiar el enlace.'); });
+  } else {
+    avisar(url);
+  }
+}
+
+
+/* ============================================================
+   SECCIÓN: PUNTOS DE ESCAPE, INTERÉS Y DESCANSO
+   Con doce personas de edades variadas, saber dónde se puede
+   parar o coger un taxi importa tanto como el recorrido.
+   ============================================================ */
+function seccionParadas(et, color, perfil){
+  const n = et.num;
+  const escapes  = et.puntos.filter(function(p){ return p.tipo==='taxi'; });
+  const comidas  = et.puntos.filter(function(p){ return p.tipo==='comida'; });
+  const interes  = et.puntos.filter(function(p){
+    return p.tipo==='cultura' || p.tipo==='iglesia' || p.tipo==='mirador'; });
+
+  const u = Geo.ultima;
+  function distDesdeAqui(p){
+    if(!u || u.etapa!==n) return '';
+    const d = p.km - u.km;
+    if(d < -0.1) return '<span class="pasado">ya pasado</span>';
+    return '<span class="restante">a '+Math.abs(d).toFixed(1)+' km</span>';
+  }
+
+  function tarjeta(p, clase){
+    return '<li><button class="hito '+(clase||'')+'" style="--c:'+color+'" '
+      + 'data-nombre="'+esc(p.nombre)+'" '
+      + 'onclick="alternarHito(this,'+p.lat+','+p.lon+','+p.km+')" aria-expanded="false">'
+      + '<span class="nom">'+esc(p.nombre)
+      + (p.sellar?'<span class="sello">Sellar</span>':'')+'</span>'
+      + '<span class="km">km '+p.km+'</span>'
+      + '<span class="tag">'+(ICONO[p.tipo]||p.tipo)
+      + (p.horario?' \u00B7 '+esc(p.horario):'')+' '+distDesdeAqui(p)+'</span>'
+      + (p.ficha?'<span class="ficha">'+esc(p.ficha)+'</span>':'')
+      + '</button></li>';
+  }
+
+  let html = '';
+
+  /* --- Escapes --- */
+  html += '<h2>Si alguien quiere parar</h2>';
+  if(escapes.length){
+    html += '<div class="bloque" style="margin-bottom:.5rem"><p style="font-size:.75rem;color:#5A554A">'
+      + 'Sois doce, de todas las edades: aquí se puede coger un taxi o esperar al coche '
+      + 'sin tener que terminar la etapa.'
+      + '</p></div><ul class="hitos">'
+      + escapes.map(function(p){ return tarjeta(p,'escape'); }).join('') + '</ul>';
+  } else {
+    html += '<div class="nota">La tita Lucila no marca puntos de escape en esta etapa.</div>';
+  }
+
+  const tels = TAXIS.filter(function(t){ return !t.etapa || t.etapa===n; });
+  if(tels.length){
+    html += '<div class="tels">'+tels.map(function(t){
+      return '<a href="tel:'+t.tel.replace(/\s/g,'')+'" class="tel">'
+        + '<span class="tel-n">'+esc(t.nombre)+'</span>'
+        + '<span class="tel-t">'+esc(t.tel)+'</span></a>';
+    }).join('')+'</div>';
+  }
+
+  /* --- Descanso y comida --- */
+  html += '<h2>Dónde descansar</h2>';
+  if(comidas.length){
+    html += '<ul class="hitos">'+comidas.map(function(p){ return tarjeta(p); }).join('')+'</ul>';
+  } else {
+    html += '<div class="nota">Sin paradas de comida marcadas en el recorrido.</div>';
+  }
+
+  /* Paradas largas que marca la guía */
+  const paradas = et.timing.filter(function(t){ return t.destacado; });
+  if(paradas.length){
+    html += '<div class="nota"><b>La tita Lucila propone parar aquí:</b><br>'
+      + paradas.map(function(t){ return esc(t.hora)+' \u2014 '+esc(t.texto); }).join('<br>')
+      + '</div>';
+  }
+
+  /* --- Interés --- */
+  html += '<h2>Qué merece la pena ver</h2>';
+  if(interes.length){
+    html += '<ul class="hitos">'+interes.map(function(p){ return tarjeta(p); }).join('')+'</ul>';
+  }
+  if(et.cultura && et.cultura.length){
+    html += '<div class="bloque" style="margin-top:.6rem"><p class="sub">Además, en el destino</p><ul>'
+      + et.cultura.map(function(c){ return '<li>'+esc(c)+'</li>'; }).join('')+'</ul></div>';
+  }
+
+  return html;
+}
+
+/* ============================================================
+   SECCIÓN: SELLOS
+   ============================================================ */
+function seccionSellos(et, color){
+  const n = et.num;
+  const lugares = Sellos.lugares(n);
+  const c = Sellos.cuenta(n);
+  const suficientes = c.hechos >= 2;
+
+  let html = '<h2>Sellos de la credencial</h2>'
+    + '<div class="sellos-estado '+(suficientes?'ok':'')+'">'
+    + '<b>'+c.hechos+' de 2</b>'
+    + '<span>'+(suficientes
+        ? 'Ya tienes los dos sellos que exige la Compostela para hoy.'
+        : 'La Compostela exige dos sellos por día en los últimos 100 km.')+'</span>'
+    + '</div>'
+    + '<div class="bloque" style="margin:.6rem 0"><p style="font-size:.74rem;color:#5A554A">'
+    + 'Marca los que vayas consiguiendo. Se guardan en este móvil, no se comparten '
+    + 'con el resto de las Lolitas: cada uno lleva su credencial.</p></div>';
+
+  html += '<ul class="sellos">' + lugares.map(function(l){
+    const m = Sellos.marcado(l.id);
+    return '<li><button class="sello-item'+(m?' hecho':'')+'" '
+      + 'onclick="Sellos.alternar(\''+l.id+'\')" aria-pressed="'+m+'">'
+      + '<span class="caja">'+(m?'\u2713':'')+'</span>'
+      + '<span class="txt"><b>'+esc(l.nombre)+'</b>'
+      + (l.km!=null?'<span class="km">km '+l.km+'</span>':'<span class="km">alojamiento</span>')
+      + (l.horario?'<span class="hor">'+esc(l.horario)+'</span>':'')
+      + (l.oficial?'<span class="ofi">sella seguro</span>':'')
+      + '</span></button></li>';
+  }).join('') + '</ul>';
+
+  html += '<div class="nota"><b>Dónde sellan además:</b> casi todos los bares, albergues, '
+    + 'iglesias y ayuntamientos del camino. Si un sitio no está en esta lista pero te sella, '
+    + 'vale igual.</div>';
+
+  html += '<div class="sellos-acciones">'
+    + '<button class="btn-recargar" onclick="Sellos.copiar()">Copiar todos como texto</button>'
+    + '<button class="btn-recargar" onclick="Sellos.borrar()">Borrar marcas</button></div>';
+
+  return html;
+}
+
+/* ============================================================
+   TELÉFONOS ÚTILES (índice)
+   ============================================================ */
+const TAXIS = [
+  {nombre:'Taxi Alberto (Sarria)', tel:'649 850 117', etapa:1},
+  {nombre:'Taxi David (Sarria)',   tel:'669 087 722', etapa:1}
+];
+
+function panelTelefonos(){
+  let html = '<h2>Teléfonos</h2>'
+    + '<div class="bloque"><p style="font-size:.75rem;color:#5A554A;margin-bottom:.6rem">'
+    + 'Todo en una pantalla, por si alguien se queda atrás o hay que avisar de algo. '
+    + 'Pulsa para llamar.</p></div>';
+
+  html += '<p class="sub">Taxis</p><div class="tels">'
+    + TAXIS.map(function(t){
+        return '<a href="tel:'+t.tel.replace(/\s/g,'')+'" class="tel">'
+          + '<span class="tel-n">'+esc(t.nombre)+'</span>'
+          + '<span class="tel-t">'+esc(t.tel)+'</span></a>';
+      }).join('') + '</div>';
+
+  html += '<p class="sub">Dónde dormimos</p><div class="tels">';
+  ETAPAS.forEach(function(e){
+    const a = e.alojamiento;
+    if(a.telefono){
+      html += '<a href="tel:'+a.telefono.replace(/\s/g,'')+'" class="tel">'
+        + '<span class="tel-n">'+esc(a.nombre)+'<em> \u00B7 '+e.fecha.slice(8)+' ago, '+esc(e.destino)+'</em></span>'
+        + '<span class="tel-t">'+esc(a.telefono)+'</span></a>';
+    } else {
+      html += '<div class="tel sin"><span class="tel-n">'+esc(a.nombre)
+        + '<em> \u00B7 '+e.fecha.slice(8)+' ago, '+esc(e.destino)+'</em></span>'
+        + '<span class="tel-t">sin teléfono</span></div>';
+    }
+  });
+  html += '</div>';
+
+  /* Extraer los teléfonos que aparecen en las cenas reservadas */
+  html += '<p class="sub">Cenas reservadas</p><div class="tels">';
+  ETAPAS.forEach(function(e){
+    (e.comidas.cena||[]).forEach(function(c){
+      const m = c.match(/(\d[\d\s]{7,})/);
+      const nombre = c.split('\u2014')[0].trim();
+      if(m){
+        html += '<a href="tel:'+m[1].replace(/\s/g,'')+'" class="tel">'
+          + '<span class="tel-n">'+esc(nombre)+'<em> \u00B7 '+e.fecha.slice(8)+' ago</em></span>'
+          + '<span class="tel-t">'+esc(m[1].trim())+'</span></a>';
+      }
+    });
+  });
+  html += '</div>';
+
+  html += '<div class="nota roja">Emergencias: <b>112</b>. Funciona en toda España, '
+    + 'incluso sin cobertura de tu operador y sin saldo.</div>';
+
+  return html;
+}
+
+/* ============================================================
+   NAVEGACIÓN
+   ============================================================ */
+function pintarNav(){
+  document.getElementById('nav').innerHTML =
+    '<button role="tab" onclick="irA(0)" aria-selected="'+(vistaEtapa===0)
+    + '" style="--et:#D8A33C"><span class="n">Índice</span><span class="d">Las 6</span></button>'
+    + ETAPAS.map(function(e,i){
+        return '<button role="tab" onclick="irA('+e.num+')" aria-selected="'+(vistaEtapa===e.num)
+          + '" style="--et:'+COLORES_ETAPA[i]+'"><span class="n">'+e.fecha.slice(8)
+          + ' ago</span><span class="d">'+esc(e.destino)+'</span></button>';
+      }).join('');
+}
+
+function irA(n, sinHistoria){
+  vistaEtapa = n;
+  kmSlider = 0;
+  if(n === 0) seccionActual = 'ruta';
+  pintarNav();
+  pintarSubnav();
+  pintarPanel();
+  document.getElementById('panel').scrollTop = 0;
+  dibujar(n);
+  if(!sinHistoria){
+    /* Con file:// algunos navegadores rechazan replaceState. No debe romper la navegación. */
+    try{
+      const url = n===0 ? location.pathname : location.pathname+'?etapa='+n;
+      history.replaceState({etapa:n}, '', url);
+    }catch(e){}
+  }
+}
+
+function moverSlider(v){
+  kmSlider = Number(v);
+  const et = ETAPAS[vistaEtapa-1];
+  if(!et) return;
+  const perfil = perfilEtapa(vistaEtapa);
+  const info = Marcha.enKm(perfil, kmSlider);
+  const rest = Math.max(0, perfil.km - kmSlider);
+
+  const datos = document.querySelector('.slider-datos');
+  if(datos && info){
+    datos.innerHTML = '<div><b>'+kmSlider.toFixed(1)+'</b><span>km hechos</span></div>'
+      + '<div><b>'+rest.toFixed(1)+'</b><span>km quedan</span></div>'
+      + '<div><b>'+Math.round(info.ele)+'</b><span>metros</span></div>'
+      + '<div><b>'+((info.pendiente>=0?'+':'')+info.pendiente.toFixed(1))
+      + '%</b><span>inclinación</span></div>';
+  }
+  const caja = document.querySelector('.perfil');
+  if(caja){
+    const tmp = document.createElement('div');
+    tmp.innerHTML = svgPerfil(perfil, COLORES_ETAPA[vistaEtapa-1], kmSlider);
+    caja.replaceWith(tmp.firstElementChild);
+  }
+  const c = Marcha.coordEnKm(et.puntos, kmSlider);
+  if(c) moverPosicion(c.lat, c.lon);
+}
+
+/* Convierte la coordenada X del toque en un kilómetro de la etapa */
+function kmDesdeEvento(ev, kmMax, mI, gW){
+  const svg = ev.target.ownerSVGElement || ev.target;
+  const caja = svg.getBoundingClientRect();
+  const escala = caja.width / svg.viewBox.baseVal.width;
+  const xSvg = (ev.clientX - caja.left) / escala;
+  const f = Math.max(0, Math.min(1, (xSvg - mI) / gW));
+  return Math.round(f * kmMax * 10) / 10;
+}
+
+function tocarPerfil(ev, kmMax, mI, gW){
+  moverSlider(kmDesdeEvento(ev, kmMax, mI, gW));
+  const r = document.querySelector('.slider-caja input[type=range]');
+  if(r) r.value = kmSlider;
+}
+
+function arrastrarPerfil(ev, kmMax, mI, gW){
+  /* Solo mientras se mantiene pulsado */
+  if(ev.buttons !== 1 && ev.pointerType !== 'touch') return;
+  if(ev.pointerType === 'touch' && !ev.isPrimary) return;
+  ev.preventDefault();
+  tocarPerfil(ev, kmMax, mI, gW);
+}
+
+function alternarHito(btn, lat, lon, km){
+  const abierto = btn.getAttribute('aria-expanded')==='true';
+  btn.setAttribute('aria-expanded', String(!abierto));
+  if(mapa && mapaListo){
+    try{ mapa.flyTo({center:[lon,lat], zoom:14.4, duration:900}); }catch(e){}
+    moverPosicion(lat, lon);
+  }
+  if(typeof km === 'number') kmSlider = km;
+  if(window.innerWidth<=860) mostrarMapa(true);
+}
+
+function abrirHito(nombre){
+  mostrarMapa(false);
+  if(vistaEtapa!==0 && seccionActual!=='ruta'){ irASeccion('ruta'); }
+  const btn = document.querySelector('.hito[data-nombre="'+escSel(nombre)+'"]');
+  if(btn){
+    btn.setAttribute('aria-expanded','true');
+    btn.scrollIntoView({block:'center', behavior:'smooth'});
+  }
+}
+
+function mostrarMapa(si){
+  const m = document.getElementById('main');
+  m.classList.toggle('mapa', si);
+  document.getElementById('verMapa').textContent = si ? 'Ver ficha' : 'Ver mapa';
+  if(si && mapa && mapaListo) setTimeout(function(){ try{ mapa.resize(); }catch(e){} }, 60);
+}
+
+function hoy(){
+  const iso = isoHoy();
+  let encontrada = null;
+  for(let i=0;i<ETAPAS.length;i++){ if(ETAPAS[i].fecha===iso){ encontrada = ETAPAS[i]; break; } }
+  irA(encontrada ? encontrada.num : 0);
+  return {iso:iso, et:encontrada};
+}
+
+function pintarCuenta(){
+  const el = document.getElementById('cuenta');
+  const h = new Date(); h.setHours(0,0,0,0);
+  const salida = new Date(2026,7,18);
+  const dias = Math.round((salida-h)/86400000);
+  const iso = isoHoy();
+  let enRuta = null;
+  for(let i=0;i<ETAPAS.length;i++){ if(ETAPAS[i].fecha===iso){ enRuta = ETAPAS[i]; break; } }
+  if(enRuta)      el.innerHTML = '<b>Etapa '+enRuta.num+'</b>hoy camináis';
+  else if(dias>0) el.innerHTML = '<b>'+dias+'</b>'+(dias===1?'día':'días')+' para salir';
+  else            el.innerHTML = '<b>\u00A1Hecho!</b>Santiago';
+}
+
+/* Flechas del teclado para cambiar de etapa */
+document.addEventListener('keydown', function(e){
+  if(e.target && e.target.tagName === 'INPUT') return;
+  if(e.key === 'ArrowRight' && vistaEtapa < 6) irA(vistaEtapa+1);
+  else if(e.key === 'ArrowLeft' && vistaEtapa > 0) irA(vistaEtapa-1);
+});
+
+
+/* ============================================================
+   SIN COBERTURA
+   Registra el service worker y permite descargar por adelantado
+   los tiles de las seis etapas.
+   ============================================================ */
+let sw = null;
+
+function registrarSW(){
+  if(!('serviceWorker' in navigator)) return;
+  /* Con file:// no funciona: hace falta http(s) */
+  if(location.protocol === 'file:') return;
+  navigator.serviceWorker.register('sw.js').then(function(reg){
+    sw = reg;
+    navigator.serviceWorker.addEventListener('message', function(e){
+      if(!e.data) return;
+      if(e.data.tipo === 'precacheado'){
+        const b = document.getElementById('barraDesc');
+        const t = document.getElementById('estadoDesc');
+        const bt = document.getElementById('btnDesc');
+        if(b) b.style.width = '100%';
+        if(t) t.textContent = 'Listo: ' + e.data.hechos + ' fragmentos de mapa guardados. '
+                            + 'Ya funciona sin conexión.';
+        if(bt){ bt.disabled = false; bt.textContent = 'Volver a guardar'; }
+      }
+      if(e.data.tipo === 'estado'){
+        const t = document.getElementById('estadoDesc');
+        if(t && e.data.tiles > 0)
+          t.textContent = e.data.tiles + ' fragmentos de mapa ya guardados en este móvil.';
+      }
+    });
+    if(navigator.serviceWorker.controller){
+      navigator.serviceWorker.controller.postMessage({tipo:'estado'});
+    }
+  }).catch(function(){ /* sin service worker se sigue navegando normal */ });
+}
+
+/* Convierte lon/lat a coordenadas de tile en un zoom dado */
+function aTile(lon, lat, z){
+  const n = Math.pow(2, z);
+  const x = Math.floor((lon + 180) / 360 * n);
+  const rad = lat * Math.PI / 180;
+  const y = Math.floor((1 - Math.log(Math.tan(rad) + 1/Math.cos(rad)) / Math.PI) / 2 * n);
+  return {x:x, y:y, z:z};
+}
+
+/* Lista de tiles que cubren las trazas.
+   z12 para la vista general, z14 para seguir el camino, y z15 solo
+   alrededor de los pueblos y puntos de escape, que es donde hace
+   falta detalle. Así la descarga baja de 900 a unos 400 fragmentos. */
+function tilesDeLaRuta(){
+  const set = {};
+
+  for(let n=1; n<=6; n++){
+    if(!TRAZAS[n]) continue;
+
+    /* Toda la traza en zoom general y de seguimiento */
+    TRAZAS[n].linea.forEach(function(q){
+      [12, 14].forEach(function(z){
+        const t = aTile(q[0], q[1], z);
+        const r = z === 14 ? 1 : 0;
+        for(let dx=-r; dx<=r; dx++){
+          for(let dy=-r; dy<=r; dy++){
+            set[z+'/'+(t.x+dx)+'/'+(t.y+dy)] = [z, t.x+dx, t.y+dy];
+          }
+        }
+      });
+    });
+
+    /* Detalle fino solo en los hitos con nombre */
+    ETAPAS[n-1].puntos.forEach(function(p){
+      if(p.tipo === 'paso') return;
+      const t = aTile(p.lon, p.lat, 15);
+      for(let dx=-1; dx<=1; dx++){
+        for(let dy=-1; dy<=1; dy++){
+          set['15/'+(t.x+dx)+'/'+(t.y+dy)] = [15, t.x+dx, t.y+dy];
+        }
+      }
+    });
+  }
+  const urls = [];
+  Object.keys(set).forEach(function(k){
+    const t = set[k];
+    urls.push('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/'
+              + t[0] + '/' + t[2] + '/' + t[1]);
+    if(t[0] <= 12){
+      urls.push('https://s3.amazonaws.com/elevation-tiles-prod/terrarium/'
+                + t[0] + '/' + t[1] + '/' + t[2] + '.png');
+    }
+  });
+  return urls;
+}
+
+function descargarMapas(){
+  if(location.protocol === 'file:'){
+    avisar('Esto solo funciona con la web publicada, no abriendo el archivo directamente.');
+    return;
+  }
+  if(!navigator.serviceWorker || !navigator.serviceWorker.controller){
+    avisar('Recarga la página una vez y vuelve a intentarlo.');
+    return;
+  }
+  const urls = tilesDeLaRuta();
+  const bt = document.getElementById('btnDesc');
+  const t  = document.getElementById('estadoDesc');
+  const b  = document.getElementById('barraDesc');
+  if(bt){ bt.disabled = true; bt.textContent = 'Descargando…'; }
+  if(t) t.textContent = 'Guardando ' + urls.length + ' fragmentos de mapa. '
+                      + 'Puede tardar un par de minutos, no cierres la página.';
+  if(b) b.style.width = '15%';
+  navigator.serviceWorker.controller.postMessage({tipo:'precachear', urls:urls});
+}
+
+/* Aviso visible de conexión */
+function vigilarRed(){
+  function actualizar(){
+    document.body.classList.toggle('offline', !navigator.onLine);
+  }
+  window.addEventListener('online', actualizar);
+  window.addEventListener('offline', actualizar);
+  actualizar();
+}
+
+/* ============================================================
+   ARRANQUE
+   ============================================================ */
+document.getElementById('btnHoy').onclick = hoy;
+document.getElementById('verMapa').onclick = function(){
+  mostrarMapa(!document.getElementById('main').classList.contains('mapa'));
+};
+
+const pedida = Number(new URLSearchParams(location.search).get('etapa'));
+vistaEtapa = (pedida>=1 && pedida<=6) ? pedida : 0;
+
+pintarCuenta();
+pintarNav();
+pintarSubnav();
+pintarPanel();
+iniciarMapa();
+registrarSW();
+vigilarRed();
+
+</script>
+</body>
+</html>
