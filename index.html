@@ -374,10 +374,17 @@ body.offline #sinRed{display:block}
 
 @media(max-width:860px){
   main{grid-template-columns:1fr;grid-template-rows:1fr}
+  /* Ficha y mapa comparten la misma celda: así el mapa siempre ocupa
+     todo el alto disponible cuando se muestra, sin quedarse en una franja. */
+  #col,#mapa{grid-column:1;grid-row:1}
   #mapa{display:none}
   main.mapa #col{display:none}
   main.mapa #mapa{display:block}
   #verMapa{display:block}
+  /* Que quepan todos los botones de la cabecera: si no caben en una línea,
+     saltan a la siguiente en vez de cortarse. */
+  header{flex-wrap:wrap;gap:.5rem;padding-left:.7rem;padding-right:.7rem}
+  #btnHoy{margin:0}
   .marca b{font-size:.92rem}
   .cuenta{display:none}
   .slider-datos{grid-template-columns:repeat(2,1fr);gap:.6rem}
@@ -2536,7 +2543,18 @@ function mostrarMapa(si){
   const m = document.getElementById('main');
   m.classList.toggle('mapa', si);
   document.getElementById('verMapa').textContent = si ? 'Ver ficha' : 'Ver mapa';
-  if(si && mapa && mapaListo) setTimeout(function(){ try{ mapa.resize(); }catch(e){} }, 60);
+  /* En móvil el mapa pasa de display:none a visible. MapLibre no se entera
+     del cambio de tamaño solo, y se queda dibujado en una franja. Hay que
+     llamar a resize() DESPUÉS de que el navegador haya recolocado el
+     contenedor: por eso el doble requestAnimationFrame (espera al reflow)
+     más una red de seguridad por si iOS tarda. No se condiciona a mapaListo:
+     resize() es inofensivo en cuanto el mapa existe (va en try/catch). */
+  if(si && mapa){
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){ try{ mapa.resize(); }catch(e){} });
+    });
+    setTimeout(function(){ try{ mapa.resize(); }catch(e){} }, 300);
+  }
 }
 
 function hoy(){
