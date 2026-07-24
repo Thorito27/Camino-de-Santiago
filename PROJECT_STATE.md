@@ -14,6 +14,31 @@ para saber en qué punto está el proyecto.
 
 ---
 
+## 2026-07-24 — Fusión a main y segundo intento del mapa en móvil
+
+**Rama:** `fix/mapa-movil` (y antes, reconciliación de ramas).
+**PR:** #3 (`feat/portada-preview-meteo → main`) para desplegar todo lo anterior; luego esta corrección.
+
+Se descubrió que todo el trabajo previo estaba fusionado en `feat/visor-lolitas`
+pero NO en `main`, que es de donde GitHub Pages despliega: la web publicada
+seguía siendo el visor base (aún «El día», `camino-v1`, mapa roto). Se abrió la
+PR #3 de `feat/portada-preview-meteo` directamente a `main` y se fusionó, con lo
+que por fin se desplegó todo. **Lección: las PR van contra `main`.**
+
+Sobre el mapa en móvil: el arreglo anterior (llamar a `resize()` tras el
+reflow) NO bastó en iOS Safari real; el mapa seguía en negro. Causa de fondo:
+el contenedor `#mapa` arrancaba en `display:none`, así que MapLibre lo creaba
+con tamaño 0 y el lienzo WebGL no se recuperaba. Nuevo enfoque: en móvil el
+mapa ya no se oculta con `display:none`, sino que va apilado detrás del panel
+opaco en la misma celda del grid, siempre a tamaño completo; al ver el mapa
+solo se oculta el panel. `sw.js` sube a `camino-v3`.
+
+**Pendiente:** este segundo arreglo del mapa TAMPOCO se ha podido probar en un
+iOS real desde el entorno de trabajo; hay que confirmarlo en el móvil tras
+desplegar.
+
+---
+
 ## 2026-07-24 — Portada, vista previa, avisos meteo y arreglos de móvil
 
 **Rama:** `feat/portada-preview-meteo`

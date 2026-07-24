@@ -374,12 +374,16 @@ body.offline #sinRed{display:block}
 
 @media(max-width:860px){
   main{grid-template-columns:1fr;grid-template-rows:1fr}
-  /* Ficha y mapa comparten la misma celda: así el mapa siempre ocupa
-     todo el alto disponible cuando se muestra, sin quedarse en una franja. */
+  /* Ficha y mapa comparten la MISMA celda. El mapa NO se oculta con
+     display:none (eso lo crearía con tamaño 0 y el lienzo WebGL de iOS
+     Safari se queda en negro aunque luego se llame a resize). En su lugar
+     el mapa va detrás, SIEMPRE renderizado a tamaño completo, y el panel
+     opaco lo tapa encima. Al ver el mapa, solo se oculta el panel y el mapa
+     —que ya estaba dibujado a pantalla completa— aflora. */
   #col,#mapa{grid-column:1;grid-row:1}
-  #mapa{display:none}
+  #mapa{z-index:0}
+  #col{z-index:1;background:var(--papel)}
   main.mapa #col{display:none}
-  main.mapa #mapa{display:block}
   #verMapa{display:block}
   /* Que quepan todos los botones de la cabecera: si no caben en una línea,
      saltan a la siguiente en vez de cortarse. */
