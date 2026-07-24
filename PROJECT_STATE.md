@@ -7,10 +7,89 @@ de cada sesión, nunca al principio, y las entradas nuevas van arriba del todo
 Antes de empezar una sesión nueva, lee al menos las 2-3 entradas más recientes
 para saber en qué punto está el proyecto.
 
+Arriba del todo, antes del diario, está la sección **Auditoría**: el estado
+conocido del visor (lo roto, lo frágil y lo mejorable) y lo que falta por probar
+a mano. Esa sección se sustituye cuando se hace una auditoría nueva; el diario,
+en cambio, solo crece.
+
 > Sobre las fechas: el historial de git de este repo está muy condensado (todo
 > el visor se subió en un único commit). Donde no se puede reconstruir una
 > sesión con certeza desde git, se dice explícitamente y se usa la fecha del
 > commit correspondiente en vez de inventarla.
+
+---
+
+## Auditoría
+
+Estado del visor tras el repaso completo del **24 de julio de 2026**, a un mes
+de salir. Esta sección no es un diario: se actualiza y se sustituye cuando se
+haga otra auditoría. Las entradas cronológicas van más abajo.
+
+### ROTO
+
+**Nada.** Buscado en serio, no por cortesía:
+
+- Las **26 funciones** invocadas desde el HTML existen todas (inventario de
+  botones, pestañas, tarjetas, slider, marcadores, enlaces `tel:` y compartir).
+- **187 comprobaciones automatizadas** en `npm test`, 0 fallos.
+- Coherencia de datos: los km de la traza cuadran con el último vértice en las
+  seis etapas; el grupo sale correcto (12/12, 12/12, **12 caminan y 11 duermen
+  el 20**, 11/11, 11/11, 11/11); los 34 retos tienen ids únicos, cuatro
+  opciones y una sola correcta; los teléfonos son válidos para `tel:`; ninguna
+  coordenada se sale de Galicia.
+
+Por eso no se subieron `VERSION` ni `APP_VERSION`: no se tocó código de la web,
+solo la herramienta de pruebas.
+
+### FRÁGIL
+
+Funciona, pero conviene saberlo. **Ninguna de las tres se arregló**, y aquí
+está el porqué:
+
+1. **Dependencia de `unpkg.com` para MapLibre, sin copia local.** Es la única
+   de las tres dependencias externas sin red de seguridad: el IGN cae solo a
+   ESRI y Open-Meteo degrada con aviso, pero **si unpkg no responde no hay
+   mapa** (sale el aviso de librería no cargada). No se arregló porque bajar
+   MapLibre al repositorio son ~800 KB y cambiaría la estrategia de caché a un
+   mes de salir. Decisión pendiente.
+2. **`npm test` no ve nada visual.** jsdom detecta errores de JavaScript,
+   vistas vacías y estados incoherentes, pero **no pinta**: no puede decir si un
+   botón es pequeño o si un texto no se lee al sol.
+3. **La cuenta atrás y el desbloqueo de Retos usan la hora del dispositivo.**
+   Si alguien tiene mal la fecha del móvil, verá los retos abiertos antes de
+   tiempo. No es arreglable sin servidor y el daño es cosmético.
+
+### MEJORABLE
+
+Propuesto, **no hecho**:
+
+- `pintarPanel()` reconstruye todo el HTML en cada cambio. **Se midió y no
+  compensa tocarlo**: 20 movimientos de slider tardan **1 ms**, porque el
+  slider no repinta el panel, solo sustituye el SVG del perfil. Optimizarlo
+  sería refactorizar por gusto.
+- Peso: `index.html` son 226 KB en crudo pero **73 KB comprimidos**, que es lo
+  que viaja de verdad. De ellos, 31 KB son las seis polilíneas GPX.
+- Cuatro listeners globales (`keydown`, `online`, `offline`,
+  `visibilitychange`), registrados una sola vez. Marcadores: 88 creados y 81
+  destruidos al recorrer las seis etapas; sin fuga.
+
+### Lo que hay que probar en el móvil
+
+Cinco cosas que ninguna prueba automática puede cubrir, con el criterio de qué
+sería un fallo:
+
+| Qué probar | Sería un fallo si… |
+|---|---|
+| Guardar mapas con wifi, modo avión, cerrar y reabrir | el mapa sale negro o la web no carga |
+| El mapa **en vertical** (es lo que más costó) | no ocupa toda la pantalla o se queda en una franja |
+| La traza roja sobre bosque oscuro (etapas 2-3) | no se distingue por dónde va el camino |
+| El 3D en la bajada a Portomarín y la Sierra de Ligonde | el relieve parece una caricatura, o no se aprecia |
+| Darle el móvil a la abuela Lola sin explicarle nada | no sabe qué pulsar en los primeros 30 segundos |
+
+**Duda que queda abierta:** no se ha podido comprobar que los tiles del PNOA se
+sirvan de verdad desde el caché sin red. Se verificó que el service worker los
+reconoce como cacheables, pero eso es leer el código, no probarlo con el móvil
+en modo avión. Es justo la primera fila de la tabla.
 
 ---
 
