@@ -53,9 +53,6 @@ No hace falta reevaluarlas:
   resolución que ESRI en la Galicia rural. **La atribución «PNOA cedido por ©
   Instituto Geográfico Nacional de España» es obligatoria por licencia.** Cubre
   solo España; si el servicio falla, la web cambia sola a ESRI de respaldo.
-- **OpenTopoMap** como segunda capa: curvas de nivel y senderos, para el bosque
-  donde el satélite no ve el camino. Se alterna con los botones de arriba a la
-  izquierda y la elección se recuerda.
 - **Tiles DEM terrarium de AWS** para el relieve 3D (exageración 1.6, y botón
   «3D» que alterna pitch 0 / 60).
 - **Marcadores DOM, nunca symbol layers.** Las etiquetas de texto de

@@ -14,10 +14,42 @@ para saber en qué punto está el proyecto.
 
 ---
 
+## 2026-07-24 — Fuera la capa topográfica
+
+**Rama:** `fix/quitar-topo`
+**PR:** pendiente contra `main`.
+
+Se retira OpenTopoMap, que se había añadido el mismo día: con el PNOA a esta
+resolución no aportaba lo bastante como para duplicar la descarga del modo sin
+cobertura. Fuera la fuente y la capa del estilo, el botón «Mapa», la clave
+`lolitas2026-capa` y toda la lógica de alternar (`aplicarCapa`), las teselas de
+`opentopomap.org` en `tilesDeLaRuta()` y ese dominio de `esTile` en `sw.js`.
+El bloque `.attr` no citaba OpenTopoMap, así que no hubo que tocarlo.
+
+«Satélite» se queda como **indicador** de lo que se está viendo (ya no hay otra
+capa entre la que alternar); el único botón que actúa es el de 3D.
+
+Intactos, como debía ser: el PNOA con su respaldo a ESRI, el botón 3D y toda la
+lógica de pitch, y el relieve de AWS Terrain (exageración 1.6) que es lo que
+hace funcionar el 3D.
+
+**Descarga recalculada:** de 1008 fragmentos y ~23 MB a **510 y ~8,4 MB** (algo
+menos de lo previsto, porque las teselas del PNOA pesan ~14 KB). `MAX_TILES`
+vuelve de 2000 a **1200**, que da margen de sobra. El texto que ve el usuario
+antes de descargar ya dice «unos 9 MB».
+
+Comprobado que el modo sin cobertura sigue en pie: el `esTile` del service
+worker reconoce las teselas del PNOA y del relieve (y ya no las de OpenTopoMap),
+sigue el precacheo de `index.html` y el respaldo de navegación sin red.
+
+`sw.js` → `camino-v14`, `APP_VERSION` → `map-7`.
+
+---
+
 ## 2026-07-24 — El marcador y los puntos, sobre la traza de verdad
 
 **Rama:** `fix/posicion-traza`
-**PR:** pendiente contra `main`.
+**PR:** [#14](https://github.com/Thorito27/Camino-de-Santiago/pull/14), fusionada.
 
 Dos problemas con la misma causa: había código tratando los hitos de la guía
 como si fueran la ruta, teniendo ya las trazas GPX.
