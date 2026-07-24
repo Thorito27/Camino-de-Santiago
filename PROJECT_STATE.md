@@ -17,7 +17,7 @@ para saber en qué punto está el proyecto.
 ## 2026-07-24 — Fuera la capa topográfica
 
 **Rama:** `fix/quitar-topo`
-**PR:** pendiente contra `main`.
+**PR:** [#15](https://github.com/Thorito27/Camino-de-Santiago/pull/15), fusionada.
 
 Se retira OpenTopoMap, que se había añadido el mismo día: con el PNOA a esta
 resolución no aportaba lo bastante como para duplicar la descarga del modo sin
