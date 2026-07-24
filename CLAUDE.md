@@ -75,10 +75,10 @@ nada y parece que el cambio no ha funcionado. El comando está en el README.
 
 **Si añades o cambias una capa de mapa, actualiza `esTile` en `sw.js`.** La
 detección de teselas va por nombre de dominio (ahora: arcgisonline,
-elevation-tiles-prod, amazonaws, **ign.es**, **opentopomap.org**). Si el dominio
+elevation-tiles-prod, amazonaws, **ign.es**). Si el dominio
 nuevo no está ahí, sus teselas no se cachean y el modo sin cobertura se rompe en
-silencio. Y recuerda que la descarga guarda **las dos capas** (~1000 fragmentos,
-unos 23 MB): si subes zooms, recalcula y revisa `MAX_TILES`.
+silencio. Y recuerda que la descarga son ~510 fragmentos y unos 8,4 MB: si subes zooms o
+añades capas, recalcula y revisa `MAX_TILES`.
 
 **El service worker no puede ir dentro del HTML.** El navegador exige un
 `.js` servido desde el mismo origen. Por eso `sw.js` va suelto. Y solo

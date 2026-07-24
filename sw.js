@@ -18,11 +18,11 @@
    el móvil: unos 60-80 MB según la zona.
    ============================================================ */
 
-const VERSION      = 'camino-v13';
+const VERSION      = 'camino-v14';
 const CACHE_APP    = VERSION + '-app';
 const CACHE_TILES  = VERSION + '-tiles';
 const CACHE_METEO  = VERSION + '-meteo';
-const MAX_TILES    = 2000;
+const MAX_TILES    = 1200;
 
 /* Lo imprescindible para arrancar sin red */
 const ESENCIALES = [
@@ -77,8 +77,7 @@ self.addEventListener('fetch', function(e){
   const esTile = url.hostname.indexOf('arcgisonline.com') >= 0
               || url.hostname.indexOf('elevation-tiles-prod') >= 0
               || url.hostname.indexOf('amazonaws.com') >= 0
-              || url.hostname.indexOf('ign.es') >= 0
-              || url.hostname.indexOf('opentopomap.org') >= 0;
+              || url.hostname.indexOf('ign.es') >= 0;
 
   if(esTile){
     e.respondWith(
