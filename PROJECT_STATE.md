@@ -96,7 +96,7 @@ en modo avión. Es justo la primera fila de la tabla.
 ## 2026-07-24 — Auditoría antes del viaje
 
 **Rama:** `chore/auditoria`
-**PR:** pendiente contra `main`.
+**PR:** [#18](https://github.com/Thorito27/Camino-de-Santiago/pull/18), fusionada.
 
 Repaso completo a un mes de salir. **No se encontró nada roto**: ni en el
 inventario de interacciones, ni en la coherencia de datos, ni en el recorrido
