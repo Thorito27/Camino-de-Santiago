@@ -290,6 +290,14 @@ h2::after{content:'';flex:1;height:1px;background:#DED8C9}
 .mk-lbl{position:absolute;left:50%;top:100%;transform:translateX(-50%);margin-top:3px;
   white-space:nowrap;font-family:'Inter',sans-serif;font-size:.63rem;font-weight:500;color:#fff;
   text-shadow:0 1px 3px rgba(0,0,0,.95),0 0 6px rgba(0,0,0,.8);pointer-events:none}
+#capas{position:absolute;top:8px;left:8px;z-index:6;display:flex;gap:.25rem}
+#capas button{background:rgba(27,42,35,.82);border:1px solid rgba(237,232,220,.28);
+  color:var(--hueso);font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:600;
+  letter-spacing:.05em;padding:.35rem .55rem;border-radius:var(--radio);cursor:pointer;
+  backdrop-filter:blur(3px);transition:background .13s,border-color .13s}
+#capas button:hover{border-color:var(--concha)}
+#capas button.on{background:var(--concha);color:var(--tinta);border-color:var(--concha)}
+#capas button:focus-visible{outline:2px solid var(--concha);outline-offset:1px}
 .attr{position:absolute;bottom:5px;left:8px;z-index:5;font-family:'JetBrains Mono',monospace;
   font-size:.56rem;color:rgba(255,255,255,.72);text-shadow:0 1px 3px rgba(0,0,0,.9);
   pointer-events:none;line-height:1.5}
@@ -479,7 +487,8 @@ body.offline #sinRed{display:block}
       <section id="panel" role="tabpanel"></section>
     </div>
     <div id="mapa">
-      <div class="attr">Imágenes: ESRI World Imagery · Relieve: AWS Terrain<br>Datos meteo: Open-Meteo.com</div>
+      <div id="capas"></div>
+      <div class="attr" id="attr">PNOA cedido por © Instituto Geográfico Nacional de España<br>Relieve: AWS Terrain · Datos meteo: Open-Meteo.com</div>
     </div>
   </main>
 </div>
@@ -1371,26 +1380,107 @@ const Meteo = {
 /* ============================================================
    MAPA
    ============================================================ */
+/* Ortofoto oficial del IGN (PNOA). Mejor resolución que ESRI en la Galicia
+   rural y actualizada. Servicio WMTS en EPSG:3857 (GoogleMapsCompatible), que
+   es lo que espera MapLibre; la URL es la forma KVP de GetTile porque el
+   servicio no publica plantilla REST. Cubre SOLO España: fuera de aquí no
+   habría imagen, pero todo el viaje es español. */
+const URL_PNOA = 'https://www.ign.es/wmts/pnoa-ma?service=WMTS&request=GetTile'
+  + '&version=1.0.0&layer=OI.OrthoimageCoverage&style=default'
+  + '&tilematrixset=GoogleMapsCompatible&format=image/jpeg'
+  + '&TileMatrix={z}&TileRow={y}&TileCol={x}';
+
+/* Respaldo por si el IGN falla: la capa que había antes. */
+const URL_ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+
+/* Topográfico: curvas de nivel, senderos y nombres de lugar. Imprescindible
+   bajo el bosque, donde el satélite no ve el camino. */
+const URL_TOPO = ['https://a.tile.opentopomap.org/{z}/{x}/{y}.png',
+                  'https://b.tile.opentopomap.org/{z}/{x}/{y}.png',
+                  'https://c.tile.opentopomap.org/{z}/{x}/{y}.png'];
+
 const ESTILO = {
   version:8,
   sources:{
-    sat:{type:'raster',
-      tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
-      tileSize:256, maxzoom:19, attribution:'ESRI World Imagery'},
+    sat:{type:'raster', tiles:[URL_PNOA], tileSize:256, maxzoom:19,
+      attribution:'PNOA cedido por © Instituto Geográfico Nacional de España'},
+    topo:{type:'raster', tiles:URL_TOPO, tileSize:256, maxzoom:17,
+      attribution:'© OpenTopoMap (CC-BY-SA), datos © OpenStreetMap'},
     relieve:{type:'raster-dem',
       tiles:['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
       encoding:'terrarium', tileSize:256, maxzoom:15}
   },
-  layers:[{id:'sat', type:'raster', source:'sat'}],
-  terrain:{source:'relieve', exaggeration:1.35}
+  /* Las dos capas de fondo van declaradas aquí, las primeras, para que la
+     traza y los marcadores queden SIEMPRE por encima. Se alterna con
+     visibility, no añadiendo y quitando capas. */
+  layers:[
+    {id:'sat',  type:'raster', source:'sat',  layout:{visibility:'visible'}},
+    {id:'topo', type:'raster', source:'topo', layout:{visibility:'none'}}
+  ],
+  terrain:{source:'relieve', exaggeration:1.6}
 };
+
+/* Capa elegida y vista 3D, recordadas entre visitas. */
+const Capa = {
+  CLAVE:'lolitas2026-capa',
+  CLAVE3D:'lolitas2026-3d',
+  actual: function(){
+    try{ return localStorage.getItem(this.CLAVE) === 'topo' ? 'topo' : 'sat'; }
+    catch(e){ return 'sat'; }
+  },
+  poner: function(cual){
+    try{ localStorage.setItem(this.CLAVE, cual); }catch(e){}
+    aplicarCapa();
+    pintarControlesMapa();
+  },
+  es3D: function(){
+    try{ return localStorage.getItem(this.CLAVE3D) === '1'; }catch(e){ return false; }
+  },
+  alternar3D: function(){
+    const nuevo = !this.es3D();
+    try{ localStorage.setItem(this.CLAVE3D, nuevo ? '1' : '0'); }catch(e){}
+    aplicar3D(true);
+    pintarControlesMapa();
+  }
+};
+
+/* Muestra una capa de fondo y oculta la otra. La traza no se toca. */
+function aplicarCapa(){
+  if(!mapa || !mapaListo) return;
+  const cual = Capa.actual();
+  ['sat','topo'].forEach(function(id){
+    try{ mapa.setLayoutProperty(id, 'visibility', id === cual ? 'visible' : 'none'); }
+    catch(e){}
+  });
+}
+
+/* Vista plana (pitch 0) o en perspectiva (pitch 60). */
+function aplicar3D(animar){
+  if(!mapa || !mapaListo) return;
+  const pitch = Capa.es3D() ? 60 : 0;
+  try{
+    if(animar) mapa.easeTo({pitch:pitch, duration:1000});
+    else mapa.setPitch(pitch);
+  }catch(e){}
+}
+
+/* Botones sobre el mapa, arriba a la izquierda. */
+function pintarControlesMapa(){
+  const c = document.getElementById('capas');
+  if(!c) return;
+  const cual = Capa.actual(), tres = Capa.es3D();
+  c.innerHTML =
+      '<button class="' + (cual==='sat' ? 'on' : '') + '" onclick="Capa.poner(\'sat\')">Satélite</button>'
+    + '<button class="' + (cual==='topo' ? 'on' : '') + '" onclick="Capa.poner(\'topo\')">Mapa</button>'
+    + '<button class="' + (tres ? 'on' : '') + '" onclick="Capa.alternar3D()">3D</button>';
+}
 
 let mapa=null, marcadores=[], marcadorPos=null, mapaListo=false;
 
 /* Etiqueta de build, visible en el diagnóstico (?debug). Sirve para saber, sin
    Mac ni consola, qué versión ha cargado de verdad el móvil (por si la caché
    sigue sirviendo una vieja). Súbela cuando cambies algo del mapa. */
-const APP_VERSION = 'map-4';
+const APP_VERSION = 'map-5';
 
 function iniciarMapa(){
   if(typeof maplibregl === 'undefined'){
@@ -1405,12 +1495,34 @@ function iniciarMapa(){
   mapa.addControl(new maplibregl.ScaleControl({unit:'metric'}), 'bottom-right');
   mapa.on('load', function(){
     mapaListo = true;
-    try{ mapa.setTerrain({source:'relieve', exaggeration:1.35}); }catch(e){}
+    try{ mapa.setTerrain({source:'relieve', exaggeration:1.6}); }catch(e){}
+    aplicarCapa();
+    aplicar3D(false);
+    pintarControlesMapa();
     dibujar(vistaEtapa);
     try{ mapa.resize(); }catch(e){}
   });
+
+  /* Respaldo: el PNOA solo cubre España y es un servicio público. Si empieza a
+     fallar (servicio caído, bloqueo), se cambia UNA vez a la capa de ESRI que
+     había antes, para no quedarse sin fondo en mitad del Camino. */
+  let fallosSat = 0, yaEnRespaldo = false;
   mapa.on('error', function(e){
-    console.warn('Mapa:', e && e.error && e.error.message);
+    const msg = e && e.error && e.error.message;
+    if(e && e.sourceId === 'sat' && !yaEnRespaldo){
+      fallosSat++;
+      if(fallosSat >= 8){
+        yaEnRespaldo = true;
+        try{
+          mapa.getSource('sat').setTiles([URL_ESRI]);
+          const a = document.getElementById('attr');
+          if(a) a.innerHTML = 'Imágenes: ESRI World Imagery (el IGN no responde)'
+            + '<br>Relieve: AWS Terrain · Datos meteo: Open-Meteo.com';
+          console.warn('PNOA no responde: se cambia a ESRI de respaldo.');
+        }catch(err){ /* si setTiles no existe, se queda como está */ }
+      }
+    }
+    console.warn('Mapa:', msg);
   });
   /* iOS Safari suele crear el mapa antes de que el contenedor tenga su tamaño
      final, y entonces el lienzo se queda en una franja. Un ResizeObserver
@@ -1890,8 +2002,8 @@ function panelIndice(){
 
     + '<h2>Para cuando no haya cobertura</h2>'
     + '<div class="descarga"><p>Entre Ferreiros y Portomarín, o cruzando la Sierra de Ligonde, '
-    + 'no hay señal. Que cada Lolita pulse aquí con wifi antes de salir: se guardan los mapas de '
-    + 'las seis etapas en el móvil y después funciona todo sin conexión.</p>'
+    + 'no hay señal. Que cada Lolita pulse aquí con wifi antes de salir: se guardan las dos '
+    + 'capas (satélite y mapa) de las seis etapas, unos 23 MB, y después funciona todo sin conexión.</p>'
     + '<div class="barra"><i id="barraDesc"></i></div>'
     + '<p id="estadoDesc">Sin descargar todavía.</p>'
     + '<button id="btnDesc" onclick="descargarMapas()">Guardar mapas para sin cobertura</button>'
@@ -3465,17 +3577,32 @@ function tilesDeLaRuta(){
       }
     });
   }
+  /* Sin cobertura hace falta poder alternar, así que se guardan LAS DOS capas.
+     Salen ~1000 fragmentos y unos 23 MB: el corredor de la ruta es estrecho y
+     las teselas del PNOA pesan poco (~14 KB). */
   const urls = [];
   Object.keys(set).forEach(function(k){
-    const t = set[k];
-    urls.push('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/'
-              + t[0] + '/' + t[2] + '/' + t[1]);
-    if(t[0] <= 12){
+    const t = set[k], z = t[0], x = t[1], y = t[2];
+    urls.push(URL_PNOA.replace('{z}', z).replace('{x}', x).replace('{y}', y));
+    urls.push('https://a.tile.opentopomap.org/' + z + '/' + x + '/' + y + '.png');
+    if(z <= 12){
       urls.push('https://s3.amazonaws.com/elevation-tiles-prod/terrarium/'
-                + t[0] + '/' + t[1] + '/' + t[2] + '.png');
+                + z + '/' + x + '/' + y + '.png');
     }
   });
   return urls;
+}
+
+/* Peso aproximado de una lista de teselas, en MB. Los pesos medios están
+   medidos sobre teselas reales del recorrido, no inventados. */
+function estimaMB(urls){
+  let b = 0;
+  urls.forEach(function(u){
+    if(u.indexOf('elevation-tiles-prod') >= 0) b += 118000;
+    else if(u.indexOf('opentopomap.org') >= 0) b += 30000;
+    else b += 14000;
+  });
+  return b / 1048576;
 }
 
 function descargarMapas(){
@@ -3488,12 +3615,18 @@ function descargarMapas(){
     return;
   }
   const urls = tilesDeLaRuta();
+  /* Estimación de espacio, medida sobre teselas reales de la ruta:
+     PNOA ~14 KB, OpenTopoMap ~30 KB, relieve ~118 KB. */
+  const mb = Math.round(estimaMB(urls));
+  if(mb > 150 && !confirm('La descarga ocupará unos ' + mb + ' MB. Conviene hacerla '
+      + 'con wifi y espacio libre. ¿Seguimos?')) return;
+
   const bt = document.getElementById('btnDesc');
   const t  = document.getElementById('estadoDesc');
   const b  = document.getElementById('barraDesc');
   if(bt){ bt.disabled = true; bt.textContent = 'Descargando…'; }
-  if(t) t.textContent = 'Guardando ' + urls.length + ' fragmentos de mapa. '
-                      + 'Puede tardar un par de minutos, no cierres la página.';
+  if(t) t.textContent = 'Guardando ' + urls.length + ' fragmentos de mapa, unos '
+                      + mb + ' MB. Puede tardar un par de minutos, no cierres la página.';
   if(b) b.style.width = '15%';
   navigator.serviceWorker.controller.postMessage({tipo:'precachear', urls:urls});
 }
