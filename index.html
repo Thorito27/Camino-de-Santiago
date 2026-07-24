@@ -154,6 +154,38 @@ h2::after{content:'';flex:1;height:1px;background:#DED8C9}
 .portada-cta:focus-visible{outline:2px solid var(--tinta);outline-offset:2px}
 .portada .firma{text-align:center;font-family:'Fraunces',serif;font-style:italic;
   color:var(--musgo);font-size:.9rem;margin-top:.2rem}
+/* Retos: tarjetas al estilo de los sellos */
+.retos{list-style:none;display:flex;flex-direction:column;gap:.5rem;margin-top:.5rem}
+.reto{background:#fff;border:1px solid #E2DCCC;border-left:3px solid var(--concha);
+  border-radius:var(--radio);padding:.6rem .7rem}
+.reto.bien{border-left-color:var(--musgo)}
+.reto.mal{border-left-color:var(--alerta)}
+.reto-p{font-size:.8rem;line-height:1.45;font-weight:500;color:var(--tinta)}
+.reto-ops{display:flex;flex-direction:column;gap:.3rem;margin-top:.5rem}
+.reto-op{width:100%;text-align:left;background:#FAF8F2;border:1px solid #D5CEBB;
+  border-radius:var(--radio);padding:.45rem .6rem;font-family:inherit;font-size:.76rem;
+  line-height:1.35;color:var(--tinta);cursor:pointer;transition:border-color .13s,background .13s}
+.reto-op:hover:not(:disabled){border-color:var(--musgo);background:#fff}
+.reto-op:focus-visible{outline:2px solid var(--musgo);outline-offset:1px}
+.reto-op:disabled{cursor:default}
+.reto-op.ok{background:#EAF1EA;border-color:var(--musgo);font-weight:600}
+.reto-op.ko{background:#FCF3F0;border-color:var(--alerta)}
+.reto-rev{margin-top:.5rem;font-size:.74rem;line-height:1.5;color:#4A463D;
+  background:#F7F4EC;border-radius:var(--radio);padding:.5rem .6rem}
+.reto-tanda{background:#fff;border:1px solid #E2DCCC;border-radius:var(--radio);
+  padding:.6rem .7rem;margin-top:.5rem}
+.reto-tanda.bloqueada{background:#F2EFE6;border-style:dashed}
+.reto-tanda-t{font-family:'Fraunces',serif;font-weight:600;font-size:.88rem;
+  color:var(--tinta);line-height:1.25}
+.reto-tanda-s{font-family:'JetBrains Mono',monospace;font-size:.63rem;letter-spacing:.03em;
+  color:#7C776B;margin-top:.22rem}
+.reto-pistas{list-style:none;margin-top:.45rem;display:flex;flex-direction:column;gap:.25rem}
+.reto-pistas li{font-size:.74rem;line-height:1.4;color:#5A554A;padding-left:.75rem;position:relative}
+.reto-pistas li::before{content:'·';position:absolute;left:.15rem;color:var(--concha);font-weight:700}
+.reto-marcador{display:inline-flex;align-items:baseline;gap:.4rem;background:var(--tinta);
+  color:var(--hueso);border-radius:var(--radio);padding:.3rem .6rem;margin-top:.35rem}
+.reto-marcador b{font-family:'JetBrains Mono',monospace;font-size:.85rem}
+.reto-marcador span{font-size:.6rem;letter-spacing:.07em;text-transform:uppercase;color:var(--piedra)}
 .decisiones{display:flex;flex-direction:column;gap:.5rem;margin-top:.5rem}
 .decision{background:#fff;border:1px solid #E2DCCC;border-left:3px solid var(--concha);
   border-radius:var(--radio);padding:.6rem .7rem}
@@ -853,6 +885,216 @@ const DECISIONES = [
   }
 ];
 
+/* ============================================================
+   RETOS — cuestionario del Camino
+   Dos bloques: `etapa: 0` es "Prepara el Camino", siempre disponible;
+   `etapa: 1..6` son las tandas de cada etapa, que se desbloquean el día
+   de la etapa a partir de las 16:00 (ver `retoDesbloqueado` en index.html).
+   Mientras están bloqueadas se muestra solo la `pista`, nunca la pregunta.
+
+   `correcta` es el índice (0-3) dentro de `opciones`.
+
+   Fuentes verificadas en julio de 2026: Oficina del Peregrino,
+   caminodesantiago.gal, Xacopedia, Centro Virtual Cervantes y
+   Google Arts & Culture con la Xunta.
+   ============================================================ */
+const RETOS = [
+
+  /* ---------- BLOQUE 1 · Prepara el Camino (siempre disponible) ---------- */
+  {
+    id:1, etapa:0,
+    pregunta:'¿Qué exige la Catedral de Santiago para dar la Compostela a quien hace los últimos 100 km a pie?',
+    opciones:['Un sello al día','Dos sellos al día','Tres sellos al día','Un sello por cada localidad atravesada'],
+    correcta:1,
+    explicacion:'Dos sellos diarios en los últimos 100 km a pie o a caballo, y en los últimos 200 km en bicicleta. Valen albergues, bares, iglesias, ayuntamientos y hasta oficinas de Correos.'
+  },
+  {
+    id:2, etapa:0,
+    pregunta:'La Compostela se recoge en la Oficina del Peregrino. ¿Cuánto cuesta?',
+    opciones:['3 euros','5 euros','Es gratuita','Depende de los kilómetros recorridos'],
+    correcta:2,
+    explicacion:'La Compostela es gratuita. Lo que cuesta 3 euros es el Certificado de Distancia, opcional, que detalla los kilómetros exactos.'
+  },
+  {
+    id:3, etapa:0,
+    pregunta:'Las flechas amarillas del Camino parecen antiquísimas, pero ¿de cuándo son?',
+    opciones:['Del siglo XII, aparecen en el Codex Calixtinus','De los años 80 del siglo XX','De la Edad Media tardía, siglo XV','Del Año Santo de 1965'],
+    correcta:1,
+    explicacion:'Las pintó Elías Valiña, párroco de O Cebreiro, a partir de 1984, cuando el Camino estaba casi olvidado. Recorrió personalmente todo el Camino Francés desde Roncesvalles marcándolo. La vieira sí es medieval: aparece en el Codex Calixtinus del siglo XII.'
+  },
+  {
+    id:4, etapa:0,
+    pregunta:'Elías Valiña, el cura que inventó las flechas amarillas, tenía una conexión con vuestro punto de partida. ¿Cuál?',
+    opciones:['Nació en Sarria','Está enterrado en Sarria','Fue párroco de Sarria antes que de O Cebreiro','Pintó su primera flecha en Sarria'],
+    correcta:0,
+    explicacion:'Elías Valiña Sampedro nació en Sarria en 1929 y murió en 1989. Empezáis el Camino en el pueblo del hombre al que le debéis poder seguirlo sin perderos.'
+  },
+  {
+    id:5, etapa:0,
+    pregunta:'¿Por qué son amarillas las flechas y no de otro color?',
+    opciones:['Porque el amarillo es el color litúrgico de Santiago','Porque Valiña aprovechó pintura sobrante de señalizar carreteras','Porque es el color de la bandera del Vaticano','Porque se ve mejor con niebla'],
+    correcta:1,
+    explicacion:'La versión más extendida dice que aprovechó pintura amarilla que le sobró a unos operarios de carreteras. Un sobrino suyo cuenta otra versión: que Valiña vio en Francia que el amarillo se usaba para señalizar rutas de montaña y lo copió. Las dos historias conviven.'
+  },
+  {
+    id:6, etapa:0,
+    pregunta:'La vieira era el símbolo del peregrino ya en la Edad Media. ¿Por qué probaba que habías llegado a Santiago?',
+    opciones:['Porque solo se pescaban en la ría de Arousa','Porque su venta estaba prohibida fuera de Santiago','Porque las entregaba el obispo en persona','Porque llevaban grabada la fecha de llegada'],
+    correcta:1,
+    explicacion:'Era el premio por completar la peregrinación, y venderlas en otro sitio estaba prohibido. En Santiago había un barrio entero, Os Concheiros, donde el gremio las vendía.'
+  },
+  {
+    id:7, etapa:0,
+    pregunta:'¿Desde dónde hay que empezar como mínimo para que la Compostela sea válida yendo a pie?',
+    opciones:['Desde Sarria o Barbadelo','Desde Ponferrada','Desde Portomarín','Desde León'],
+    correcta:0,
+    explicacion:'La Oficina del Peregrino fija Sarria o Barbadelo como punto mínimo en el Camino Francés a pie, porque son los últimos 100 km. Ponferrada es el mínimo para quien va en bicicleta, que necesita 200 km.'
+  },
+  {
+    id:8, etapa:0,
+    pregunta:'¿Cuánto pesa el Botafumeiro de la catedral de Santiago?',
+    opciones:['25 kg','53 kg','80 kg','120 kg'],
+    correcta:1,
+    explicacion:'53 kg y metro y medio de alto. Hacen falta ocho hombres, los tiraboleiros, para moverlo. Cuelga a 20 metros y alcanza mucha velocidad.'
+  },
+  {
+    id:9, etapa:0,
+    pregunta:'El Codex Calixtinus, del siglo XII, contiene la primera guía del peregrino de la historia. ¿Dónde se conserva el original?',
+    opciones:['En la Biblioteca Nacional de Madrid','En la catedral de Santiago','En la abadía de Cluny, en Francia','En el Vaticano'],
+    correcta:1,
+    explicacion:'Se conserva en la catedral de Santiago. Lo impulsó el arzobispo Diego Gelmírez para afianzar Compostela como sede apostólica. Su libro V describe el Camino etapa por etapa.'
+  },
+  {
+    id:10, etapa:0,
+    pregunta:'¿Puede conseguir la Compostela alguien que no sea creyente?',
+    opciones:['No, hace falta declararse católico practicante','Sí, basta declarar una motivación religiosa, espiritual o de búsqueda','Solo si hace el Camino en Año Santo','Solo si asiste a la misa del peregrino'],
+    correcta:1,
+    explicacion:'La Oficina admite motivación religiosa, espiritual o «de búsqueda». Quien hace el Camino por deporte o turismo puede pedir el Certificado de Distancia, que no exige motivación ninguna.'
+  },
+
+  /* ---------- BLOQUE 2 · Lo que has visto hoy ---------- */
+
+  /* Etapa 1 · Sarria → Portomarín */
+  {
+    id:11, etapa:1,
+    pista:'La iglesia de Portomarín no siempre estuvo donde está',
+    pregunta:'La iglesia de San Nicolás de Portomarín tiene una historia poco corriente. ¿Cuál?',
+    opciones:['Se construyó en una sola noche, según la leyenda','Se desmontó piedra a piedra y se trasladó','Nunca llegó a terminarse','Está construida sobre un castro celta'],
+    correcta:1,
+    explicacion:'Al construirse el embalse de Belesar en los años sesenta, el Portomarín antiguo quedó bajo las aguas del Miño. La iglesia-fortaleza de San Nicolás, del siglo XII, se numeró piedra a piedra y se reconstruyó en el pueblo nuevo. Si el embalse baja mucho, aún asoman los restos del pueblo viejo.'
+  },
+  {
+    id:12, etapa:1,
+    pista:'El nombre de Ferreiros no es casual',
+    pregunta:'¿A qué se dedicaban los habitantes de Ferreiros, y de ahí su nombre?',
+    opciones:['Eran herreros: claveteaban el calzado de los peregrinos y herraban sus caballerías','Fabricaban campanas para las iglesias del Camino','Extraían hierro de una mina cercana','Forjaban las cruces de los cruceiros'],
+    correcta:0,
+    explicacion:'Ferreiros significa «herreros» en gallego. Aquí se claveteaba el calzado de los peregrinos y se herraban sus caballerías: un servicio de primera necesidad cuando se caminaban cientos de kilómetros.'
+  },
+
+  /* Etapa 2 · Portomarín → Palas de Rei */
+  {
+    id:13, etapa:2,
+    pista:'Hay un poblado muy antiguo a diez minutos del Camino',
+    pregunta:'El castro de Castromaior, junto al Camino, ¿de qué época es?',
+    opciones:['Romana, siglo I','Medieval, siglo XII','Prerromana, más de 2400 años','Visigoda, siglo VII'],
+    correcta:2,
+    explicacion:'Poblado celta prerromano, de los mejor conservados de Galicia. Se visita libre y gratis con un desvío corto.'
+  },
+  {
+    id:14, etapa:2,
+    pista:'Un cruceiro con cuatro símbolos en la base y una sorpresa arriba',
+    pregunta:'En el cruceiro de Lameiros, la base tiene esculpidos cuatro elementos. ¿Cuáles?',
+    opciones:['Los cuatro evangelistas','Martillo, clavos, espinas y calaveras','Las cuatro estaciones del año','Los cuatro caminos que llegan a Santiago'],
+    correcta:1,
+    explicacion:'Son los símbolos de la Pasión. En la cruz, en cambio, hay un relieve de la maternidad. Muerte abajo y vida arriba, en la misma piedra, desde 1670.'
+  },
+
+  /* Etapa 3 · Palas de Rei → Melide */
+  {
+    id:15, etapa:3,
+    pista:'Hay algo en Leboreiro que parece una cesta gigante',
+    pregunta:'En Leboreiro hay un cabazo. ¿Qué es exactamente?',
+    opciones:['Un pozo comunal cubierto','Un granero redondo de varas entrelazadas, para el maíz','Un horno de pan compartido por la aldea','Una capilla pequeña sin campanario'],
+    correcta:1,
+    explicacion:'Un hórreo primitivo de ramas entrelazadas y techo de paja, sobre base de piedra. Se considera el precursor del hórreo gallego rectangular de granito. El de Leboreiro es el más famoso del Camino.'
+  },
+  {
+    id:16, etapa:3,
+    pista:'El nombre de Leboreiro viene de un animal',
+    pregunta:'El Codex Calixtinus llamaba a Leboreiro «Campus Leporarius». ¿Por qué?',
+    opciones:['Por la abundancia de liebres','Por los campos de lino que lo rodeaban','Por una batalla que se libró allí','Por un antiguo leprosario'],
+    correcta:0,
+    explicacion:'Leporarius viene de lepus, liebre en latín.'
+  },
+  {
+    id:17, etapa:3,
+    pista:'Melide guarda un récord de Galicia',
+    pregunta:'Melide es famosa por el pulpo, pero guarda un récord. ¿Cuál?',
+    opciones:['El albergue más antiguo del Camino','El cruceiro más antiguo de Galicia','La iglesia románica más grande de Galicia','El puente medieval más largo del Camino Francés'],
+    correcta:1,
+    explicacion:'El cruceiro de Melide, del siglo XIV, está considerado el más antiguo de Galicia. Está junto a la capilla de San Roque.'
+  },
+
+  /* Etapa 4 · Melide → Arzúa */
+  {
+    id:18, etapa:4,
+    pista:'En Castañeda los peregrinos dejaban algo que traían de lejos',
+    pregunta:'En Castañeda hubo hornos de cal medievales. ¿Qué tenían que ver con los peregrinos?',
+    opciones:['Traían piedra caliza desde Triacastela para la catedral de Santiago','Cocían el pan que llevaban de camino','Blanqueaban sus ropas antes de llegar','Fabricaban las conchas de recuerdo'],
+    correcta:0,
+    explicacion:'Era tradición cargar una piedra caliza desde Triacastela hasta los hornos de Castañeda. La cal se usaba en las obras de la catedral. Cada peregrino aportaba su piedra.'
+  },
+  {
+    id:19, etapa:4,
+    pista:'En Arzúa hay que probar algo, y no es el pulpo',
+    pregunta:'Arzúa es capital de un queso con Denominación de Origen. ¿Cuál?',
+    opciones:['Tetilla','San Simón da Costa','Arzúa-Ulloa','Cebreiro'],
+    correcta:2,
+    explicacion:'Se elabora con leche entera de vaca en toda la comarca. Desde 1975 se celebra la fiesta del queso.'
+  },
+
+  /* Etapa 5 · Arzúa → O Pedrouzo */
+  {
+    id:20, etapa:5,
+    pista:'Hay una fuente con fama de milagrosa antes de Santa Irene',
+    pregunta:'La fuente barroca de Santa Irene tiene fama. ¿De qué?',
+    opciones:['De no secarse nunca, ni en agosto','De ser curativa: la llaman de la eterna juventud','De marcar la mitad exacta del Camino Francés','De tener el agua más fría de Galicia'],
+    correcta:1,
+    explicacion:'La guía de la tita Lucila la recoge como «fuente de la eterna juventud», junto a la ermita de Santa Irene. Está en un desvío corto señalizado, a la izquierda, antes del núcleo.'
+  },
+  /* OJO — SIN VERIFICAR: la pregunta 21 está redactada con lo que dice la guía
+     de la tita Lucila y lo que se cuenta habitualmente del monumento, pero NO
+     se ha podido confirmar en una fuente sólida (julio 2026). Revisar antes de
+     darla por buena. */
+  {
+    id:21, etapa:5, sinVerificar:true,
+    pista:'Un monumento con unas botas, después de Salceda',
+    pregunta:'Después de Salceda hay un monumento a Guillermo Watt. ¿Qué recuerda?',
+    opciones:['Al ingeniero que trazó la carretera N-547','A un peregrino que murió en ese punto del Camino','Al fundador del primer albergue de la zona','A un santo local del siglo XV'],
+    correcta:1,
+    explicacion:'Es un memorial a un peregrino que falleció a pocos kilómetros de Santiago, con sus botas en bronce sobre la piedra. Un recordatorio de que no todo el mundo llega.'
+  },
+
+  /* Etapa 6 · O Pedrouzo → Santiago */
+  {
+    id:22, etapa:6,
+    pista:'El nombre de Lavacolla es más explícito de lo que parece',
+    pregunta:'Lavacolla aparece en el Codex Calixtinus como «Lavamentula». ¿Qué hacían allí los peregrinos?',
+    opciones:['Lavaban solo la ropa antes de entrar en Santiago','Se lavaban el cuerpo entero, partes íntimas incluidas','Bebían el agua del río como rito de purificación','Dejaban una prenda como ofrenda al Apóstol'],
+    correcta:1,
+    explicacion:'El Codex es muy explícito: dice que los peregrinos franceses se quitaban la ropa y se lavaban «no solo sus partes, sino la suciedad de todo el cuerpo», por amor al Apóstol. Lavamentula viene de ahí. Era la purificación antes de entrar en la ciudad del Apóstol, y de paso llegaban presentables.'
+  },
+  {
+    id:23, etapa:6,
+    pista:'Desde Monte do Gozo pasa algo por primera vez',
+    pregunta:'¿Por qué se llama Monte do Gozo?',
+    opciones:['Porque desde allí se ven por primera vez las torres de la catedral','Porque era donde los peregrinos celebraban con vino','Por una ermita dedicada a Nuestra Señora del Gozo','Porque marcaba el fin de los peajes medievales'],
+    correcta:0,
+    explicacion:'Tras semanas o meses de camino, allí aparecía por fin la meta. El primero del grupo en verlas era proclamado «rey» de la peregrinación, y de ahí vienen apellidos como Leroy o King.'
+  }
+];
+
 </script>
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script>
@@ -1161,7 +1403,9 @@ function dibujarEtapa(n){
 
 function dibujar(v){
   if(!mapa || !mapaListo) return;
-  try{ v<=0 ? dibujarIndice() : dibujarEtapa(v); }
+  /* Solo las etapas 1-6 tienen traza propia; portada (-1), índice (0) y
+     retos (7) muestran el conjunto. */
+  try{ (v >= 1 && v <= 6) ? dibujarEtapa(v) : dibujarIndice(); }
   catch(e){ console.warn('No se ha podido dibujar el mapa:', e.message); }
 }
 
@@ -1286,7 +1530,8 @@ let kmSlider = 0;
 
 function pintarSubnav(){
   const sn = document.getElementById('subnav');
-  if(vistaEtapa <= 0){ sn.style.display='none'; sn.innerHTML=''; return; }
+  /* Portada, índice y retos no tienen sub-pestañas */
+  if(vistaEtapa <= 0 || vistaEtapa === 7){ sn.style.display='none'; sn.innerHTML=''; return; }
   sn.style.display='flex';
   const color = COLORES_ETAPA[vistaEtapa-1];
   const cs = (typeof Sellos!=='undefined' && vistaEtapa>=1)
@@ -1763,8 +2008,10 @@ function pintarPanel(){
   const p = document.getElementById('panel');
   p.innerHTML = vistaEtapa===-1 ? panelPortada()
               : vistaEtapa===0  ? panelIndice()
+              : vistaEtapa===7  ? panelRetos()
               : panelEtapa(vistaEtapa);
-  p.style.setProperty('--et', vistaEtapa<=0 ? '#D8A33C' : COLORES_ETAPA[vistaEtapa-1]);
+  p.style.setProperty('--et', (vistaEtapa>=1 && vistaEtapa<=6)
+    ? COLORES_ETAPA[vistaEtapa-1] : '#D8A33C');
   if(vistaEtapa===0) cargarMeteoIndice();
   else if(vistaEtapa>=1 && seccionActual==='tiempo') cargarMeteoEtapa(vistaEtapa);
 }
@@ -2259,8 +2506,11 @@ function compartir(n){
   /* Para una etapa se comparte etapaN.html, la página con las etiquetas Open
      Graph propias (mapa, km, desnivel): así WhatsApp muestra su vista previa
      y no la genérica. Esa página redirige al visor. El índice comparte la raíz. */
-  const url = n>0 ? raiz + 'etapa' + n + '.html' : raiz;
-  const et = n>0 ? ETAPAS[n-1] : null;
+  /* Solo las etapas 1-6 tienen su etapaN.html; portada, índice y retos (7)
+     comparten la raíz. */
+  const esEtapa = n >= 1 && n <= 6;
+  const url = esEtapa ? raiz + 'etapa' + n + '.html' : raiz;
+  const et = esEtapa ? ETAPAS[n-1] : null;
   const texto = et
     ? 'Las Lolitas al Camino \u2014 Etapa '+n+': '+et.origen+' a '+et.destino
       + ' ('+(TRAZAS[n]?TRAZAS[n].km.toFixed(1):et.km.guia)+' km), '+et.diaSemana+' '+et.fecha.slice(8)+' de agosto'
@@ -2408,6 +2658,179 @@ function seccionSellos(et, color){
 }
 
 /* ============================================================
+   RETOS — cuestionario del Camino
+   Bloque previo (etapa 0) siempre abierto; las tandas de etapa se
+   desbloquean el día de la etapa a partir de las 16:00.
+   ============================================================ */
+
+/* ¿Está abierta la tanda de esa fecha? Mismo criterio de fecha que el
+   botón "Hoy" (isoHoy, hora local del dispositivo). Las cadenas ISO
+   'AAAA-MM-DD' se comparan bien alfabéticamente. */
+function retoDesbloqueado(fechaISO){
+  const hoyISO = isoHoy();
+  if(hoyISO > fechaISO) return true;
+  if(hoyISO === fechaISO && new Date().getHours() >= 16) return true;
+  return false;
+}
+
+const Retos = {
+  CLAVE: 'lolitas2026-retos',
+  datos: null,
+
+  cargar: function(){
+    if(this.datos) return this.datos;
+    try{
+      const s = localStorage.getItem(this.CLAVE);
+      this.datos = s ? JSON.parse(s) : {};
+    }catch(e){ this.datos = {}; }
+    return this.datos;
+  },
+
+  guardar: function(){
+    try{ localStorage.setItem(this.CLAVE, JSON.stringify(this.datos)); }
+    catch(e){ /* modo privado o sin espacio: se pierde al cerrar, no es grave */ }
+  },
+
+  acertado: function(id){ return !!this.cargar()[id]; },
+
+  marcar: function(id){
+    this.cargar();
+    this.datos[id] = true;
+    this.guardar();
+  },
+
+  reiniciar: function(){
+    this.datos = {};
+    try{ localStorage.removeItem(this.CLAVE); }catch(e){}
+    respuestasRetos = {};
+    ordenRetos = {};
+    pintarPanel();
+  },
+
+  /* Aciertos de un bloque (0 = previo, 1-6 = etapa) */
+  cuenta: function(etapa){
+    const lista = RETOS.filter(function(r){ return r.etapa === etapa; });
+    let h = 0;
+    lista.forEach(function(r){ if(Retos.acertado(r.id)) h++; });
+    return {hechos:h, total:lista.length};
+  }
+};
+
+/* Respuestas dadas en ESTA carga (para revelar la explicación) y orden
+   barajado de las opciones, fijo mientras no se recargue la página. */
+let respuestasRetos = {};
+let ordenRetos = {};
+
+function ordenDeReto(r){
+  if(!ordenRetos[r.id]){
+    const idx = r.opciones.map(function(_, i){ return i; });
+    for(let i = idx.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      const t = idx[i]; idx[i] = idx[j]; idx[j] = t;
+    }
+    ordenRetos[r.id] = idx;
+  }
+  return ordenRetos[r.id];
+}
+
+function responderReto(id, indice){
+  const r = RETOS.filter(function(x){ return x.id === id; })[0];
+  if(!r || respuestasRetos[id] != null) return;
+  respuestasRetos[id] = indice;
+  if(indice === r.correcta) Retos.marcar(id);
+  pintarPanel();
+}
+
+/* Una pregunta acertada no vuelve a salir hasta reiniciar, pero sí se
+   queda visible en la carga en la que se acierta (para leer el dato). */
+function retosPendientes(etapa){
+  return RETOS.filter(function(r){
+    return r.etapa === etapa && (respuestasRetos[r.id] != null || !Retos.acertado(r.id));
+  });
+}
+
+function tarjetaReto(r){
+  const elegido = respuestasRetos[r.id];
+  const respondido = elegido != null;
+  const acierto = respondido && elegido === r.correcta;
+
+  let html = '<li class="reto' + (respondido ? (acierto ? ' bien' : ' mal') : '') + '">'
+    + '<p class="reto-p">' + esc(r.pregunta) + '</p><div class="reto-ops">';
+
+  ordenDeReto(r).forEach(function(i){
+    let cls = 'reto-op';
+    if(respondido){
+      if(i === r.correcta) cls += ' ok';
+      else if(i === elegido) cls += ' ko';
+    }
+    html += '<button class="' + cls + '"' + (respondido ? ' disabled' : '')
+      + ' onclick="responderReto(' + r.id + ',' + i + ')">' + esc(r.opciones[i]) + '</button>';
+  });
+  html += '</div>';
+
+  if(respondido){
+    html += '<div class="reto-rev"><b>' + (acierto ? '¡Bien!' : 'Casi.') + '</b> '
+      + (acierto ? '' : 'La correcta era «' + esc(r.opciones[r.correcta]) + '». ')
+      + esc(r.explicacion) + '</div>';
+  }
+  return html + '</li>';
+}
+
+function panelRetos(){
+  const cPrev = Retos.cuenta(0);
+
+  let html = '<div class="et-cab" style="--et:#D8A33C">'
+    + '<div class="fecha">Cuestionario del Camino</div>'
+    + '<h1>Retos de <em>las Lolitas</em></h1></div>'
+    + '<div class="nota">Preguntas sobre el Camino, Galicia y lo que se ve por el recorrido. '
+    + 'Para jugar caminando o de sobremesa. Lo que aciertas se guarda en este móvil (no se '
+    + 'comparte) y no vuelve a salir. Las tandas de cada etapa se abren el día que toca, '
+    + 'a partir de las 16:00.</div>';
+
+  /* --- Bloque 1: siempre disponible --- */
+  html += '<h2>Prepara el Camino</h2>'
+    + '<div class="reto-marcador"><b>' + cPrev.hechos + ' de ' + cPrev.total + '</b>'
+    + '<span>acertadas</span></div>';
+  const pend0 = retosPendientes(0);
+  html += pend0.length
+    ? '<ul class="retos">' + pend0.map(tarjetaReto).join('') + '</ul>'
+    : '<div class="nota">Todas acertadas. Si quieres repetirlas, reinicia abajo.</div>';
+
+  /* --- Bloque 2: una tanda por etapa --- */
+  html += '<h2>Lo que has visto hoy</h2>';
+  ETAPAS.forEach(function(e){
+    const preg = RETOS.filter(function(r){ return r.etapa === e.num; });
+    if(!preg.length) return;
+    const abierto = retoDesbloqueado(e.fecha);
+    const c = Retos.cuenta(e.num);
+
+    html += '<div class="reto-tanda' + (abierto ? '' : ' bloqueada') + '">'
+      + '<p class="reto-tanda-t">Etapa ' + e.num + ' · ' + esc(e.origen)
+      + ' → ' + esc(e.destino) + '</p>';
+
+    if(!abierto){
+      /* Bloqueada: se enseñan las pistas, nunca las preguntas. */
+      html += '<p class="reto-tanda-s">Se abre el ' + esc(e.diaSemana) + ' '
+        + e.fecha.slice(8) + ' a las 16:00</p><ul class="reto-pistas">'
+        + preg.map(function(r){ return '<li>' + esc(r.pista) + '</li>'; }).join('')
+        + '</ul>';
+    } else {
+      html += '<p class="reto-tanda-s">' + c.hechos + ' de ' + c.total + ' acertadas</p>';
+      const pend = retosPendientes(e.num);
+      html += pend.length
+        ? '<ul class="retos">' + pend.map(tarjetaReto).join('') + '</ul>'
+        : '<div class="nota">Tanda completa.</div>';
+    }
+    html += '</div>';
+  });
+
+  html += '<button class="btn-recargar" style="margin-top:.8rem" '
+    + 'onclick="if(confirm(\'¿Reiniciar los retos? Se borran las preguntas acertadas.\'))'
+    + 'Retos.reiniciar()">Reiniciar los retos</button>';
+  return html;
+}
+
+/* ============================================================
    TELÉFONOS ÚTILES (índice)
    ============================================================ */
 /* Taxis por localidad. `etapa` puede ser un número o una lista (algunos
@@ -2545,7 +2968,9 @@ function pintarNav(){
         return '<button role="tab" onclick="irA('+e.num+')" aria-selected="'+(vistaEtapa===e.num)
           + '" style="--et:'+COLORES_ETAPA[i]+'"><span class="n">'+e.fecha.slice(8)
           + ' ago</span><span class="d">'+esc(e.destino)+'</span></button>';
-      }).join('');
+      }).join('')
+    + '<button role="tab" onclick="irA(7)" aria-selected="'+(vistaEtapa===7)
+    + '" style="--et:#D8A33C"><span class="n">Juego</span><span class="d">Retos</span></button>';
 }
 
 function irA(n, sinHistoria){
@@ -2560,7 +2985,9 @@ function irA(n, sinHistoria){
   if(!sinHistoria){
     /* Con file:// algunos navegadores rechazan replaceState. No debe romper la navegación. */
     try{
-      const url = n>=1 ? location.pathname+'?etapa='+n : location.pathname;
+      const url = (n>=1 && n<=6) ? location.pathname+'?etapa='+n
+                : n===7          ? location.pathname+'?retos=1'
+                : location.pathname;
       history.replaceState({etapa:n}, '', url);
     }catch(e){}
   }
@@ -2679,7 +3106,7 @@ function pintarCuenta(){
 /* Flechas del teclado para cambiar de etapa */
 document.addEventListener('keydown', function(e){
   if(e.target && e.target.tagName === 'INPUT') return;
-  if(e.key === 'ArrowRight' && vistaEtapa < 6) irA(vistaEtapa+1);
+  if(e.key === 'ArrowRight' && vistaEtapa < 7) irA(vistaEtapa+1);
   else if(e.key === 'ArrowLeft' && vistaEtapa > 0) irA(vistaEtapa-1);
 });
 
@@ -2814,10 +3241,13 @@ document.getElementById('verMapa').onclick = function(){
   mostrarMapa(!document.getElementById('main').classList.contains('mapa'));
 };
 
-/* Con ?etapa=N se entra directo a esa etapa, saltándose la portada.
-   Sin parámetro válido, lo primero que se ve es la portada (vistaEtapa -1). */
-const pedida = Number(new URLSearchParams(location.search).get('etapa'));
-vistaEtapa = (pedida>=1 && pedida<=6) ? pedida : -1;
+/* Con ?etapa=N se entra directo a esa etapa y con ?retos a los retos, saltándose
+   la portada. Sin parámetro válido, lo primero que se ve es la portada (-1). */
+const params = new URLSearchParams(location.search);
+const pedida = Number(params.get('etapa'));
+vistaEtapa = (pedida>=1 && pedida<=6) ? pedida
+           : params.has('retos')      ? 7
+           : -1;
 
 pintarCuenta();
 pintarNav();
