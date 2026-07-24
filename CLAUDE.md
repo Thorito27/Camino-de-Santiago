@@ -80,13 +80,34 @@ nuevo no está ahí, sus teselas no se cachean y el modo sin cobertura se rompe 
 silencio. Y recuerda que la descarga son ~510 fragmentos y unos 8,4 MB: si subes zooms o
 añades capas, recalcula y revisa `MAX_TILES`.
 
+**El service worker sirve la PÁGINA a red-primero. No lo revirtáis sin leer
+esto.** Antes era caché-primero para todo, y eso hizo que durante dos días los
+cambios desplegados no se vieran en el móvil: la web seguía sirviendo la copia
+guardada y parecía que el código estaba mal. Los tiles y las librerías sí siguen
+a caché-primero (son fijos y pesados); solo las navegaciones van a la red
+primero, con la copia guardada como respaldo sin cobertura.
+
+**En móvil el mapa va a pantalla completa con `position:fixed`, no dentro del
+grid.** La fila `1fr` del grid se colapsaba en iOS cuando la barra de
+geolocalización ocupaba mucho, y el contenedor del mapa se quedaba en una franja
+de cuatro píxeles. Se intentó arreglar tres veces tocando el lienzo
+(`resize()`, `ResizeObserver`, apilado con z-index) y ninguna funcionó, porque
+el problema era el **contenedor**, no el lienzo. Si alguien devuelve el mapa al
+flujo del grid, volverá el fallo.
+
 **El service worker no puede ir dentro del HTML.** El navegador exige un
 `.js` servido desde el mismo origen. Por eso `sw.js` va suelto. Y solo
 funciona publicado en Pages, no abriendo el archivo local.
 
-**Si cambias `index.html`, sube `VERSION` en `sw.js`.** De `camino-v1` a
-`camino-v2`, etc. Si no, los móviles que ya tengan la web cacheada seguirán
-viendo la versión vieja indefinidamente.
+**Hay DOS versiones que subir, y no son lo mismo.**
+
+- **`VERSION` en `sw.js`** (ahora `camino-v14`): súbela **siempre que cambies
+  `index.html`**. Nombra los cachés; si no la subes, los móviles que ya tengan
+  la web guardada pueden seguir con la vieja.
+- **`APP_VERSION` en `index.html`** (ahora `map-7`): súbela **al tocar el
+  mapa**. No afecta al caché: es la etiqueta que enseña el diagnóstico `?debug`
+  para saber, desde el propio móvil y sin Mac, qué versión ha cargado de
+  verdad. Sirvió para descubrir que el problema del mapa era caché y no código.
 
 **Las pruebas con jsdom deben cerrar la ventana.** La página deja algún
 `setInterval` vivo (la cuenta atrás), y sin `dom.window.close()` al final el
@@ -138,8 +159,11 @@ if(w.__m) w.__m._fire('load');   // dispara el evento load del mapa
 Hace falta `npm install jsdom` la primera vez.
 
 **Comprobar siempre las 37 vistas**: el índice más 6 etapas × 6 secciones.
-Un cambio en el enrutado puede dejar una en blanco sin que salte ningún
-error.
+Un cambio en el enrutado puede dejar una en blanco sin que salte ningún error.
+
+**Ojo: `npm test` NO cubre la portada (`vistaEtapa -1`) ni los Retos
+(`vistaEtapa 7`).** Recorre solo esas 37. Si tocas alguna de esas dos vistas,
+pruébala aparte con jsdom (y **cierra la ventana** al terminar, ver más abajo).
 
 ---
 
@@ -179,7 +203,18 @@ El orden importa: `TRAZAS` antes que `ETAPAS`, y ambos antes que la lógica.
   El ranking **no es automático**: se comparte por WhatsApp con
   `compartirTexto()`, que usa el mismo mecanismo que `compartir()`.
 
-Los tres únicos usos de localStorage son `Sellos`, `Retos` y `Persona`.
+- **`Capa`** — controles del mapa. Ya NO alterna capas (hubo una topográfica,
+  se retiró): solo guarda si la vista es 3D, en `lolitas2026-3d`. `aplicar3D()`
+  pone pitch 0 o 60.
+
+**Las cuatro claves de localStorage** (no hay más, y no se usa para nada más):
+
+| Clave | Qué guarda |
+|---|---|
+| `lolitas2026-sellos` | sellos marcados de la credencial |
+| `lolitas2026-retos` | respuestas del cuestionario (`{v, persona, respuestas}`) |
+| `lolitas2026-persona` | quién juega en este móvil |
+| `lolitas2026-3d` | si el mapa está en vista 3D |
 - **`Marcha.coordEnKm(puntos, km, n)`** — interpola sobre `TRAZAS[n].linea`,
   NO sobre los hitos. Pásale siempre el número de etapa; sin él cae al respaldo
   por hitos, que corta campo a través.
@@ -188,6 +223,39 @@ Los tres únicos usos de localStorage son `Sellos`, `Retos` y `Persona`.
   `kmGuia` y no mueve los `fueraDeRuta`. Tras usarlo, reincrustar `datos.js`.
 - **`perfilEtapa(n)`** — combina la traza GPX con los hitos de la guía.
   Usar esta, no `Marcha.perfil()` directamente.
+
+### El mapa
+
+- **Capa satélite: PNOA del Instituto Geográfico Nacional** (WMTS, teselas
+  `GoogleMapsCompatible`, `image/jpeg`, URL en forma KVP porque el servicio no
+  publica plantilla REST). Cubre **solo España**.
+- **La atribución «PNOA cedido por © Instituto Geográfico Nacional de España»
+  es obligatoria por licencia**, no decorativa. Está en el bloque `.attr`. No
+  la quites.
+- **Respaldo automático**: si esa fuente acumula 8 errores de tesela, el visor
+  cambia solo a ESRI (`URL_ESRI`) y lo dice en la atribución.
+- **Relieve**: DEM terrarium de AWS, exageración 1.6. Es lo que hace funcionar
+  el 3D; sin él el botón 3D no tendría nada que inclinar.
+- Hubo una capa topográfica (OpenTopoMap) y **se retiró**: duplicaba la
+  descarga sin cobertura sin aportar bastante frente al PNOA.
+
+### Los datos de los puntos
+
+Cada punto de `ETAPAS[n].puntos` puede llevar:
+
+| Campo | Qué significa |
+|---|---|
+| `km`, `ele`, `lat`, `lon` | tomados de la **traza GPX**, no de la guía |
+| `kmGuia` | el kilómetro que dice la tita Lucila. **No se toca nunca** |
+| `desviacion_m` | cuántos metros se movió el punto al llevarlo a la traza |
+| `fueraDeRuta` + `desvio_m` | está fuera del Camino (desvío señalizado); no se mueve |
+| `fiable: false` + `ajustado` | dato dudoso; `ajustado` son los metros que se corrigió al integrar los GPX |
+| `sellar`, `horario`, `ficha`, `tipo` | información de la guía |
+
+Y en `datos.js`: **`tamanoGrupo(fecha)`** son los que DUERMEN esa noche (manda
+en las plazas de alojamiento) y **`grupoCamina(fecha)`** los que CAMINAN esa
+etapa. Difieren el 20 de agosto: caminan 12 y duermen 11, porque Alejandro
+vuela al terminar la etapa 3.
 
 ### Navegación
 

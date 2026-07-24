@@ -35,10 +35,50 @@ haz commit, súbela y abre una Pull Request.
 | `etapa1.html`…`etapa6.html` | Páginas mínimas con las etiquetas Open Graph propias de cada etapa. Redirigen al visor. **Generadas, no se editan a mano.** |
 | `og/etapa1.png`…`og/etapa6.png` | Las tarjetas de vista previa de WhatsApp. **Generadas.** |
 | `herramientas/og.js` | Genera las dos cosas de arriba a partir de los datos del visor. |
+| `herramientas/validar.js` | `npm run validar`: comprueba la sintaxis del JS incrustado. |
+| `herramientas/probar.js` | `npm test`: recorre 37 vistas con jsdom. |
+| `herramientas/ajustar-puntos.js` | Lleva los puntos de `datos.js` a la traza GPX. |
+| `CLAUDE.md` | Reglas fijas del proyecto, para trabajar con Claude. |
+| `PROJECT_STATE.md` | Diario de sesiones: qué se hizo y cuándo. |
+| `package.json` | Los tres scripts de npm y la única dependencia (jsdom, y `@resvg/resvg-js` para las tarjetas). |
 
 `datos.js` y `trazas.js` están duplicados dentro de `index.html`. Se
 mantienen sueltos porque son más cómodos de editar y de revisar en una PR.
 **Si cambias uno, hay que volver a incrustarlo** (ver más abajo).
+
+---
+
+## Qué hace la web
+
+**Portada.** Lo primero al entrar: quiénes van, qué es el Camino Francés y por
+qué se sale de Sarria, qué es la Compostela, los dos sellos al día y cómo usar
+la web. El trazado se dibuja como SVG propio, sin imágenes externas. Con
+`?etapa=N` se salta directo a esa etapa.
+
+**Índice.** Tabla de las seis etapas con km, desnivel y tiempo estimado, la
+previsión de los días que quedan, el apartado «Decisiones del grupo», los
+teléfonos y el botón de guardar mapas para zonas sin cobertura.
+
+**Cada etapa** tiene seis pestañas, en este orden:
+
+| Pestaña | Qué muestra |
+|---|---|
+| **Itinerario** | El horario de la tita Lucila, dónde se duerme, comidas, qué ver y avisos. Es la que se abre por defecto. |
+| **Ruta** | Los puntos del recorrido con su km y hora de paso estimada. |
+| **Perfil** | Perfil de altitud interactivo; al mover el punto, el marcador recorre la traza en el mapa. |
+| **Paradas** | Dónde se puede parar o coger un taxi, y dónde comer. |
+| **Sellos** | Checklist de los dos sellos diarios que exige la Compostela. |
+| **Tiempo** | Previsión hora a hora, con avisos derivados (calor por tramo, lluvia, frío de mañana, viento). |
+
+**Retos.** Séptima pestaña: cuestionario de 34 preguntas sobre el Camino, en
+dos bloques. Primero eliges quién eres. El bloque previo está siempre abierto;
+las tandas de cada etapa se abren el día de la etapa a las 16:00 y hasta
+entonces solo enseñan pistas. Una sola oportunidad por pregunta. El ranking del
+grupo **no es automático**: se comparte por WhatsApp pegando el mensaje.
+
+**En el mapa y la cabecera.** Botón «Hoy» que salta a la etapa del día,
+«Dónde estoy» que sitúa al peregrino sobre la traza, cuenta atrás en horas y
+minutos hasta la llegada a Santiago, botón 3D y compartir.
 
 ---
 
@@ -110,7 +150,8 @@ tiempo = distancia / V_BASE
        × FACTOR_FATIGA
 ```
 
-`V_BASE` está en 4 km/h y `FACTOR_FATIGA` en 1,0. **Después del primer día
+`V_BASE` está en 4 km/h y `FACTOR_FATIGA` en 1,0 (valores reales de
+`CONFIG_MARCHA`; los umbrales de bajada son 5 % y 12 %). **Después del primer día
 real, ajustad `FACTOR_FATIGA`** dividiendo el tiempo que tardasteis entre el
 que estimaba el visor.
 
@@ -141,6 +182,10 @@ en la interfaz, en el apartado "Avisos" de cada etapa.
 ---
 
 ## Pendiente de resolver
+
+Las cinco siguen abiertas: en `DECISIONES` (`datos.js`) las cinco tienen
+`estado:'pendiente'`. Se ven en el índice, y el estado se edita a mano en el
+repositorio cuando algo se cierre de verdad.
 
 - **Villa Xardín (O Pedrouzo, 22 de agosto):** 10 plazas para 11 personas.
   Falta una cama.

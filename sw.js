@@ -6,19 +6,24 @@
    cobertura.
 
    Estrategia por tipo de recurso:
-   - La propia página y sus librerías: cache primero. Son fijas.
-   - Tiles del mapa: cache primero, y lo que se descargue se
+   - La PÁGINA (navegaciones): RED primero, con la copia guardada
+     como respaldo sin cobertura. Antes era caché primero y hacía
+     que los cambios desplegados no se vieran en el móvil. No lo
+     cambies sin leer la nota de CLAUDE.md.
+   - Librerías y fuentes: caché primero. Son fijas.
+   - Tiles del mapa: caché primero, y lo que se descargue se
      guarda. Al mirar una etapa con wifi quedan cacheados sus
      tiles para el día siguiente.
    - Open-Meteo: red primero, con la última respuesta como
      reserva. Una previsión de ayer es mejor que nada, pero
      siempre se prefiere la fresca.
 
-   El caché de tiles se limita a 1200 entradas para no llenar
-   el móvil: unos 60-80 MB según la zona.
+   El caché de tiles se limita a 1200 entradas. La descarga
+   completa de la ruta son ~510 teselas y unos 8,4 MB (medido);
+   el resto del margen es para lo que se navegue.
    ============================================================ */
 
-const VERSION      = 'camino-v14';
+const VERSION      = 'camino-v15';
 const CACHE_APP    = VERSION + '-app';
 const CACHE_TILES  = VERSION + '-tiles';
 const CACHE_METEO  = VERSION + '-meteo';
