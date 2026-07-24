@@ -188,7 +188,8 @@ const ETAPAS = [
     'Cruceiro del s. XIV — el más antiguo de Galicia, Rúa Cantón San Roque 38.'],
   avisos:['La guía se contradice sobre Melide: en un sitio equipara Sancti Spiritus con San Pedro, en otro dice que San Pedro es hoy la capilla de San Roque. Son edificios distintos.',
     'Alternativa apuntada en la guía: hay quien hace Palas de Rei-Arzúa directamente.',
-    'Plan B por la tarde: Iglesia de Vilar de Donas, 10 min en coche, abierta 16:00-20:00.']
+    'Plan B por la tarde: Iglesia de Vilar de Donas, 10 min en coche, abierta 16:00-20:00.',
+    'Alejandro vuela hoy desde Santiago a las 18:00. La llegada a Melide está prevista sobre las 14:30, y del centro al aeropuerto hay unos 55 km, cerca de una hora en coche. El margen es justo pero sale: conviene salir de Melide hacia las 15:15 o 15:30 para ir sin agobios.']
 },
 {
   num:4, fecha:'2026-08-21', diaSemana:'viernes',
@@ -334,4 +335,66 @@ const ETAPAS = [
 ];
 
 const GRUPO = {total:12, desde:{fecha:'2026-08-20', momento:'tarde', total:11}};
+/* Cuántos DUERMEN la noche de esa fecha (para plazas de alojamiento). */
 function tamanoGrupo(f){ return f >= GRUPO.desde.fecha ? GRUPO.desde.total : GRUPO.total; }
+
+/* Cuántos CAMINAN esa etapa. El grupo mengua por la tarde del 20 (Alejandro
+   vuela tras llegar a Melide), así que ese día todavía caminan todos: la
+   reducción de día empieza al día siguiente. Con 'mañana' empezaría el mismo
+   día. Por eso las etapas 1-3 son de 12 y las 4-6 de 11, aunque la noche del
+   20 ya duerman 11. */
+function grupoCamina(f){
+  const yaMenos = GRUPO.desde.momento === 'tarde'
+    ? f > GRUPO.desde.fecha
+    : f >= GRUPO.desde.fecha;
+  return yaMenos ? GRUPO.desde.total : GRUPO.total;
+}
+
+/* ============================================================
+   DECISIONES PENDIENTES DEL GRUPO
+   Cosas del viaje sin cerrar. El `estado` es la única verdad
+   compartida: se edita AQUÍ (a mano, en el repo) cuando algo se
+   resuelve de verdad. No se guarda en localStorage a propósito:
+   si cada móvil guardara lo suyo, alguien marcaría "resuelto" y
+   creería que los demás lo ven, y no. Aquí todos ven lo mismo.
+   Valores de `estado`: 'pendiente' | 'resuelto'.
+   `fecha` es la fecha ISO a la que afecta (para ordenar); `cuando`
+   es el texto que se muestra.
+   ============================================================ */
+const DECISIONES = [
+  {
+    id:'villa-xardin', titulo:'Villa Xardín: falta una cama',
+    lugar:'O Pedrouzo', fecha:'2026-08-22', cuando:'Noche del sábado 22 de agosto',
+    que:'La reserva de Villa Xardín es de 10 plazas y sois 11 personas. Falta una cama.',
+    estado:'pendiente',
+    wa:'Villa Xardín (O Pedrouzo, noche del 22 ago): la reserva es de 10 plazas y somos 11. Falta una cama, ¿cómo lo resolvemos?'
+  },
+  {
+    id:'ceadoiro', titulo:'Cena en O Ceadoiro sin confirmar',
+    lugar:'Cerceda', fecha:'2026-08-22', cuando:'Cena del sábado 22 de agosto',
+    que:'La cena en O Ceadoiro (Cerceda) está solicitada pero sin confirmar. Es la única cena del viaje que sigue sin cerrar.',
+    estado:'pendiente',
+    wa:'Cena en O Ceadoiro (Cerceda, 22 ago): está solicitada pero sin confirmar, es la única que queda. ¿Alguien puede llamar para cerrarla?'
+  },
+  {
+    id:'casa-nene', titulo:'Casa Nené: dos reservas que no cuadran',
+    lugar:'Arzúa', fecha:'2026-08-21', cuando:'Cena del viernes 21 de agosto',
+    que:'Casa Nené tiene dos reservas, de 8 y de 4 personas (12 en total), a horas distintas: 20:00 y 20:30. Desde el jueves sois 11. Hay que unificarlas en una sola hora para 11.',
+    estado:'pendiente',
+    wa:'Casa Nené (Arzúa, 21 ago): hay dos reservas (8 + 4 = 12) a las 20:00 y 20:30, pero somos 11. ¿Las unificamos en una sola hora para 11?'
+  },
+  {
+    id:'santiago-misa-cena', titulo:'Santiago: la misa y la cena se solapan',
+    lugar:'Santiago', fecha:'2026-08-23', cuando:'Noche del domingo 23 de agosto',
+    que:'La misa del peregrino es a las 19:30 y la cena en Milongas a las 20:30. No caben las dos: hay que elegir o mover una.',
+    estado:'pendiente',
+    wa:'Santiago (23 ago): la misa del peregrino es a las 19:30 y la cena en Milongas a las 20:30, no caben las dos. ¿Qué preferís, o movemos alguna?'
+  },
+  {
+    id:'a-lareira', titulo:'Mesón A Lareira: falta comunicar el menú',
+    lugar:'Palas de Rei', fecha:'2026-08-12', cuando:'Fecha límite: antes del 12 de agosto de 2026',
+    que:'Hay que comunicar a Mesón A Lareira qué va a cenar cada uno. Lo piden con una semana de antelación.',
+    estado:'pendiente',
+    wa:'Mesón A Lareira (Palas de Rei): hay que decirles antes del 12 de agosto qué cena cada uno. ¿Vamos apuntando los platos?'
+  }
+];
