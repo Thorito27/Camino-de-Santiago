@@ -56,9 +56,11 @@ No hace falta reevaluarlas:
   entonces los textos desaparecen sin dar error. Todos los marcadores son
   `maplibregl.Marker` con un `div` HTML.
 - **localStorage solo para lo personal de cada móvil:** los sellos
-  (`lolitas2026-sellos`) y los retos acertados (`lolitas2026-retos`). Son
-  marcas de cada peregrino; si se pierden no se pierde nada del viaje. Todo
-  lo demás vive en memoria o en el propio HTML.
+  (`lolitas2026-sellos`), las respuestas de los retos (`lolitas2026-retos`) y
+  quién juega (`lolitas2026-persona`). Son marcas de cada peregrino; si se
+  pierden no se pierde nada del viaje. Todo lo demás vive en memoria o en el
+  propio HTML. **No hay servidor ni sincronización**: el ranking de los retos
+  se lleva a mano, pegando mensajes en el chat de WhatsApp.
 - **`history.replaceState` va dentro de try/catch.** Con protocolo `file://`
   algunos navegadores lo rechazan y sin la protección se rompe la navegación
   entera.
@@ -233,10 +235,14 @@ Ideas que quedaron sobre la mesa:
 
 Ya hechas:
 
-- **Retos** (`vistaEtapa = 7`, `panelRetos`): cuestionario de 23 preguntas en
-  dos bloques. El previo siempre abierto; las tandas de cada etapa se
-  desbloquean el día de la etapa a las 16:00 y hasta entonces solo enseñan
-  pistas. Progreso en localStorage.
+- **Retos** (`vistaEtapa = 7`, `panelRetos`): cuestionario de **34 preguntas**
+  en dos bloques (10 previas + 4 por etapa). Primero eliges **quién eres** de
+  la lista del grupo (`PERSONAS`). El bloque previo está siempre abierto; las
+  tandas de cada etapa se desbloquean el día de la etapa a las 16:00 y hasta
+  entonces solo enseñan pistas. **Una sola oportunidad por pregunta.**
+  Puntuación acumulada y por etapa, menciones (pleno de etapa, racha de 3 o
+  más) y botón para **compartir la puntuación por WhatsApp**: el ranking del
+  grupo se lleva en el chat, no hay ranking automático.
 - **Portada de bienvenida** (`vistaEtapa = -1`, `panelPortada`): presentación
   del grupo y del viaje, con el trazado como SVG propio. Es lo primero que se
   ve salvo si se entra con `?etapa=N`.

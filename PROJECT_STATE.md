@@ -14,10 +14,49 @@ para saber en qué punto está el proyecto.
 
 ---
 
+## 2026-07-24 — Retos v2: identificación, una sola oportunidad y compartir
+
+**Rama:** `feat/retos` (recreada desde `main`; la anterior ya estaba fusionada)
+**PR:** pendiente contra `main`.
+
+Ampliación grande de la pestaña Retos sobre lo que ya había:
+
+- **34 preguntas** (antes 23): 10 del bloque previo y **cuatro por etapa**.
+  Nuevas: la leyenda de la escalinata de Portomarín, la trampa del mojón del
+  km 100, el punto más alto (Sierra de Ligonde), el cementerio de peregrinos de
+  Ligonde, la confluencia con el Camino Primitivo en Melide, el hospital de
+  Ribadiso, la subida final a Arzúa, el bar de los botellines, los dos nombres
+  de O Pedrouzo, el nombre latinizado en la Compostela y por qué no cuadran los
+  kilómetros.
+- **Identificación**: antes de jugar hay que elegir quién eres de la lista
+  `PERSONAS` (12 nombres), sin contraseña, en `lolitas2026-persona`. Botón
+  discreto para cambiar de persona. La portada saluda por el nombre.
+- **Almacenamiento rehecho**: `lolitas2026-retos` guarda ahora un registro por
+  respuesta (`id`, `opcion`, `acierto`, `ts`) más `v` de formato y `persona`.
+  Pensado para que una futura sincronización con servidor fuese un añadido y no
+  una reescritura; **no hay nada de sincronización ahora**.
+- **Una sola oportunidad** por pregunta, avisada antes de responder. Las
+  respondidas no se vuelven a ofrecer: se muestran con lo que marcaste y la
+  correcta, más la explicación (acertando o fallando).
+- **Puntuación** acumulada del viaje y desglose por etapa, **menciones** (pleno
+  de etapa y racha de tres o más aciertos) y **compartir por WhatsApp** con dos
+  mensajes listos para pegar (uno por tanda completada y otro general), usando
+  el mismo mecanismo que `compartir()`. Nota visible explicando que no hay
+  ranking automático.
+- Ya no hay reinicio general; solo un «empezar de cero» con confirmación.
+
+`sw.js` → `camino-v10`.
+
+**Pendiente / ojo:** la pregunta 28 (monumento a Guillermo Watt) sigue marcada
+con `sinVerificar:true` y su comentario en `datos.js`: viene de la guía y de lo
+que se cuenta, pero no está confirmada en fuente sólida. Revisar.
+
+---
+
 ## 2026-07-24 — Cuenta atrás a Santiago + desatasco del despliegue
 
 **Rama:** `feat/cuenta-atras`
-**PR:** pendiente contra `main`.
+**PR:** [#10](https://github.com/Thorito27/Camino-de-Santiago/pull/10), fusionada.
 
 El hueco de la esquina superior derecha (`.cuenta`) contaba los días **para
 salir**; ahora es una **cuenta atrás para llegar a Santiago**, tomando la meta
@@ -41,7 +80,7 @@ en vivo que el servidor ya sirve Retos. Si vuelve a pasar, ese es el remedio.
 ## 2026-07-24 — Retos: cuestionario del Camino
 
 **Rama:** `feat/retos`
-**PR:** pendiente contra `main`.
+**PR:** [#9](https://github.com/Thorito27/Camino-de-Santiago/pull/9), fusionada.
 
 Séptima pestaña de la barra, a la derecha de la etapa 6 (`vistaEtapa = 7`,
 `panelRetos`). Cuestionario de **23 preguntas** en la constante `RETOS` de
@@ -69,7 +108,7 @@ que se cuenta habitualmente, pero no se ha confirmado en fuente sólida. Revisar
 ## 2026-07-24 — Contactos (taxis y salud) + cierre del mapa en móvil
 
 **Rama:** `feat/contactos-taxis-salud`
-**PR:** pendiente contra `main`.
+**PR:** [#8](https://github.com/Thorito27/Camino-de-Santiago/pull/8), fusionada.
 
 **Contactos.** `TAXIS` (en `index.html`) pasa de 2 a 12, por localidad; `etapa`
 admite lista para los que cubren varias, con filtro `taxiEnEtapa`. Los sacados
