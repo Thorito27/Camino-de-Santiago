@@ -180,6 +180,12 @@ El orden importa: `TRAZAS` antes que `ETAPAS`, y ambos antes que la lógica.
   `compartirTexto()`, que usa el mismo mecanismo que `compartir()`.
 
 Los tres únicos usos de localStorage son `Sellos`, `Retos` y `Persona`.
+- **`Marcha.coordEnKm(puntos, km, n)`** — interpola sobre `TRAZAS[n].linea`,
+  NO sobre los hitos. Pásale siempre el número de etapa; sin él cae al respaldo
+  por hitos, que corta campo a través.
+- **`herramientas/ajustar-puntos.js`** — lleva los puntos de `datos.js` a la
+  traza. Sin argumentos solo enseña la tabla; `--aplicar` escribe. Respeta
+  `kmGuia` y no mueve los `fueraDeRuta`. Tras usarlo, reincrustar `datos.js`.
 - **`perfilEtapa(n)`** — combina la traza GPX con los hitos de la guía.
   Usar esta, no `Marcha.perfil()` directamente.
 

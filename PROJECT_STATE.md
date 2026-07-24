@@ -14,10 +14,49 @@ para saber en qué punto está el proyecto.
 
 ---
 
+## 2026-07-24 — El marcador y los puntos, sobre la traza de verdad
+
+**Rama:** `fix/posicion-traza`
+**PR:** pendiente contra `main`.
+
+Dos problemas con la misma causa: había código tratando los hitos de la guía
+como si fueran la ruta, teniendo ya las trazas GPX.
+
+- **`Marcha.coordEnKm` interpola ahora sobre `TRAZAS[n].linea`** (km acumulado
+  en la posición 3 de cada vértice) en vez de entre los hitos. Solo tenía un
+  llamador, `moverSlider()`; la geolocalización ya usaba `Geo.proyectar` sobre
+  la traza. Se conserva el método viejo como respaldo si una etapa no tuviera
+  traza. Medido en la etapa 1: antes el marcador se apartaba **hasta 415 m**
+  de la línea (124 m de media); ahora **0,00 m** en todo el recorrido.
+- **`herramientas/ajustar-puntos.js`** (nuevo): lleva cada punto al vértice más
+  cercano de su traza y actualiza `lat`, `lon`, `km` y `ele`, dejando `kmGuia`
+  intacto y anotando `desviacion_m`. Por defecto solo enseña la tabla; escribe
+  con `--aplicar`, y se planta si algún punto se movería más de 500 m.
+  Resultado: **86 puntos ajustados**, ninguno pasó de 347 m. Antes había 36 de
+  88 a más de 50 m de la traza.
+- **Fuera de ruta**: los puntos con desvío señalizado NO se mueven; se marcan
+  `fueraDeRuta:true` con su `desvio_m`. Son **Castro de Castromaior** (131 m) y
+  **Santa Irene** (41 m). La detección exige dos cosas —que la ficha hable de
+  desvío **y** que el punto esté de verdad separado— porque solo con el texto se
+  colaba *Portos*, cuya ficha dice que «entre Portos y Lestedo sale el desvío a
+  Vilar de Donas»: el desvío arranca cerca, pero Portos está sobre el Camino.
+- En el mapa esos puntos llevan **una línea fina discontinua hasta el Camino**
+  (se descartó el borde discontinuo: ya significa «ubicación aproximada» y se
+  confundirían), y su ficha dice cuántos metros hay que desviarse.
+
+**Ojo para el futuro:** la traza NO está simplificada a 12 m como se creía. En
+la etapa 1 la separación entre vértices es de **88 m de mediana y hasta 378 m**.
+Aun así el marcador va exactamente sobre la línea, porque interpola entre esos
+vértices, que es justo lo que se dibuja.
+
+`sw.js` → `camino-v13`, `APP_VERSION` → `map-6`.
+
+---
+
 ## 2026-07-24 — Mapas: PNOA del IGN, capa topográfica y vista 3D
 
 **Rama:** `feat/mapas`
-**PR:** pendiente contra `main`.
+**PR:** [#13](https://github.com/Thorito27/Camino-de-Santiago/pull/13), fusionada.
 
 - **Satélite: ESRI → PNOA del IGN** (WMTS, `GoogleMapsCompatible`, `image/jpeg`,
   URL en forma KVP porque el servicio no publica plantilla REST). **Verificado
