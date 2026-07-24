@@ -428,7 +428,10 @@ body.offline #sinRed{display:block}
   header{flex-wrap:wrap;gap:.5rem;padding-left:.7rem;padding-right:.7rem}
   #btnHoy{margin:0}
   .marca b{font-size:.92rem}
-  .cuenta{display:none}
+  /* La cuenta atrás también se ve en móvil, pegada a la derecha de la
+     cabecera (que envuelve si hace falta). */
+  .cuenta{display:block;margin-left:auto;font-size:.6rem}
+  .cuenta b{font-size:.76rem}
   .slider-datos{grid-template-columns:repeat(2,1fr);gap:.6rem}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -3093,14 +3096,20 @@ function hoy(){
 function pintarCuenta(){
   const el = document.getElementById('cuenta');
   const h = new Date(); h.setHours(0,0,0,0);
-  const salida = new Date(2026,7,18);
-  const dias = Math.round((salida-h)/86400000);
-  const iso = isoHoy();
-  let enRuta = null;
-  for(let i=0;i<ETAPAS.length;i++){ if(ETAPAS[i].fecha===iso){ enRuta = ETAPAS[i]; break; } }
-  if(enRuta)      el.innerHTML = '<b>Etapa '+enRuta.num+'</b>hoy camináis';
-  else if(dias>0) el.innerHTML = '<b>'+dias+'</b>'+(dias===1?'día':'días')+' para salir';
-  else            el.innerHTML = '<b>\u00A1Hecho!</b>Santiago';
+  /* La meta es la fecha de la ULTIMA etapa, sacada de los datos: si cambian
+     las fechas del viaje, la cuenta atras se ajusta sola. */
+  if(typeof ETAPAS === 'undefined' || !ETAPAS.length) return;
+  const fin = ETAPAS[ETAPAS.length-1].fecha;
+  const p = fin.split('-').map(Number);
+  const meta = new Date(p[0], p[1]-1, p[2]);
+  const dias = Math.round((meta - h)/86400000);
+
+  if(dias > 0)      el.innerHTML = '<b>'+dias+'</b>'+(dias===1?'día':'días')+' para Santiago';
+  else if(dias===0) el.innerHTML = '<b>\u00A1Hoy!</b>llegáis a Santiago';
+  else              el.innerHTML = '<b>\u00A1Hecho!</b>Santiago';
+
+  el.title = 'Cuenta atrás para llegar a Santiago, el '
+    + Number(fin.slice(8)) + ' de agosto';
 }
 
 /* Flechas del teclado para cambiar de etapa */
@@ -3250,6 +3259,12 @@ vistaEtapa = (pedida>=1 && pedida<=6) ? pedida
            : -1;
 
 pintarCuenta();
+/* Si alguien deja la web abierta y vuelve al día siguiente, la cuenta atrás
+   se recalcula al volver a la pestaña. Se evita a propósito un setInterval:
+   dejaría un temporizador vivo y colgaría las pruebas con jsdom. */
+document.addEventListener('visibilitychange', function(){
+  if(!document.hidden) pintarCuenta();
+});
 pintarNav();
 pintarSubnav();
 pintarPanel();

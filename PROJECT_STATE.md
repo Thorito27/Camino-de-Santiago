@@ -14,6 +14,30 @@ para saber en qué punto está el proyecto.
 
 ---
 
+## 2026-07-24 — Cuenta atrás a Santiago + desatasco del despliegue
+
+**Rama:** `feat/cuenta-atras`
+**PR:** pendiente contra `main`.
+
+El hueco de la esquina superior derecha (`.cuenta`) contaba los días **para
+salir**; ahora es una **cuenta atrás para llegar a Santiago**, tomando la meta
+de la fecha de la última etapa (si cambian las fechas, se ajusta sola). Muestra
+«N días para Santiago», «¡Hoy! llegáis a Santiago» el día 23 y «¡Hecho!»
+después. Antes estaba oculta en móvil; ahora se ve, pegada a la derecha de la
+cabecera. Se recalcula al volver a la pestaña (`visibilitychange`).
+
+Detalle que costó: el primer intento usaba `setInterval` para refrescarla, y eso
+**colgaba `npm test`** (el temporizador mantiene vivo el proceso de jsdom).
+Sustituido por el listener de visibilidad, que además cubre mejor el caso real.
+`sw.js` → `camino-v9`.
+
+**Despliegue:** el build de Pages del commit de Retos se quedó atascado (más de
+5 min en `building` con duración 0 ms, sin error). Se desatascó pidiendo una
+reconstrucción por API (`POST /pages/builds`), que completó en 27 s. Verificado
+en vivo que el servidor ya sirve Retos. Si vuelve a pasar, ese es el remedio.
+
+---
+
 ## 2026-07-24 — Retos: cuestionario del Camino
 
 **Rama:** `feat/retos`
