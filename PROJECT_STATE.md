@@ -14,10 +14,35 @@ para saber en qué punto está el proyecto.
 
 ---
 
+## 2026-07-24 — Cuenta atrás en horas y minutos
+
+**Rama:** `feat/cuenta-horas`
+**PR:** pendiente contra `main`.
+
+La cuenta atrás de la cabecera pasa de **días** a **horas y minutos**, y ahora
+apunta a un instante concreto: la **llegada a Santiago a las 13:30 del 23 de
+agosto**, hora que se saca del propio horario de la tita Lucila (se busca la
+entrada «Llegada a Santiago» en el `timing` de la última etapa) en vez de
+escribirla a mano. Muestra por ejemplo «714 h 11 min para Santiago», y «¡Hecho!»
+pasada la hora. Se refresca cada 30 s.
+
+Para poder tener ese temporizador hubo que arreglar antes el arnés de pruebas:
+`herramientas/probar.js` no cerraba la ventana de jsdom, así que cualquier
+`setInterval` de la página dejaba el proceso vivo y **colgaba `npm test`** (ya
+pasó al añadir la cuenta atrás la primera vez). Ahora hace `dom.window.close()`
+al terminar y el test acaba en medio segundo.
+
+Además, la pregunta 28 (Guillermo Watt) deja de estar marcada como sin
+verificar: quien mantiene la guía la dio por buena.
+
+`sw.js` → `camino-v11`.
+
+---
+
 ## 2026-07-24 — Retos v2: identificación, una sola oportunidad y compartir
 
 **Rama:** `feat/retos` (recreada desde `main`; la anterior ya estaba fusionada)
-**PR:** pendiente contra `main`.
+**PR:** [#11](https://github.com/Thorito27/Camino-de-Santiago/pull/11), fusionada.
 
 Ampliación grande de la pestaña Retos sobre lo que ya había:
 
@@ -47,9 +72,8 @@ Ampliación grande de la pestaña Retos sobre lo que ya había:
 
 `sw.js` → `camino-v10`.
 
-**Pendiente / ojo:** la pregunta 28 (monumento a Guillermo Watt) sigue marcada
-con `sinVerificar:true` y su comentario en `datos.js`: viene de la guía y de lo
-que se cuenta, pero no está confirmada en fuente sólida. Revisar.
+**Nota:** la pregunta 28 (Guillermo Watt) se marcó como sin verificar; quien
+mantiene la guía la dio por buena después, así que se retiró la marca.
 
 ---
 

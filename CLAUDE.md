@@ -81,6 +81,11 @@ funciona publicado en Pages, no abriendo el archivo local.
 `camino-v2`, etc. Si no, los móviles que ya tengan la web cacheada seguirán
 viendo la versión vieja indefinidamente.
 
+**Las pruebas con jsdom deben cerrar la ventana.** La página deja algún
+`setInterval` vivo (la cuenta atrás), y sin `dom.window.close()` al final el
+proceso de node no termina nunca y `npm test` se queda colgado. `probar.js` ya
+lo hace; si escribes otra prueba, ciérrala tú también.
+
 **`const` no es accesible desde fuera en las pruebas.** Si escribes un test
 con jsdom, `window.ETAPAS` da `undefined`. Hay que usar
 `window.eval('ETAPAS')`.

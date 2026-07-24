@@ -1154,11 +1154,11 @@ const RETOS = [
     correcta:1,
     explicacion:'La guía de la tita Lucila la recoge como «fuente de la eterna juventud», junto a la ermita de Santa Irene, en un desvío corto señalizado antes del núcleo.'
   },
-  /* OJO — SIN VERIFICAR: esta pregunta sale de la guía de la tita Lucila y de
-     lo que se cuenta habitualmente del monumento, pero NO se ha confirmado en
-     una fuente sólida (julio 2026). Revisar antes de darla por buena. */
+  /* El monumento a Guillermo Watt sale de la guía de la tita Lucila y de lo que
+     se cuenta del sitio. Se marcó como sin verificar, y quien mantiene la guía
+     lo dio por bueno (julio 2026), así que se deja como dato firme. */
   {
-    id:28, etapa:5, sinVerificar:true,
+    id:28, etapa:5,
     pista:'Un monumento con unas botas, después de Salceda',
     pregunta:'Después de Salceda hay un monumento a Guillermo Watt. ¿Qué recuerda?',
     opciones:['Al ingeniero de la N-547','A un peregrino que murió ahí','Al fundador del primer albergue','A un santo local'],
@@ -3341,21 +3341,41 @@ function hoy(){
 
 function pintarCuenta(){
   const el = document.getElementById('cuenta');
-  const h = new Date(); h.setHours(0,0,0,0);
-  /* La meta es la fecha de la ULTIMA etapa, sacada de los datos: si cambian
-     las fechas del viaje, la cuenta atras se ajusta sola. */
   if(typeof ETAPAS === 'undefined' || !ETAPAS.length) return;
-  const fin = ETAPAS[ETAPAS.length-1].fecha;
-  const p = fin.split('-').map(Number);
-  const meta = new Date(p[0], p[1]-1, p[2]);
-  const dias = Math.round((meta - h)/86400000);
+  const meta = metaSantiago();
+  const ms = meta - new Date();
 
-  if(dias > 0)      el.innerHTML = '<b>'+dias+'</b>'+(dias===1?'día':'días')+' para Santiago';
-  else if(dias===0) el.innerHTML = '<b>\u00A1Hoy!</b>llegáis a Santiago';
-  else              el.innerHTML = '<b>\u00A1Hecho!</b>Santiago';
+  if(ms > 0){
+    const min = Math.floor(ms / 60000);
+    el.innerHTML = '<b>' + Math.floor(min / 60) + ' h '
+      + String(min % 60).padStart(2,'0') + ' min</b>para Santiago';
+  } else {
+    el.innerHTML = '<b>\u00A1Hecho!</b>Santiago';
+  }
 
-  el.title = 'Cuenta atrás para llegar a Santiago, el '
-    + Number(fin.slice(8)) + ' de agosto';
+  el.title = 'Cuenta atrás hasta la llegada a Santiago: '
+    + Number(ETAPAS[ETAPAS.length-1].fecha.slice(8)) + ' de agosto, '
+    + horaLlegadaSantiago();
+}
+
+/* Hora de llegada a Santiago segun el horario de la tita Lucila. Se busca en
+   el timing de la ultima etapa en vez de escribirla a mano, para que siga a
+   los datos si cambian. */
+function horaLlegadaSantiago(){
+  const e = ETAPAS[ETAPAS.length-1];
+  let hora = e.salida || '00:00';
+  (e.timing || []).forEach(function(t){
+    if(/Llegada a Santiago/i.test(t.texto || '')) hora = t.hora;
+  });
+  return String(hora).split('-')[0].trim();
+}
+
+/* Instante exacto al que apunta la cuenta atras. */
+function metaSantiago(){
+  const e = ETAPAS[ETAPAS.length-1];
+  const f = e.fecha.split('-').map(Number);
+  const hm = horaLlegadaSantiago().split(':').map(Number);
+  return new Date(f[0], f[1]-1, f[2], hm[0] || 0, hm[1] || 0, 0, 0);
 }
 
 /* Flechas del teclado para cambiar de etapa */
@@ -3505,9 +3525,11 @@ vistaEtapa = (pedida>=1 && pedida<=6) ? pedida
            : -1;
 
 pintarCuenta();
-/* Si alguien deja la web abierta y vuelve al día siguiente, la cuenta atrás
-   se recalcula al volver a la pestaña. Se evita a propósito un setInterval:
-   dejaría un temporizador vivo y colgaría las pruebas con jsdom. */
+/* La cuenta atrás va en horas y minutos, así que hay que refrescarla. Cada 30 s
+   basta para que el minuto mostrado nunca se quede atrás de forma visible.
+   (probar.js cierra la ventana de jsdom al terminar, así que este temporizador
+   no cuelga las pruebas.) */
+setInterval(pintarCuenta, 30000);
 document.addEventListener('visibilitychange', function(){
   if(!document.hidden) pintarCuenta();
 });
