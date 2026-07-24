@@ -73,6 +73,13 @@ para poder editarlos y revisarlos, pero **la web carga su copia incrustada
 en `index.html`**. Si editas el archivo suelto y no reincrustas, no cambia
 nada y parece que el cambio no ha funcionado. El comando está en el README.
 
+**Si añades o cambias una capa de mapa, actualiza `esTile` en `sw.js`.** La
+detección de teselas va por nombre de dominio (ahora: arcgisonline,
+elevation-tiles-prod, amazonaws, **ign.es**, **opentopomap.org**). Si el dominio
+nuevo no está ahí, sus teselas no se cachean y el modo sin cobertura se rompe en
+silencio. Y recuerda que la descarga guarda **las dos capas** (~1000 fragmentos,
+unos 23 MB): si subes zooms, recalcula y revisa `MAX_TILES`.
+
 **El service worker no puede ir dentro del HTML.** El navegador exige un
 `.js` servido desde el mismo origen. Por eso `sw.js` va suelto. Y solo
 funciona publicado en Pages, no abriendo el archivo local.

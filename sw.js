@@ -18,11 +18,11 @@
    el móvil: unos 60-80 MB según la zona.
    ============================================================ */
 
-const VERSION      = 'camino-v11';
+const VERSION      = 'camino-v12';
 const CACHE_APP    = VERSION + '-app';
 const CACHE_TILES  = VERSION + '-tiles';
 const CACHE_METEO  = VERSION + '-meteo';
-const MAX_TILES    = 1200;
+const MAX_TILES    = 2000;
 
 /* Lo imprescindible para arrancar sin red */
 const ESENCIALES = [
@@ -72,9 +72,13 @@ self.addEventListener('fetch', function(e){
   const url = new URL(req.url);
 
   /* --- Tiles del mapa: satélite ESRI y relieve AWS --- */
+  /* Ojo: los dominios de las capas cambiaron (IGN y OpenTopoMap). Si no están
+     aquí, sus teselas dejan de cachearse y el modo sin cobertura se rompe. */
   const esTile = url.hostname.indexOf('arcgisonline.com') >= 0
               || url.hostname.indexOf('elevation-tiles-prod') >= 0
-              || url.hostname.indexOf('amazonaws.com') >= 0;
+              || url.hostname.indexOf('amazonaws.com') >= 0
+              || url.hostname.indexOf('ign.es') >= 0
+              || url.hostname.indexOf('opentopomap.org') >= 0;
 
   if(esTile){
     e.respondWith(

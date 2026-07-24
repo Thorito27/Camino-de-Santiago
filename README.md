@@ -49,8 +49,15 @@ No hace falta reevaluarlas:
 - **Un solo archivo HTML autónomo.** Sin build, sin dependencias que
   instalar. Se abre y funciona.
 - **MapLibre GL JS** para el mapa. Gratis, sin API key.
-- **ESRI World Imagery** como vista satélite única y por defecto.
-- **Tiles DEM terrarium de AWS** para el relieve 3D.
+- **PNOA del IGN** como capa satélite (WMTS, `GoogleMapsCompatible`). Mejor
+  resolución que ESRI en la Galicia rural. **La atribución «PNOA cedido por ©
+  Instituto Geográfico Nacional de España» es obligatoria por licencia.** Cubre
+  solo España; si el servicio falla, la web cambia sola a ESRI de respaldo.
+- **OpenTopoMap** como segunda capa: curvas de nivel y senderos, para el bosque
+  donde el satélite no ve el camino. Se alterna con los botones de arriba a la
+  izquierda y la elección se recuerda.
+- **Tiles DEM terrarium de AWS** para el relieve 3D (exageración 1.6, y botón
+  «3D» que alterna pitch 0 / 60).
 - **Marcadores DOM, nunca symbol layers.** Las etiquetas de texto de
   MapLibre dependen de una fuente de glyphs externa que puede no cargar, y
   entonces los textos desaparecen sin dar error. Todos los marcadores son

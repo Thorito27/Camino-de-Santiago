@@ -14,10 +14,38 @@ para saber en qué punto está el proyecto.
 
 ---
 
+## 2026-07-24 — Mapas: PNOA del IGN, capa topográfica y vista 3D
+
+**Rama:** `feat/mapas`
+**PR:** pendiente contra `main`.
+
+- **Satélite: ESRI → PNOA del IGN** (WMTS, `GoogleMapsCompatible`, `image/jpeg`,
+  URL en forma KVP porque el servicio no publica plantilla REST). **Verificado
+  antes de cambiar**: teselas 200 OK de z12 a z19 en Portomarín, ~14 KB y ~0,3 s;
+  comparadas visualmente con ESRI a z18, el PNOA se ve claramente más nítido.
+  Atribución obligatoria puesta en el bloque `.attr`. Si el IGN empieza a fallar
+  (8 errores de esa fuente), la web cambia sola a ESRI de respaldo y lo dice.
+- **Segunda capa: OpenTopoMap** (curvas de nivel y senderos, para el bosque).
+  Botones «Satélite / Mapa / 3D» arriba a la izquierda del mapa; la elección se
+  recuerda (`lolitas2026-capa`). Las dos capas van declaradas en el estilo y se
+  alternan con `visibility`, así la traza y los marcadores quedan siempre encima.
+- **Vista 3D**: botón que alterna pitch 0 / 60 con transición de 1 s, recordado
+  en `lolitas2026-3d`. Exageración del relieve de 1.35 a **1.6**.
+- **Sin cobertura**: la descarga guarda **las dos capas**. Números reales
+  medidos: 496 teselas únicas → **1008 fragmentos, ~23 MB** (antes 512 y ~9 MB).
+  No hizo falta recortar zooms. `MAX_TILES` de 1200 a **2000** para que lo
+  precargado y lo navegado no se poden entre sí, y `esTile` en `sw.js` ahora
+  reconoce `ign.es` y `opentopomap.org` (sin eso, sus teselas no se cachearían).
+  Se muestra la estimación en MB antes de descargar.
+
+`sw.js` → `camino-v12`, `APP_VERSION` → `map-5`.
+
+---
+
 ## 2026-07-24 — Cuenta atrás en horas y minutos
 
 **Rama:** `feat/cuenta-horas`
-**PR:** pendiente contra `main`.
+**PR:** [#12](https://github.com/Thorito27/Camino-de-Santiago/pull/12), fusionada.
 
 La cuenta atrás de la cabecera pasa de **días** a **horas y minutos**, y ahora
 apunta a un instante concreto: la **llegada a Santiago a las 13:30 del 23 de
