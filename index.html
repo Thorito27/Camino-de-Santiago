@@ -384,7 +384,13 @@ body.offline #sinRed{display:block}
   #mapa{z-index:0}
   #col{z-index:1;background:var(--papel)}
   main.mapa #col{display:none}
-  #verMapa{display:block}
+  /* La causa real del "mapa en una franja": la fila 1fr del grid se colapsa
+     en iOS cuando la barra de geolocalización ocupa mucho, y el contenedor
+     del mapa se queda casi sin alto. Al verlo, lo sacamos a PANTALLA COMPLETA
+     de verdad (fixed, cubriendo todo), independiente del alto del grid. El
+     botón "Ver ficha" queda por encima para volver. */
+  main.mapa #mapa{position:fixed;top:0;left:0;right:0;bottom:0;z-index:40}
+  #verMapa{display:block;z-index:50}
   /* Que quepan todos los botones de la cabecera: si no caben en una línea,
      saltan a la siguiente en vez de cortarse. */
   header{flex-wrap:wrap;gap:.5rem;padding-left:.7rem;padding-right:.7rem}
@@ -1020,7 +1026,7 @@ let mapa=null, marcadores=[], marcadorPos=null, mapaListo=false;
 /* Etiqueta de build, visible en el diagnóstico (?debug). Sirve para saber, sin
    Mac ni consola, qué versión ha cargado de verdad el móvil (por si la caché
    sigue sirviendo una vieja). Súbela cuando cambies algo del mapa. */
-const APP_VERSION = 'map-3';
+const APP_VERSION = 'map-4';
 
 function iniciarMapa(){
   if(typeof maplibregl === 'undefined'){

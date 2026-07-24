@@ -18,7 +18,7 @@
    el móvil: unos 60-80 MB según la zona.
    ============================================================ */
 
-const VERSION      = 'camino-v4';
+const VERSION      = 'camino-v5';
 const CACHE_APP    = VERSION + '-app';
 const CACHE_TILES  = VERSION + '-tiles';
 const CACHE_METEO  = VERSION + '-meteo';
