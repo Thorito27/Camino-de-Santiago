@@ -1017,6 +1017,11 @@ const ESTILO = {
 
 let mapa=null, marcadores=[], marcadorPos=null, mapaListo=false;
 
+/* Etiqueta de build, visible en el diagnóstico (?debug). Sirve para saber, sin
+   Mac ni consola, qué versión ha cargado de verdad el móvil (por si la caché
+   sigue sirviendo una vieja). Súbela cuando cambies algo del mapa. */
+const APP_VERSION = 'map-3';
+
 function iniciarMapa(){
   if(typeof maplibregl === 'undefined'){
     document.getElementById('mapa').innerHTML =
@@ -1032,10 +1037,23 @@ function iniciarMapa(){
     mapaListo = true;
     try{ mapa.setTerrain({source:'relieve', exaggeration:1.35}); }catch(e){}
     dibujar(vistaEtapa);
+    try{ mapa.resize(); }catch(e){}
   });
   mapa.on('error', function(e){
     console.warn('Mapa:', e && e.error && e.error.message);
   });
+  /* iOS Safari suele crear el mapa antes de que el contenedor tenga su tamaño
+     final, y entonces el lienzo se queda en una franja. Un ResizeObserver
+     reajusta el lienzo CADA vez que el contenedor cambia de tamaño —al alternar
+     ficha/mapa, al girar, o cuando el layout se asienta—, sea cual sea el
+     momento. Es lo único que se adapta a todos los casos sin depender de
+     temporizadores. */
+  try{
+    if(typeof ResizeObserver !== 'undefined'){
+      const ro = new ResizeObserver(function(){ try{ mapa.resize(); }catch(e){} });
+      ro.observe(document.getElementById('mapa'));
+    }
+  }catch(e){}
 }
 
 function limpiarMarcadores(){
@@ -2732,6 +2750,42 @@ pintarPanel();
 iniciarMapa();
 registrarSW();
 vigilarRed();
+diagnostico();
+
+/* Diagnóstico en pantalla, SOLO si la URL lleva ?debug. Pensado para poder
+   depurar el mapa desde el propio móvil, sin Mac ni consola: muestra la
+   versión cargada y las medidas reales del contenedor y del lienzo del mapa.
+   Si el lienzo es mucho más bajo que el contenedor, es que no se ha
+   redimensionado; si webgl=no, el problema es otro. */
+function diagnostico(){
+  if(!new URLSearchParams(location.search).has('debug')) return;
+  const box = document.createElement('div');
+  box.style.cssText = 'position:fixed;left:6px;bottom:6px;z-index:99999;max-width:94vw;'
+    + 'background:rgba(10,15,12,.93);color:#EDE8DC;font:11px/1.5 monospace;padding:8px 10px;'
+    + 'border:1px solid #7FA98A;border-radius:5px;white-space:pre;pointer-events:none';
+  document.body.appendChild(box);
+  function webgl(){
+    try{ const c = document.createElement('canvas');
+      return !!(c.getContext('webgl2') || c.getContext('webgl') || c.getContext('experimental-webgl'));
+    }catch(e){ return false; }
+  }
+  function upd(){
+    const m = document.getElementById('mapa');
+    const r = m ? m.getBoundingClientRect() : {width:0, height:0};
+    let cw = 0, ch = 0;
+    try{ if(mapa){ const cv = mapa.getCanvas(); cw = cv.width; ch = cv.height; } }catch(e){}
+    box.textContent =
+        'build ' + APP_VERSION + '   dpr ' + (window.devicePixelRatio || 1) + '\n'
+      + 'ventana   ' + Math.round(window.innerWidth) + ' x ' + Math.round(window.innerHeight) + '\n'
+      + 'contenedor ' + Math.round(r.width) + ' x ' + Math.round(r.height) + '\n'
+      + 'lienzo     ' + cw + ' x ' + ch + '\n'
+      + 'mapaListo ' + (typeof mapaListo !== 'undefined' && mapaListo)
+      + '   webgl ' + webgl() + '\n'
+      + 'vistaMapa ' + document.getElementById('main').classList.contains('mapa');
+  }
+  upd();
+  setInterval(upd, 700);
+}
 
 </script>
 </body>
