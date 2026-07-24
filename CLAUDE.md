@@ -150,14 +150,24 @@ El orden importa: `TRAZAS` antes que `ETAPAS`, y ambos antes que la lógica.
 - **`Meteo`** — Open-Meteo, sin clave. Solo consulta si la etapa está a 9
   días o menos; si no, dice que no hay previsión en vez de inventarla.
 - **`Geo`** — geolocalización proyectada sobre la traza.
-- **`Sellos`** — checklist en localStorage. Es el único sitio donde se usa.
+- **`Sellos`** — checklist en localStorage (`lolitas2026-sellos`).
+- **`Retos`** — cuestionario en localStorage (`lolitas2026-retos`): guarda solo
+  las preguntas acertadas. Junto con `Sellos`, los dos únicos usos de
+  localStorage. Las tandas de etapa se abren con `retoDesbloqueado(fecha)`:
+  el día de la etapa a partir de las 16:00. Mientras están bloqueadas se
+  muestran las `pista`, **nunca** las preguntas.
 - **`perfilEtapa(n)`** — combina la traza GPX con los hitos de la guía.
   Usar esta, no `Marcha.perfil()` directamente.
 
 ### Navegación
 
-`vistaEtapa` (**-1 = portada**, 0 = índice, 1-6 = etapa) y `seccionActual`.
-Las funciones son `irA(n)` e `irASeccion(id)`.
+`vistaEtapa` (**-1 = portada**, 0 = índice, 1-6 = etapa, **7 = retos**) y
+`seccionActual`. Las funciones son `irA(n)` e `irASeccion(id)`.
+
+Ojo al añadir vistas: **solo las etapas 1-6** tienen traza, color, sub-pestañas
+y `etapaN.html`. Portada, índice y retos comparten el mapa general, ocultan el
+subnav y comparten la raíz al usar `compartir()`. Los retos se enlazan con
+`?retos=1`.
 
 La portada es la pantalla de bienvenida (`panelPortada`), lo primero que se
 ve al entrar sin `?etapa=N`; con `?etapa=N` se salta directo a esa etapa. El

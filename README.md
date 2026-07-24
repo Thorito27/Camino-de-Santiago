@@ -55,9 +55,10 @@ No hace falta reevaluarlas:
   MapLibre dependen de una fuente de glyphs externa que puede no cargar, y
   entonces los textos desaparecen sin dar error. Todos los marcadores son
   `maplibregl.Marker` con un `div` HTML.
-- **localStorage solo para los sellos.** Son marcas personales de cada
-  peregrino; si se pierden no se pierde nada del viaje. Todo lo demás vive
-  en memoria o en el propio HTML.
+- **localStorage solo para lo personal de cada móvil:** los sellos
+  (`lolitas2026-sellos`) y los retos acertados (`lolitas2026-retos`). Son
+  marcas de cada peregrino; si se pierden no se pierde nada del viaje. Todo
+  lo demás vive en memoria o en el propio HTML.
 - **`history.replaceState` va dentro de try/catch.** Con protocolo `file://`
   algunos navegadores lo rechazan y sin la protección se rompe la navegación
   entera.
@@ -232,6 +233,10 @@ Ideas que quedaron sobre la mesa:
 
 Ya hechas:
 
+- **Retos** (`vistaEtapa = 7`, `panelRetos`): cuestionario de 23 preguntas en
+  dos bloques. El previo siempre abierto; las tandas de cada etapa se
+  desbloquean el día de la etapa a las 16:00 y hasta entonces solo enseñan
+  pistas. Progreso en localStorage.
 - **Portada de bienvenida** (`vistaEtapa = -1`, `panelPortada`): presentación
   del grupo y del viaje, con el trazado como SVG propio. Es lo primero que se
   ve salvo si se entra con `?etapa=N`.

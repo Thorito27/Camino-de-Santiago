@@ -14,6 +14,34 @@ para saber en qué punto está el proyecto.
 
 ---
 
+## 2026-07-24 — Retos: cuestionario del Camino
+
+**Rama:** `feat/retos`
+**PR:** pendiente contra `main`.
+
+Séptima pestaña de la barra, a la derecha de la etapa 6 (`vistaEtapa = 7`,
+`panelRetos`). Cuestionario de **23 preguntas** en la constante `RETOS` de
+`datos.js`: bloque «Prepara el Camino» (10, `etapa: 0`, siempre abierto) y
+bloque «Lo que has visto hoy» (13 repartidas por etapa). Cada tanda de etapa se
+desbloquea el día de su etapa a partir de las 16:00 (`retoDesbloqueado`, misma
+lectura de fecha que el botón «Hoy»); mientras está bloqueada se muestran las
+**pistas y nunca las preguntas**.
+
+Cuatro opciones por pregunta, orden barajado en cada carga, revelación de la
+correcta y la explicación tanto al acertar como al fallar, contador por bloque
+y progreso en localStorage (`lolitas2026-retos`) con botón de reinicio. Una
+pregunta acertada no vuelve a salir. Estilos apoyados en los de sellos.
+
+De paso se arregló `compartir()`, que con la vista 7 habría generado un
+`etapa7.html` inexistente, y las flechas del teclado llegan ya a la pestaña de
+retos. `sw.js` → `camino-v8`.
+
+**Pendiente / ojo:** la pregunta 21 (monumento a Guillermo Watt) está marcada
+en `datos.js` con `sinVerificar:true` y un comentario: viene de la guía y de lo
+que se cuenta habitualmente, pero no se ha confirmado en fuente sólida. Revisar.
+
+---
+
 ## 2026-07-24 — Contactos (taxis y salud) + cierre del mapa en móvil
 
 **Rama:** `feat/contactos-taxis-salud`
