@@ -643,11 +643,11 @@ const RETOS = [
     correcta:1,
     explicacion:'La guía de la tita Lucila la recoge como «fuente de la eterna juventud», junto a la ermita de Santa Irene, en un desvío corto señalizado antes del núcleo.'
   },
-  /* OJO — SIN VERIFICAR: esta pregunta sale de la guía de la tita Lucila y de
-     lo que se cuenta habitualmente del monumento, pero NO se ha confirmado en
-     una fuente sólida (julio 2026). Revisar antes de darla por buena. */
+  /* El monumento a Guillermo Watt sale de la guía de la tita Lucila y de lo que
+     se cuenta del sitio. Se marcó como sin verificar, y quien mantiene la guía
+     lo dio por bueno (julio 2026), así que se deja como dato firme. */
   {
-    id:28, etapa:5, sinVerificar:true,
+    id:28, etapa:5,
     pista:'Un monumento con unas botas, después de Salceda',
     pregunta:'Después de Salceda hay un monumento a Guillermo Watt. ¿Qué recuerda?',
     opciones:['Al ingeniero de la N-547','A un peregrino que murió ahí','Al fundador del primer albergue','A un santo local'],

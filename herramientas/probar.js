@@ -61,5 +61,10 @@ for(let n=1; n<=6; n++){
 
 console.log(`\n${vistas} vistas, ${vacias} vacías, ${errores.length} errores.`);
 if(errores.length) errores.forEach(e => console.error('  '+e));
+
+/* Cerrar la ventana: si la página deja algún temporizador vivo (la cuenta
+   atrás lo hace), node no terminaría nunca y la prueba se quedaría colgada. */
+dom.window.close();
+
 if(vacias || errores.length) process.exit(1);
 console.log('Todo correcto.');
