@@ -141,6 +141,38 @@ h2::after{content:'';flex:1;height:1px;background:#DED8C9}
   font-size:.62rem;letter-spacing:.06em;text-transform:uppercase}
 .nota.km::before{content:'Los km no cuadran · ';font-weight:600;color:var(--alerta);
   font-size:.62rem;letter-spacing:.06em;text-transform:uppercase}
+.portada-mapa{width:100%;height:auto;display:block;border-radius:var(--radio);margin:.4rem 0 .2rem}
+.portada .lead{font-size:.9rem;line-height:1.6;color:var(--pizarra);margin-top:.7rem}
+.portada p{font-size:.82rem;line-height:1.62;margin-top:.55rem}
+.portada strong{font-weight:600;color:var(--tinta)}
+.portada a{color:var(--musgo);font-weight:600}
+.portada .nota strong{color:var(--tinta)}
+.portada-cta{display:block;width:100%;margin:1.2rem 0 .3rem;padding:.9rem 1rem;
+  font-family:'Fraunces',serif;font-weight:600;font-size:1.08rem;text-align:center;
+  color:var(--tinta);background:var(--concha);border:none;border-radius:var(--radio);cursor:pointer}
+.portada-cta:hover{background:#E2AE49}
+.portada-cta:focus-visible{outline:2px solid var(--tinta);outline-offset:2px}
+.portada .firma{text-align:center;font-family:'Fraunces',serif;font-style:italic;
+  color:var(--musgo);font-size:.9rem;margin-top:.2rem}
+.decisiones{display:flex;flex-direction:column;gap:.5rem;margin-top:.5rem}
+.decision{background:#fff;border:1px solid #E2DCCC;border-left:3px solid var(--concha);
+  border-radius:var(--radio);padding:.6rem .7rem}
+.decision.resuelto{border-left-color:var(--musgo)}
+.decision h3{font-family:'Fraunces',serif;font-weight:600;font-size:.92rem;color:var(--tinta);
+  line-height:1.25;display:flex;justify-content:space-between;align-items:flex-start;gap:.6rem}
+.decision .estado{flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:.56rem;
+  font-weight:600;letter-spacing:.07em;text-transform:uppercase;padding:.14rem .42rem;
+  border-radius:100px;margin-top:.1rem}
+.decision .estado.pendiente{background:#FCF3F0;color:var(--alerta)}
+.decision .estado.resuelto{background:#EAF1EA;color:var(--musgo)}
+.decision p{font-size:.75rem;line-height:1.5;color:#4A463D;margin-top:.4rem}
+.decision .cuando{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.03em;
+  color:#7C776B;margin-top:.3rem}
+.decision .wa{display:inline-block;margin-top:.55rem;font-family:'JetBrains Mono',monospace;
+  font-size:.64rem;font-weight:600;letter-spacing:.02em;text-decoration:none;color:#fff;
+  background:var(--musgo);padding:.4rem .65rem;border-radius:var(--radio)}
+.decision .wa:hover{background:#3B5641}
+.decision .wa:focus-visible{outline:2px solid var(--tinta);outline-offset:2px}
 .marcha{background:var(--tinta);color:var(--hueso);border-radius:var(--radio);
   padding:.75rem .8rem;margin-top:.5rem}
 .marcha .fila{display:flex;justify-content:space-between;align-items:baseline;gap:1rem}
@@ -342,10 +374,17 @@ body.offline #sinRed{display:block}
 
 @media(max-width:860px){
   main{grid-template-columns:1fr;grid-template-rows:1fr}
+  /* Ficha y mapa comparten la misma celda: así el mapa siempre ocupa
+     todo el alto disponible cuando se muestra, sin quedarse en una franja. */
+  #col,#mapa{grid-column:1;grid-row:1}
   #mapa{display:none}
   main.mapa #col{display:none}
   main.mapa #mapa{display:block}
   #verMapa{display:block}
+  /* Que quepan todos los botones de la cabecera: si no caben en una línea,
+     saltan a la siguiente en vez de cortarse. */
+  header{flex-wrap:wrap;gap:.5rem;padding-left:.7rem;padding-right:.7rem}
+  #btnHoy{margin:0}
   .marca b{font-size:.92rem}
   .cuenta{display:none}
   .slider-datos{grid-template-columns:repeat(2,1fr);gap:.6rem}
@@ -356,7 +395,9 @@ body.offline #sinRed{display:block}
 <body>
 <div id="app">
   <header>
-    <div class="marca"><b>Las Lolitas al Camino</b><span>Sarria → Santiago · agosto 2026</span></div>
+    <div class="marca" onclick="irA(-1)" role="button" tabindex="0"
+      onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();irA(-1);}"
+      title="Ir a la portada" style="cursor:pointer"><b>Las Lolitas al Camino</b><span>Sarria → Santiago · agosto 2026</span></div>
     <button id="btnHoy">Hoy</button>
     <button id="btnGeo" onclick="Geo.iniciar()">Dónde estoy</button>
     <button id="btnComp" onclick="compartir(vistaEtapa)">Compartir</button>
@@ -407,8 +448,7 @@ const TRAZAS = {
    Grupo: 12 personas (11 desde el jueves 20 por la tarde)
 
    PROCEDENCIA
-   - Horarios, alojamientos, comidas, cultura: PDFs de la guía que
-     preparó la tita Lucila para el grupo.
+   - Horarios, alojamientos, comidas, cultura: PDFs de la guía familiar.
    - Coordenadas: Google Places, julio 2026.
    - Altitudes (ele): cotas escritas en los perfiles de la guía.
      Solo hay cota de los pueblos; entre uno y otro se interpola en
@@ -592,7 +632,8 @@ const ETAPAS = [
     'Cruceiro del s. XIV — el más antiguo de Galicia, Rúa Cantón San Roque 38.'],
   avisos:['La guía se contradice sobre Melide: en un sitio equipara Sancti Spiritus con San Pedro, en otro dice que San Pedro es hoy la capilla de San Roque. Son edificios distintos.',
     'Alternativa apuntada en la guía: hay quien hace Palas de Rei-Arzúa directamente.',
-    'Plan B por la tarde: Iglesia de Vilar de Donas, 10 min en coche, abierta 16:00-20:00.']
+    'Plan B por la tarde: Iglesia de Vilar de Donas, 10 min en coche, abierta 16:00-20:00.',
+    'Alejandro vuela hoy desde Santiago a las 18:00. La llegada a Melide está prevista sobre las 14:30, y del centro al aeropuerto hay unos 55 km, cerca de una hora en coche. El margen es justo pero sale: conviene salir de Melide hacia las 15:15 o 15:30 para ir sin agobios.']
 },
 {
   num:4, fecha:'2026-08-21', diaSemana:'viernes',
@@ -738,7 +779,69 @@ const ETAPAS = [
 ];
 
 const GRUPO = {total:12, desde:{fecha:'2026-08-20', momento:'tarde', total:11}};
+/* Cuántos DUERMEN la noche de esa fecha (para plazas de alojamiento). */
 function tamanoGrupo(f){ return f >= GRUPO.desde.fecha ? GRUPO.desde.total : GRUPO.total; }
+
+/* Cuántos CAMINAN esa etapa. El grupo mengua por la tarde del 20 (Alejandro
+   vuela tras llegar a Melide), así que ese día todavía caminan todos: la
+   reducción de día empieza al día siguiente. Con 'mañana' empezaría el mismo
+   día. Por eso las etapas 1-3 son de 12 y las 4-6 de 11, aunque la noche del
+   20 ya duerman 11. */
+function grupoCamina(f){
+  const yaMenos = GRUPO.desde.momento === 'tarde'
+    ? f > GRUPO.desde.fecha
+    : f >= GRUPO.desde.fecha;
+  return yaMenos ? GRUPO.desde.total : GRUPO.total;
+}
+
+/* ============================================================
+   DECISIONES PENDIENTES DEL GRUPO
+   Cosas del viaje sin cerrar. El `estado` es la única verdad
+   compartida: se edita AQUÍ (a mano, en el repo) cuando algo se
+   resuelve de verdad. No se guarda en localStorage a propósito:
+   si cada móvil guardara lo suyo, alguien marcaría "resuelto" y
+   creería que los demás lo ven, y no. Aquí todos ven lo mismo.
+   Valores de `estado`: 'pendiente' | 'resuelto'.
+   `fecha` es la fecha ISO a la que afecta (para ordenar); `cuando`
+   es el texto que se muestra.
+   ============================================================ */
+const DECISIONES = [
+  {
+    id:'villa-xardin', titulo:'Villa Xardín: falta una cama',
+    lugar:'O Pedrouzo', fecha:'2026-08-22', cuando:'Noche del sábado 22 de agosto',
+    que:'La reserva de Villa Xardín es de 10 plazas y sois 11 personas. Falta una cama.',
+    estado:'pendiente',
+    wa:'Villa Xardín (O Pedrouzo, noche del 22 ago): la reserva es de 10 plazas y somos 11. Falta una cama, ¿cómo lo resolvemos?'
+  },
+  {
+    id:'ceadoiro', titulo:'Cena en O Ceadoiro sin confirmar',
+    lugar:'Cerceda', fecha:'2026-08-22', cuando:'Cena del sábado 22 de agosto',
+    que:'La cena en O Ceadoiro (Cerceda) está solicitada pero sin confirmar. Es la única cena del viaje que sigue sin cerrar.',
+    estado:'pendiente',
+    wa:'Cena en O Ceadoiro (Cerceda, 22 ago): está solicitada pero sin confirmar, es la única que queda. ¿Alguien puede llamar para cerrarla?'
+  },
+  {
+    id:'casa-nene', titulo:'Casa Nené: dos reservas que no cuadran',
+    lugar:'Arzúa', fecha:'2026-08-21', cuando:'Cena del viernes 21 de agosto',
+    que:'Casa Nené tiene dos reservas, de 8 y de 4 personas (12 en total), a horas distintas: 20:00 y 20:30. Desde el jueves sois 11. Hay que unificarlas en una sola hora para 11.',
+    estado:'pendiente',
+    wa:'Casa Nené (Arzúa, 21 ago): hay dos reservas (8 + 4 = 12) a las 20:00 y 20:30, pero somos 11. ¿Las unificamos en una sola hora para 11?'
+  },
+  {
+    id:'santiago-misa-cena', titulo:'Santiago: la misa y la cena se solapan',
+    lugar:'Santiago', fecha:'2026-08-23', cuando:'Noche del domingo 23 de agosto',
+    que:'La misa del peregrino es a las 19:30 y la cena en Milongas a las 20:30. No caben las dos: hay que elegir o mover una.',
+    estado:'pendiente',
+    wa:'Santiago (23 ago): la misa del peregrino es a las 19:30 y la cena en Milongas a las 20:30, no caben las dos. ¿Qué preferís, o movemos alguna?'
+  },
+  {
+    id:'a-lareira', titulo:'Mesón A Lareira: falta comunicar el menú',
+    lugar:'Palas de Rei', fecha:'2026-08-12', cuando:'Fecha límite: antes del 12 de agosto de 2026',
+    que:'Hay que comunicar a Mesón A Lareira qué va a cenar cada uno. Lo piden con una semana de antelación.',
+    estado:'pendiente',
+    wa:'Mesón A Lareira (Palas de Rei): hay que decirles antes del 12 de agosto qué cena cada uno. ¿Vamos apuntando los platos?'
+  }
+];
 
 </script>
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
@@ -1030,7 +1133,7 @@ function dibujarEtapa(n){
 
 function dibujar(v){
   if(!mapa || !mapaListo) return;
-  try{ v===0 ? dibujarIndice() : dibujarEtapa(v); }
+  try{ v<=0 ? dibujarIndice() : dibujarEtapa(v); }
   catch(e){ console.warn('No se ha podido dibujar el mapa:', e.message); }
 }
 
@@ -1142,20 +1245,20 @@ function svgPerfil(perfil, color, kmActual){
    ESTADO Y SUB-PESTAÑAS
    ============================================================ */
 const SECCIONES = [
+  {id:'dia',     nom:'Itinerario'},
   {id:'ruta',    nom:'Ruta'},
   {id:'perfil',  nom:'Perfil'},
   {id:'paradas', nom:'Paradas'},
   {id:'sellos',  nom:'Sellos'},
-  {id:'tiempo',  nom:'Tiempo'},
-  {id:'dia',     nom:'El día'}
+  {id:'tiempo',  nom:'Tiempo'}
 ];
 let vistaEtapa = 0;
-let seccionActual = 'ruta';
+let seccionActual = 'dia';
 let kmSlider = 0;
 
 function pintarSubnav(){
   const sn = document.getElementById('subnav');
-  if(vistaEtapa === 0){ sn.style.display='none'; sn.innerHTML=''; return; }
+  if(vistaEtapa <= 0){ sn.style.display='none'; sn.innerHTML=''; return; }
   sn.style.display='flex';
   const color = COLORES_ETAPA[vistaEtapa-1];
   const cs = (typeof Sellos!=='undefined' && vistaEtapa>=1)
@@ -1176,8 +1279,159 @@ function irASeccion(id){
 }
 
 /* ============================================================
+   PANEL — PORTADA
+   La primera pantalla para quien no sabe qué es esto (la abuela
+   Lola, quien llega por un enlace). Con ?etapa=N no se ve: se
+   entra directo a la etapa. Dibuja el trazado como SVG propio a
+   partir de TRAZAS, sin imágenes externas.
+   ============================================================ */
+function svgPortadaMapa(){
+  if(typeof TRAZAS==='undefined') return '';
+  const lineas = [];
+  let minLon=Infinity, maxLon=-Infinity, minLat=Infinity, maxLat=-Infinity;
+  for(let n=1;n<=6;n++){
+    if(!TRAZAS[n]) continue;
+    const pts = TRAZAS[n].linea;
+    lineas.push({n:n, pts:pts});
+    pts.forEach(function(q){
+      if(q[0]<minLon)minLon=q[0]; if(q[0]>maxLon)maxLon=q[0];
+      if(q[1]<minLat)minLat=q[1]; if(q[1]>maxLat)maxLat=q[1];
+    });
+  }
+  if(!lineas.length || !isFinite(minLon)) return '';
+  const lat0 = (minLat+maxLat)/2, kx = Math.cos(lat0*Math.PI/180);
+  const W = 1000, P = 52;
+  const spanX = (maxLon-minLon)*kx || 1, spanY = (maxLat-minLat) || 1;
+  const scale = (W-2*P)/spanX;
+  const H = Math.round(spanY*scale + 2*P);
+  function X(lon){ return (P+(lon-minLon)*kx*scale).toFixed(1); }
+  function Y(lat){ return (P+(maxLat-lat)*scale).toFixed(1); }
+
+  let trazos = '';
+  lineas.forEach(function(L){
+    const pts = L.pts.map(function(q){ return X(q[0])+','+Y(q[1]); }).join(' ');
+    trazos += '<polyline points="'+pts+'" fill="none" stroke="'+COLORES_ETAPA[L.n-1]
+      + '" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>';
+  });
+  const ini = lineas[0].pts[0];
+  const ultima = lineas[lineas.length-1].pts;
+  const fin = ultima[ultima.length-1];
+  const hitos =
+      '<circle cx="'+X(ini[0])+'" cy="'+Y(ini[1])+'" r="10" fill="#EDE8DC" stroke="#1B2A23" stroke-width="3"/>'
+    + '<circle cx="'+X(fin[0])+'" cy="'+Y(fin[1])+'" r="13" fill="#D8A33C" stroke="#1B2A23" stroke-width="3"/>'
+    + '<text x="'+(X(ini[0])-16)+'" y="'+(Y(ini[1])+9)+'" text-anchor="end" '
+      + 'font-family="Fraunces,serif" font-size="30" font-weight="600" fill="#EDE8DC">Sarria</text>'
+    + '<text x="'+(Number(X(fin[0]))+20)+'" y="'+(Y(fin[1])+9)+'" text-anchor="start" '
+      + 'font-family="Fraunces,serif" font-size="30" font-weight="600" fill="#D8A33C">Santiago</text>';
+
+  return '<svg class="portada-mapa" viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" '
+    + 'role="img" aria-label="Trazado de las seis etapas, de Sarria a Santiago">'
+    + '<rect width="'+W+'" height="'+H+'" rx="4" fill="#1B2A23"/>'
+    + trazos + hitos + '</svg>';
+}
+
+function panelPortada(){
+  const totKm = (typeof TRAZAS!=='undefined')
+    ? [1,2,3,4,5,6].reduce(function(s,n){ return s + (TRAZAS[n]?TRAZAS[n].km:0); }, 0)
+    : 0;
+  return '<div class="portada">'
+
+    + '<div class="et-cab" style="--et:#D8A33C">'
+    + '<div class="fecha">18 – 23 de agosto de 2026 · seis etapas</div>'
+    + '<h1>Las Lolitas al <em>Camino</em></h1></div>'
+
+    + svgPortadaMapa()
+
+    + '<p class="lead">Doce personas y tres generaciones caminando juntas de Sarria a '
+    + 'Santiago. Esta web es vuestra guía de bolsillo para el viaje.</p>'
+
+    + '<h2>Quiénes van</h2>'
+    + '<p>El grupo se llama <strong>las Lolitas</strong> por la abuela <strong>Lola</strong>, '
+    + 'que abre camino. Con ella van sus tres hijas y sus familias. '
+    + '<strong>Elena</strong> camina con su marido <strong>Juan Martínez</strong> y sus hijos '
+    + '<strong>Alejandro</strong>, <strong>Juanje</strong> y <strong>Julio</strong>. '
+    + '<strong>Lucila</strong> —la tita que ha preparado esta guía— con su marido '
+    + '<strong>Juan Luque</strong> y sus hijas <strong>Lucilita</strong> y <strong>Sofía</strong>. '
+    + 'Y <strong>Rocío</strong> con su hijo <strong>Pablo</strong>. De la abuela a los nietos, '
+    + 'todos hasta la catedral.</p>'
+
+    + '<h2>Qué es esto</h2>'
+    + '<p>Son los últimos <strong>115 km del Camino Francés</strong>, de Sarria a Santiago '
+    + 'de Compostela, en <strong>seis etapas</strong> del 18 al 23 de agosto de 2026. La traza real '
+    + 'del GPS marca <strong>122,3 km</strong>: el camino serpentea más de lo que dicen los '
+    + 'carteles.</p>'
+
+    + '<h2>Antes de empezar, lo básico</h2>'
+    + '<p><strong>Por qué se sale de Sarria.</strong> El Camino Francés cruza todo el norte de '
+    + 'España, pero para recibir la <strong>Compostela</strong> —el certificado que se recoge '
+    + 'en la Oficina del Peregrino al llegar a Santiago— basta con hacer a pie los últimos '
+    + '100 km. Sarria es justo el pueblo donde empiezan esos 100 km, por eso arranca aquí tanta '
+    + 'gente.</p>'
+    + '<p><strong>Los sellos.</strong> En estos últimos 100 km la Catedral pide <strong>dos sellos '
+    + 'al día</strong> en la credencial, para demostrar que se ha hecho el camino a pie. Se sellan '
+    + 'en albergues, bares, iglesias y ayuntamientos: casi cualquier sitio del Camino tiene su sello. '
+    + 'Cada etapa lleva su '
+    + '<a href="#" onclick="irA(1);irASeccion(\'sellos\');return false;">checklist de sellos</a> '
+    + 'para ir marcándolos.</p>'
+    + '<p><strong>De dónde salen los datos.</strong> Los horarios, alojamientos, restaurantes y '
+    + 'puntos de interés los preparó <strong>la tita Lucila</strong> en su guía. Los trazados '
+    + 'y desniveles vienen de archivos <strong>GPX reales de Wikiloc</strong>.</p>'
+
+    + '<h2>Cómo usar la web</h2>'
+    + '<p>Arriba tienes las <strong>seis etapas</strong>; cada una con su mapa, su perfil de subidas y '
+    + 'bajadas, las paradas, la previsión del tiempo, el checklist de sellos y el itinerario del '
+    + 'día. El botón <strong>Hoy</strong> salta directo a la etapa que toca. '
+    + '<strong>Dónde estoy</strong> te sitúa sobre la traza para saber cuánto llevas y '
+    + 'cuánto queda. Y están los <strong>teléfonos</strong> útiles a mano.</p>'
+    + '<div class="nota"><strong>Guarda los mapas antes de salir.</strong> Entre Ferreiros y '
+    + 'Portomarín, y cruzando la Sierra de Ligonde, no hay cobertura. Que cada uno, <strong>con '
+    + 'wifi</strong>, pulse «Guardar mapas para sin cobertura» en el índice antes de '
+    + 'arrancar: así el mapa funciona aunque no haya señal.</div>'
+
+    + '<h2>Una nota sobre el grupo</h2>'
+    + '<p><strong>Alejandro</strong> vuela de vuelta el <strong>jueves 20 por la tarde</strong>, nada '
+    + 'más terminar la etapa 3 en Melide. Así que las <strong>tres primeras etapas</strong> las '
+    + 'camináis doce y las <strong>tres últimas</strong>, once.</p>'
+
+    + '<button class="portada-cta" onclick="irA(0)">Entrar al índice →</button>'
+    + '<p class="firma">Buen Camino.</p>'
+    + '</div>';
+}
+
+/* ============================================================
    PANEL — ÍNDICE
    ============================================================ */
+
+/* Apartado de decisiones pendientes del grupo. El estado sale de
+   la constante DECISIONES (datos.js): es lo único compartido, y lo
+   actualiza a mano quien mantiene la web. Cada tarjeta abre WhatsApp
+   con el mensaje preparado (wa.me sin número: deja elegir el chat).
+   Deliberadamente NO hay votación ni localStorage: sin servidor,
+   marcar algo aquí solo lo vería quien lo marca, y eso engaña. */
+function decisionesIndice(){
+  if(typeof DECISIONES === 'undefined' || !DECISIONES.length) return '';
+  const tarjetas = DECISIONES.map(function(d){
+    const resuelto = d.estado === 'resuelto';
+    const wa = 'https://wa.me/?text=' + encodeURIComponent(d.wa);
+    return '<div class="decision'+(resuelto?' resuelto':'')+'">'
+      + '<h3>'+esc(d.titulo)
+      + '<span class="estado '+(resuelto?'resuelto':'pendiente')+'">'
+      + (resuelto?'Resuelto':'Pendiente')+'</span></h3>'
+      + '<p>'+esc(d.que)+'</p>'
+      + '<p class="cuando">'+esc(d.cuando)+'</p>'
+      + (resuelto ? '' :
+         '<a class="wa" href="'+wa+'" target="_blank" rel="noopener">'
+         + 'Preguntar al grupo por WhatsApp</a>')
+      + '</div>';
+  }).join('');
+  return '<h2>Decisiones del grupo</h2>'
+    + '<div class="nota">Estas '+DECISIONES.length+' cosas dependen de decisiones del grupo, '
+    + 'no del código. El estado que se ve aquí lo actualiza quien mantiene la web cuando algo se '
+    + 'cierra de verdad; no se guarda en cada móvil, así que todos veis lo mismo. Cada una lleva un '
+    + 'botón para preguntarla por WhatsApp.</div>'
+    + '<div class="decisiones">'+tarjetas+'</div>';
+}
+
 function panelIndice(){
   const perfiles = ETAPAS.map(function(e){ return perfilEtapa(e.num); });
   const totKm  = perfiles.reduce(function(s,p,i){
@@ -1231,16 +1485,7 @@ function panelIndice(){
     + 'sube-y-baja entre pueblos. Tras el primer día, ajusta <code>FACTOR_FATIGA</code> '
     + 'dividiendo el tiempo real entre el estimado.</p></div>'
 
-    + '<h2>Antes de salir</h2><div class="bloque"><ul>'
-    + '<li><b>Antes del 12 de agosto:</b> comunicar a Mesón A Lareira (Palas de Rei) qué va a '
-    + 'cenar cada uno. Lo piden con una semana de antelación.</li>'
-    + '<li><b>O Pedrouzo, 22 de agosto:</b> Villa Xardín tiene 10 plazas y sois 11. Falta una cama.</li>'
-    + '<li><b>Cerceda, 22 de agosto:</b> la cena en O Ceadoiro está solicitada pero no confirmada. '
-    + 'Es la única del viaje sin cerrar.</li>'
-    + '<li><b>Arzúa, 21 de agosto:</b> Casa Nené tiene dos reservas (8 + 4 = 12) a horas distintas. '
-    + 'Conviene unificar y ajustar a 11.</li>'
-    + '<li><b>Santiago, 23 de agosto:</b> la misa de 19:30 y la cena de 20:30 no caben las dos.</li>'
-    + '</ul></div>'
+    + decisionesIndice()
 
     + panelTelefonos()
 
@@ -1456,7 +1701,8 @@ function perfilEtapa(n){
 function panelEtapa(n){
   const et = ETAPAS[n-1], color = COLORES_ETAPA[n-1];
   const perfil = perfilEtapa(n);
-  const pax = tamanoGrupo(et.fecha);
+  const camina = grupoCamina(et.fecha);   // los que hacen la etapa
+  const duerme = tamanoGrupo(et.fecha);   // los que se quedan esa noche
   const kmDisputa = et.km.sumaTramos !== et.km.guia || et.km.guiaAlt;
 
   let cab = '<div class="et-cab" style="--et:'+color+'">'
@@ -1467,9 +1713,12 @@ function panelEtapa(n){
     + '<div class="metrica sube"><b>+'+(perfil?perfil.dPos:'—')+'</b><span>subida</span></div>'
     + '<div class="metrica baja"><b>\u2212'+(perfil?perfil.dNeg:'—')+'</b><span>bajada</span></div>'
     + '<div class="metrica"><b>'+(perfil?Marcha.formato(perfil.horas):'—')+'</b><span>marcha</span></div>'
-    + '<div class="metrica"><b>'+pax+'</b><span>personas</span></div>'
+    + '<div class="metrica"><b>'+camina+'</b><span>caminan</span></div>'
     + '</div></div>';
   if(kmDisputa) cab += '<div class="nota km">'+esc(et.km.nota)+'</div>';
+  if(camina !== duerme)
+    cab += '<div class="nota">La etapa la caminan '+camina+', pero esa noche se '
+      + 'quedan '+duerme+': Alejandro vuela de vuelta desde Santiago por la tarde.</div>';
 
   let cuerpo;
   if(seccionActual==='perfil')       cuerpo = seccionPerfil(et, color, perfil);
@@ -1484,10 +1733,12 @@ function panelEtapa(n){
 
 function pintarPanel(){
   const p = document.getElementById('panel');
-  p.innerHTML = vistaEtapa===0 ? panelIndice() : panelEtapa(vistaEtapa);
-  p.style.setProperty('--et', vistaEtapa===0 ? '#D8A33C' : COLORES_ETAPA[vistaEtapa-1]);
+  p.innerHTML = vistaEtapa===-1 ? panelPortada()
+              : vistaEtapa===0  ? panelIndice()
+              : panelEtapa(vistaEtapa);
+  p.style.setProperty('--et', vistaEtapa<=0 ? '#D8A33C' : COLORES_ETAPA[vistaEtapa-1]);
   if(vistaEtapa===0) cargarMeteoIndice();
-  else if(seccionActual==='tiempo') cargarMeteoEtapa(vistaEtapa);
+  else if(vistaEtapa>=1 && seccionActual==='tiempo') cargarMeteoEtapa(vistaEtapa);
 }
 
 /* ============================================================
@@ -1538,6 +1789,96 @@ function cargarMeteoIndice(){
   });
 }
 
+/* ¿Por dónde estará el grupo entre dos instantes (en minutos desde
+   medianoche)?  Devuelve los extremos del tramo que solapa con la
+   marcha, o null si en ese rato ya no están caminando.  Se apoya en
+   Marcha.horarios(et), que da el paso estimado por cada hito. */
+function tramoEnIntervalo(et, minIni, minFin){
+  const hor = Marcha.horarios(et);
+  if(!hor || !hor.length) return null;
+  const salida = hor[0].minutos, llegada = hor[hor.length-1].minutos;
+  const a = Math.max(minIni, salida), b = Math.min(minFin, llegada);
+  if(a >= b) return null;                      // fuera de la marcha
+  let A = hor[0].punto, B = hor[hor.length-1].punto;
+  for(let i=0;i<hor.length;i++){ if(hor[i].minutos <= a) A = hor[i].punto; else break; }
+  for(let i=0;i<hor.length;i++){ if(hor[i].minutos >= b){ B = hor[i].punto; break; } }
+  return {A:A.nombre, B:B.nombre};
+}
+
+/* Avisos derivados de la previsión ya descargada. Silencio si no hay
+   nada que decir: mejor eso que un aviso vacío. Tono informativo, sin
+   alarmismo. `h` es j.hourly; [desde,hasta] las horas que se muestran. */
+function avisosMeteo(h, desde, hasta, et){
+  const avisos = [];
+
+  /* Frío de mañana: a la hora de salida, menos de 12°. */
+  const hor = Marcha.horarios(et);
+  if(hor){
+    const hSalida = Math.floor(hor[0].minutos/60);
+    const tSalida = h.temperature_2m[hSalida];
+    if(tSalida != null && tSalida < 12)
+      avisos.push('A la salida (' + esc(et.salida || Marcha.hora(hor[0].minutos))
+        + ') rondará los ' + Math.round(tSalida) + '°: conviene llevar algo de abrigo a mano '
+        + 'para el arranque, aunque luego caliente.');
+  }
+
+  /* Calor: tres o más horas seguidas por encima de 30°. */
+  for(let i=desde; i<=hasta; ){
+    if(h.temperature_2m[i] > 30){
+      let j = i, pico = h.temperature_2m[i];
+      while(j+1 <= hasta && h.temperature_2m[j+1] > 30){ j++; if(h.temperature_2m[j] > pico) pico = h.temperature_2m[j]; }
+      if(j - i + 1 >= 3){
+        let msg = 'De ' + String(i).padStart(2,'0') + ':00 a ' + String(j).padStart(2,'0')
+          + ':00 se superan los ' + Math.round(pico) + '°.';
+        const tr = tramoEnIntervalo(et, i*60, (j+1)*60);
+        if(tr) msg += tr.A === tr.B
+          ? ' Para entonces estaréis por ' + esc(tr.A) + '; buscad sombra y agua.'
+          : ' Para entonces estaréis en el tramo de ' + esc(tr.A) + ' a ' + esc(tr.B)
+            + '; buscad sombra y agua.';
+        else msg += ' Cae en las horas de más calor, ya sin caminar.';
+        avisos.push(msg);
+      }
+      i = j + 1;
+    } else i++;
+  }
+
+  /* Lluvia: alguna hora por encima del 60% de probabilidad. */
+  let lo = -1, hi = -1, ppMax = 0;
+  for(let i=desde; i<=hasta; i++){
+    if(h.precipitation_probability[i] > 60){
+      if(lo < 0) lo = i;
+      hi = i;
+      if(h.precipitation_probability[i] > ppMax) ppMax = h.precipitation_probability[i];
+    }
+  }
+  if(lo >= 0){
+    const cuando = lo === hi
+      ? 'A las ' + String(lo).padStart(2,'0') + ':00'
+      : 'De ' + String(lo).padStart(2,'0') + ':00 a ' + String(hi).padStart(2,'0') + ':00';
+    const cifra = lo === hi ? ppMax + '%' : 'hasta ' + ppMax + '%';
+    avisos.push(cuando + ' la probabilidad de lluvia pasa del 60% (' + cifra
+      + '): chubasquero a mano.');
+  }
+
+  /* Viento: solo si supera 30 km/h. */
+  let vLo = -1, vHi = -1, vMax = 0;
+  for(let i=desde; i<=hasta; i++){
+    if(h.wind_speed_10m[i] > 30){
+      if(vLo < 0) vLo = i;
+      vHi = i;
+      if(h.wind_speed_10m[i] > vMax) vMax = h.wind_speed_10m[i];
+    }
+  }
+  if(vLo >= 0)
+    avisos.push('Viento de hasta ' + Math.round(vMax) + ' km/h ' + (vLo === vHi
+      ? 'a las ' + String(vLo).padStart(2,'0') + ':00.'
+      : 'entre las ' + String(vLo).padStart(2,'0') + ':00 y las '
+        + String(vHi).padStart(2,'0') + ':00.'));
+
+  if(!avisos.length) return '';
+  return avisos.map(function(a){ return '<div class="nota">' + a + '</div>'; }).join('');
+}
+
 function cargarMeteoEtapa(n){
   const et = ETAPAS[n-1];
   const cont = document.getElementById('meteoEtapa');
@@ -1565,6 +1906,7 @@ function cargarMeteoEtapa(n){
       + '<div><b>'+Math.round(dd.temperature_2m_max[0])+'\u00B0</b><span>máxima</span></div>'
       + '<div><b>'+Math.round(dd.temperature_2m_min[0])+'\u00B0</b><span>mínima</span></div>'
       + '<div><b>'+dd.precipitation_sum[0].toFixed(1)+'</b><span>mm de lluvia</span></div></div>'
+      + avisosMeteo(h, desde, hasta, et)
       + '<div class="meteo-grid">'+filas+'</div>'
       + '<div class="nota">Amanece a las '+dd.sunrise[0].slice(11,16)+' y anochece a las '
       + dd.sunset[0].slice(11,16)+'. Datos para el punto medio de la etapa ('
@@ -1884,8 +2226,12 @@ function avisar(texto){
    COMPARTIR
    ============================================================ */
 function compartir(n){
-  const base = location.origin + location.pathname;
-  const url = n>0 ? base + '?etapa=' + n : base;
+  /* Directorio donde vive el sitio (quita el "index.html" final si lo hay). */
+  const raiz = location.origin + location.pathname.replace(/[^/]*$/, '');
+  /* Para una etapa se comparte etapaN.html, la página con las etiquetas Open
+     Graph propias (mapa, km, desnivel): así WhatsApp muestra su vista previa
+     y no la genérica. Esa página redirige al visor. El índice comparte la raíz. */
+  const url = n>0 ? raiz + 'etapa' + n + '.html' : raiz;
   const et = n>0 ? ETAPAS[n-1] : null;
   const texto = et
     ? 'Las Lolitas al Camino \u2014 Etapa '+n+': '+et.origen+' a '+et.destino
@@ -2107,7 +2453,7 @@ function pintarNav(){
 function irA(n, sinHistoria){
   vistaEtapa = n;
   kmSlider = 0;
-  if(n === 0) seccionActual = 'ruta';
+  if(n === 0) seccionActual = 'dia';
   pintarNav();
   pintarSubnav();
   pintarPanel();
@@ -2116,7 +2462,7 @@ function irA(n, sinHistoria){
   if(!sinHistoria){
     /* Con file:// algunos navegadores rechazan replaceState. No debe romper la navegación. */
     try{
-      const url = n===0 ? location.pathname : location.pathname+'?etapa='+n;
+      const url = n>=1 ? location.pathname+'?etapa='+n : location.pathname;
       history.replaceState({etapa:n}, '', url);
     }catch(e){}
   }
@@ -2197,7 +2543,18 @@ function mostrarMapa(si){
   const m = document.getElementById('main');
   m.classList.toggle('mapa', si);
   document.getElementById('verMapa').textContent = si ? 'Ver ficha' : 'Ver mapa';
-  if(si && mapa && mapaListo) setTimeout(function(){ try{ mapa.resize(); }catch(e){} }, 60);
+  /* En móvil el mapa pasa de display:none a visible. MapLibre no se entera
+     del cambio de tamaño solo, y se queda dibujado en una franja. Hay que
+     llamar a resize() DESPUÉS de que el navegador haya recolocado el
+     contenedor: por eso el doble requestAnimationFrame (espera al reflow)
+     más una red de seguridad por si iOS tarda. No se condiciona a mapaListo:
+     resize() es inofensivo en cuanto el mapa existe (va en try/catch). */
+  if(si && mapa){
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){ try{ mapa.resize(); }catch(e){} });
+    });
+    setTimeout(function(){ try{ mapa.resize(); }catch(e){} }, 300);
+  }
 }
 
 function hoy(){
@@ -2359,8 +2716,10 @@ document.getElementById('verMapa').onclick = function(){
   mostrarMapa(!document.getElementById('main').classList.contains('mapa'));
 };
 
+/* Con ?etapa=N se entra directo a esa etapa, saltándose la portada.
+   Sin parámetro válido, lo primero que se ve es la portada (vistaEtapa -1). */
 const pedida = Number(new URLSearchParams(location.search).get('etapa'));
-vistaEtapa = (pedida>=1 && pedida<=6) ? pedida : 0;
+vistaEtapa = (pedida>=1 && pedida<=6) ? pedida : -1;
 
 pintarCuenta();
 pintarNav();

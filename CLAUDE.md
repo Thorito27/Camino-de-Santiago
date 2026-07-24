@@ -3,6 +3,12 @@
 Este archivo lo lee Claude automáticamente al abrir el proyecto. Contiene
 lo que hay que saber antes de tocar nada.
 
+**Existe un diario de sesiones en `PROJECT_STATE.md`.** Léelo al empezar (al
+menos las 2-3 entradas más recientes) para saber en qué punto está el
+proyecto, y actualízalo al final de cada sesión con lo que hayas hecho. Este
+archivo (CLAUDE.md) son las reglas fijas; `PROJECT_STATE.md` es el registro
+cronológico de cambios.
+
 ---
 
 ## Qué es esto
@@ -150,19 +156,34 @@ El orden importa: `TRAZAS` antes que `ETAPAS`, y ambos antes que la lógica.
 
 ### Navegación
 
-`vistaEtapa` (0 = índice, 1-6 = etapa) y `seccionActual` (`ruta`, `perfil`,
-`paradas`, `sellos`, `tiempo`, `dia`). Las funciones son `irA(n)` e
-`irASeccion(id)`.
+`vistaEtapa` (**-1 = portada**, 0 = índice, 1-6 = etapa) y `seccionActual`.
+Las funciones son `irA(n)` e `irASeccion(id)`.
+
+La portada es la pantalla de bienvenida (`panelPortada`), lo primero que se
+ve al entrar sin `?etapa=N`; con `?etapa=N` se salta directo a esa etapa. El
+trazado de la portada es un SVG propio generado de `TRAZAS` (`svgPortadaMapa`),
+sin imágenes externas.
+
+Las sub-pestañas de una etapa, en orden, son `dia` (**se muestra como
+"Itinerario"**), `ruta`, `perfil`, `paradas`, `sellos`, `tiempo`. **La sección
+por defecto al abrir una etapa es `dia`**, no `ruta`; ese default está fijado
+en la declaración de `seccionActual` y en `irA(0)`. Ojo: `abrirHito` sí fuerza
+`ruta` al pulsar un marcador del mapa, y debe seguir así. El id sigue siendo
+`dia`; solo cambió el texto visible y su posición.
 
 ---
 
 ## Estado actual
 
-Funciona: navegación completa, mapa con las trazas reales, perfil
-interactivo, geolocalización, previsión meteorológica, sellos, teléfonos,
-modo sin cobertura y compartir.
+Funciona: portada de bienvenida, navegación completa, mapa con las trazas
+reales, perfil interactivo, geolocalización, previsión meteorológica con
+avisos derivados (calor, lluvia, frío de mañana, viento), sellos, teléfonos,
+modo sin cobertura, compartir y vista previa propia por etapa en WhatsApp.
 
-**Pendiente del viaje** (no del código):
+**Pendiente del viaje** (no del código). Estas cinco viven ahora en la
+constante `DECISIONES` de `datos.js` y se ven en el apartado «Decisiones del
+grupo» del índice. El `estado` se edita a mano en `datos.js` cuando algo se
+cierra de verdad (no en localStorage: sería solo para quien lo marca):
 
 - Villa Xardín, 22 de agosto: 10 plazas para 11 personas.
 - La cena de Cerceda sigue sin confirmar.
@@ -170,9 +191,20 @@ modo sin cobertura y compartir.
 - El 23: la misa de 19:30 y la cena de 20:30 no caben las dos.
 - Antes del 12 de agosto: comunicar el menú a Mesón A Lareira.
 
+**Vista previa por etapa:** las etiquetas Open Graph no se pueden generar en
+el cliente (WhatsApp no ejecuta JS), así que hay una página `etapaN.html` por
+etapa con sus etiquetas y una tarjeta `og/etapaN.png`. Se regeneran con
+`npm run og` (ver README). `compartir(n)` enlaza a `etapaN.html`, no a
+`?etapa=N`.
+
 **Ideas que quedaron sin hacer:**
 
-- Imagen de vista previa propia por etapa para WhatsApp.
-- Aviso de calor derivado, no solo la temperatura.
+- **Identificación por nombre y ubicación compartida del grupo.** Que cada
+  persona indique su nombre al entrar (sin contraseña, solo para identificarse
+  dentro del grupo) y que se pueda ver en el mapa dónde está cada integrante,
+  no solo la posición propia como ahora. Complejidad: `Geo` es local a cada
+  móvil y Pages no tiene backend, así que exige un servicio externo en tiempo
+  real (Firebase, Supabase) y decisiones de privacidad (frecuencia de
+  actualización, retención, y poder desactivarlo por persona). No implementado.
 - Alertas por fecha que aparezcan y desaparezcan solas.
 - Selector de tamaño de letra.
