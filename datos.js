@@ -400,90 +400,100 @@ const DECISIONES = [
 ];
 
 /* ============================================================
+   PERSONAS — quién juega a los Retos
+   Lista fija del grupo. Sin contraseña: solo sirve para saber de quién
+   es la puntuación en este móvil. Se guarda en 'lolitas2026-persona'.
+   ============================================================ */
+const PERSONAS = ['Lola','Elena','Juan Martínez','Alejandro','Juanje','Julio',
+  'Lucila','Juan Luque','Lucilita','Sofía','Rocío','Pablo'];
+
+/* ============================================================
    RETOS — cuestionario del Camino
-   Dos bloques: `etapa: 0` es "Prepara el Camino", siempre disponible;
-   `etapa: 1..6` son las tandas de cada etapa, que se desbloquean el día
-   de la etapa a partir de las 16:00 (ver `retoDesbloqueado` en index.html).
+   `etapa: 0` es "Prepara el Camino", siempre disponible. `etapa: 1..6` son
+   las tandas de cada etapa (cuatro preguntas cada una), que se desbloquean
+   el día de la etapa a partir de las 16:00 (ver `retoDesbloqueado`).
    Mientras están bloqueadas se muestra solo la `pista`, nunca la pregunta.
 
    `correcta` es el índice (0-3) dentro de `opciones`.
+   Solo hay UNA oportunidad por pregunta.
 
    Fuentes verificadas en julio de 2026: Oficina del Peregrino,
-   caminodesantiago.gal, Xacopedia, Centro Virtual Cervantes y
-   Google Arts & Culture con la Xunta.
+   caminodesantiago.gal, Xacopedia, Centro Virtual Cervantes, Google Arts &
+   Culture con la Xunta, y guías locales de Portomarín para la leyenda de la
+   escalinata.
    ============================================================ */
 const RETOS = [
 
   /* ---------- BLOQUE 1 · Prepara el Camino (siempre disponible) ---------- */
   {
     id:1, etapa:0,
-    pregunta:'¿Qué exige la Catedral de Santiago para dar la Compostela a quien hace los últimos 100 km a pie?',
-    opciones:['Un sello al día','Dos sellos al día','Tres sellos al día','Un sello por cada localidad atravesada'],
+    pregunta:'¿Qué exige la Catedral para dar la Compostela a quien hace los últimos 100 km a pie?',
+    opciones:['Un sello al día','Dos sellos al día','Tres sellos al día','Un sello por localidad'],
     correcta:1,
-    explicacion:'Dos sellos diarios en los últimos 100 km a pie o a caballo, y en los últimos 200 km en bicicleta. Valen albergues, bares, iglesias, ayuntamientos y hasta oficinas de Correos.'
+    explicacion:'Dos sellos diarios en los últimos 100 km a pie, y en los últimos 200 en bicicleta. Valen albergues, bares, iglesias, ayuntamientos y hasta oficinas de Correos.'
   },
   {
     id:2, etapa:0,
     pregunta:'La Compostela se recoge en la Oficina del Peregrino. ¿Cuánto cuesta?',
-    opciones:['3 euros','5 euros','Es gratuita','Depende de los kilómetros recorridos'],
+    opciones:['3 euros','5 euros','Es gratuita','Depende de los kilómetros'],
     correcta:2,
-    explicacion:'La Compostela es gratuita. Lo que cuesta 3 euros es el Certificado de Distancia, opcional, que detalla los kilómetros exactos.'
+    explicacion:'Gratuita. Lo que cuesta 3 euros es el Certificado de Distancia, opcional, que detalla los kilómetros exactos.'
   },
   {
     id:3, etapa:0,
-    pregunta:'Las flechas amarillas del Camino parecen antiquísimas, pero ¿de cuándo son?',
-    opciones:['Del siglo XII, aparecen en el Codex Calixtinus','De los años 80 del siglo XX','De la Edad Media tardía, siglo XV','Del Año Santo de 1965'],
+    pregunta:'Las flechas amarillas parecen antiquísimas. ¿De cuándo son?',
+    opciones:['Del siglo XII, aparecen en el Codex Calixtinus','De los años 80 del siglo XX','De la Edad Media tardía','Del Año Santo de 1965'],
     correcta:1,
-    explicacion:'Las pintó Elías Valiña, párroco de O Cebreiro, a partir de 1984, cuando el Camino estaba casi olvidado. Recorrió personalmente todo el Camino Francés desde Roncesvalles marcándolo. La vieira sí es medieval: aparece en el Codex Calixtinus del siglo XII.'
+    explicacion:'Las pintó Elías Valiña, párroco de O Cebreiro, a partir de 1984, cuando el Camino estaba casi olvidado. Recorrió personalmente todo el Camino Francés marcándolo. La vieira sí es medieval: aparece en el Codex del siglo XII.'
   },
   {
     id:4, etapa:0,
-    pregunta:'Elías Valiña, el cura que inventó las flechas amarillas, tenía una conexión con vuestro punto de partida. ¿Cuál?',
-    opciones:['Nació en Sarria','Está enterrado en Sarria','Fue párroco de Sarria antes que de O Cebreiro','Pintó su primera flecha en Sarria'],
+    pregunta:'Elías Valiña, el cura que inventó las flechas, tenía una conexión con vuestro punto de partida. ¿Cuál?',
+    opciones:['Nació en Sarria','Está enterrado en Sarria','Fue párroco de Sarria antes que de O Cebreiro','Pintó su primera flecha allí'],
     correcta:0,
-    explicacion:'Elías Valiña Sampedro nació en Sarria en 1929 y murió en 1989. Empezáis el Camino en el pueblo del hombre al que le debéis poder seguirlo sin perderos.'
+    explicacion:'Nació en Sarria en 1929 y murió en 1989. Empezáis el Camino en el pueblo del hombre al que le debéis poder seguirlo sin perderos.'
   },
   {
     id:5, etapa:0,
-    pregunta:'¿Por qué son amarillas las flechas y no de otro color?',
-    opciones:['Porque el amarillo es el color litúrgico de Santiago','Porque Valiña aprovechó pintura sobrante de señalizar carreteras','Porque es el color de la bandera del Vaticano','Porque se ve mejor con niebla'],
+    pregunta:'¿Por qué son amarillas las flechas?',
+    opciones:['Es el color litúrgico de Santiago','Valiña aprovechó pintura sobrante de señalizar carreteras','Es el color del Vaticano','Porque se ve mejor con niebla'],
     correcta:1,
-    explicacion:'La versión más extendida dice que aprovechó pintura amarilla que le sobró a unos operarios de carreteras. Un sobrino suyo cuenta otra versión: que Valiña vio en Francia que el amarillo se usaba para señalizar rutas de montaña y lo copió. Las dos historias conviven.'
+    explicacion:'La versión más extendida dice que aprovechó pintura sobrante de unos operarios de carreteras. Un sobrino cuenta otra: que vio en Francia que el amarillo se usaba para rutas de montaña y lo copió. Las dos historias conviven.'
   },
   {
     id:6, etapa:0,
-    pregunta:'La vieira era el símbolo del peregrino ya en la Edad Media. ¿Por qué probaba que habías llegado a Santiago?',
-    opciones:['Porque solo se pescaban en la ría de Arousa','Porque su venta estaba prohibida fuera de Santiago','Porque las entregaba el obispo en persona','Porque llevaban grabada la fecha de llegada'],
+    pregunta:'La vieira probaba que habías llegado a Santiago. ¿Por qué?',
+    opciones:['Solo se pescaban en la ría de Arousa','Su venta estaba prohibida fuera de Santiago','Las entregaba el obispo','Llevaban grabada la fecha'],
     correcta:1,
-    explicacion:'Era el premio por completar la peregrinación, y venderlas en otro sitio estaba prohibido. En Santiago había un barrio entero, Os Concheiros, donde el gremio las vendía.'
+    explicacion:'Era el premio por completar la peregrinación, y venderlas en otro sitio estaba prohibido. En Santiago había un barrio, Os Concheiros, donde el gremio las vendía.'
   },
   {
     id:7, etapa:0,
     pregunta:'¿Desde dónde hay que empezar como mínimo para que la Compostela sea válida yendo a pie?',
-    opciones:['Desde Sarria o Barbadelo','Desde Ponferrada','Desde Portomarín','Desde León'],
+    opciones:['Sarria o Barbadelo','Ponferrada','Portomarín','León'],
     correcta:0,
-    explicacion:'La Oficina del Peregrino fija Sarria o Barbadelo como punto mínimo en el Camino Francés a pie, porque son los últimos 100 km. Ponferrada es el mínimo para quien va en bicicleta, que necesita 200 km.'
+    explicacion:'La Oficina fija Sarria o Barbadelo en el Camino Francés a pie, porque son los últimos 100 km. Ponferrada es el mínimo en bicicleta, que necesita 200.'
   },
   {
     id:8, etapa:0,
-    pregunta:'¿Cuánto pesa el Botafumeiro de la catedral de Santiago?',
+    pregunta:'¿Cuánto pesa el Botafumeiro?',
     opciones:['25 kg','53 kg','80 kg','120 kg'],
     correcta:1,
-    explicacion:'53 kg y metro y medio de alto. Hacen falta ocho hombres, los tiraboleiros, para moverlo. Cuelga a 20 metros y alcanza mucha velocidad.'
+    explicacion:'53 kg y metro y medio de alto. Hacen falta ocho tiraboleiros para moverlo. Cuelga a 20 metros.'
   },
   {
     id:9, etapa:0,
-    pregunta:'El Codex Calixtinus, del siglo XII, contiene la primera guía del peregrino de la historia. ¿Dónde se conserva el original?',
-    opciones:['En la Biblioteca Nacional de Madrid','En la catedral de Santiago','En la abadía de Cluny, en Francia','En el Vaticano'],
+    pregunta:'¿Dónde se conserva el original del Codex Calixtinus?',
+    opciones:['Biblioteca Nacional de Madrid','La catedral de Santiago','La abadía de Cluny','El Vaticano'],
     correcta:1,
-    explicacion:'Se conserva en la catedral de Santiago. Lo impulsó el arzobispo Diego Gelmírez para afianzar Compostela como sede apostólica. Su libro V describe el Camino etapa por etapa.'
+    explicacion:'En la catedral de Santiago. Lo impulsó el arzobispo Gelmírez. Su libro V es la primera guía del peregrino de la historia.'
   },
   {
     id:10, etapa:0,
     pregunta:'¿Puede conseguir la Compostela alguien que no sea creyente?',
-    opciones:['No, hace falta declararse católico practicante','Sí, basta declarar una motivación religiosa, espiritual o de búsqueda','Solo si hace el Camino en Año Santo','Solo si asiste a la misa del peregrino'],
+    opciones:['No, hace falta ser católico practicante','Sí, basta declarar motivación religiosa, espiritual o de búsqueda','Solo en Año Santo','Solo asistiendo a la misa del peregrino'],
     correcta:1,
-    explicacion:'La Oficina admite motivación religiosa, espiritual o «de búsqueda». Quien hace el Camino por deporte o turismo puede pedir el Certificado de Distancia, que no exige motivación ninguna.'
+    explicacion:'Se admite motivación religiosa, espiritual o «de búsqueda». Quien va por deporte puede pedir el Certificado de Distancia, que no exige motivación.'
   },
 
   /* ---------- BLOQUE 2 · Lo que has visto hoy ---------- */
@@ -493,118 +503,205 @@ const RETOS = [
     id:11, etapa:1,
     pista:'La iglesia de Portomarín no siempre estuvo donde está',
     pregunta:'La iglesia de San Nicolás de Portomarín tiene una historia poco corriente. ¿Cuál?',
-    opciones:['Se construyó en una sola noche, según la leyenda','Se desmontó piedra a piedra y se trasladó','Nunca llegó a terminarse','Está construida sobre un castro celta'],
+    opciones:['Se construyó en una noche, según la leyenda','Se desmontó piedra a piedra y se trasladó','Nunca se terminó','Está sobre un castro celta'],
     correcta:1,
-    explicacion:'Al construirse el embalse de Belesar en los años sesenta, el Portomarín antiguo quedó bajo las aguas del Miño. La iglesia-fortaleza de San Nicolás, del siglo XII, se numeró piedra a piedra y se reconstruyó en el pueblo nuevo. Si el embalse baja mucho, aún asoman los restos del pueblo viejo.'
+    explicacion:'Al construirse el embalse de Belesar en 1963, el Portomarín antiguo quedó bajo el Miño. La iglesia del siglo XII se numeró piedra a piedra y se reconstruyó arriba. Aún se ven las marcas de numeración en los sillares.'
   },
   {
     id:12, etapa:1,
+    pista:'Cuidado con pararse a mitad de la escalinata',
+    pregunta:'La escalinata de entrada a Portomarín tiene una leyenda. ¿Cuál?',
+    opciones:['Quien la sube sin parar tendrá suerte en el amor','Quien se para a mirar atrás queda maldito en el amor','Hay que subirla descalzo','Quien cuenta mal los escalones no llega a Santiago'],
+    correcta:1,
+    explicacion:'Son 82 escalones y 17 metros, construidos con un arco del antiguo puente medieval rescatado antes de la inundación. La leyenda dice que quien se detiene a mitad y mira atrás sufrirá años de mala fortuna en el amor. Así que subidla del tirón.'
+  },
+  {
+    id:13, etapa:1,
     pista:'El nombre de Ferreiros no es casual',
-    pregunta:'¿A qué se dedicaban los habitantes de Ferreiros, y de ahí su nombre?',
-    opciones:['Eran herreros: claveteaban el calzado de los peregrinos y herraban sus caballerías','Fabricaban campanas para las iglesias del Camino','Extraían hierro de una mina cercana','Forjaban las cruces de los cruceiros'],
+    pregunta:'¿A qué se dedicaban en Ferreiros, y de ahí su nombre?',
+    opciones:['Eran herreros: claveteaban el calzado de los peregrinos','Fabricaban campanas','Extraían hierro de una mina','Forjaban cruces de cruceiros'],
     correcta:0,
     explicacion:'Ferreiros significa «herreros» en gallego. Aquí se claveteaba el calzado de los peregrinos y se herraban sus caballerías: un servicio de primera necesidad cuando se caminaban cientos de kilómetros.'
+  },
+  {
+    id:14, etapa:1,
+    pista:'El mojón del km 100 no es lo que parece',
+    pregunta:'Entre Sarria y Portomarín pasaréis el mojón del km 100. Pero hay una trampa. ¿Cuál?',
+    opciones:['Hay dos mojones distintos y el clásico ya no es el oficial','Está a 99 km reales','Se cambió de sitio en 2010','No existe, es una leyenda'],
+    correcta:0,
+    explicacion:'El clásico, el de las fotos, está entre Brea y Morgade. Pero el oficial actual está más adelante, cerca de A Pena, pasado Ferreiros. Podéis fotografiaros en los dos.'
   },
 
   /* Etapa 2 · Portomarín → Palas de Rei */
   {
-    id:13, etapa:2,
+    id:15, etapa:2,
     pista:'Hay un poblado muy antiguo a diez minutos del Camino',
-    pregunta:'El castro de Castromaior, junto al Camino, ¿de qué época es?',
+    pregunta:'El castro de Castromaior, ¿de qué época es?',
     opciones:['Romana, siglo I','Medieval, siglo XII','Prerromana, más de 2400 años','Visigoda, siglo VII'],
     correcta:2,
-    explicacion:'Poblado celta prerromano, de los mejor conservados de Galicia. Se visita libre y gratis con un desvío corto.'
+    explicacion:'Poblado celta prerromano, de los mejor conservados de Galicia. Visita libre y gratuita.'
   },
   {
-    id:14, etapa:2,
+    id:16, etapa:2,
     pista:'Un cruceiro con cuatro símbolos en la base y una sorpresa arriba',
-    pregunta:'En el cruceiro de Lameiros, la base tiene esculpidos cuatro elementos. ¿Cuáles?',
-    opciones:['Los cuatro evangelistas','Martillo, clavos, espinas y calaveras','Las cuatro estaciones del año','Los cuatro caminos que llegan a Santiago'],
+    pregunta:'En el cruceiro de Lameiros, la base tiene cuatro elementos esculpidos. ¿Cuáles?',
+    opciones:['Los cuatro evangelistas','Martillo, clavos, espinas y calaveras','Las cuatro estaciones','Los cuatro caminos'],
     correcta:1,
-    explicacion:'Son los símbolos de la Pasión. En la cruz, en cambio, hay un relieve de la maternidad. Muerte abajo y vida arriba, en la misma piedra, desde 1670.'
+    explicacion:'Los símbolos de la Pasión. En la cruz, en cambio, hay un relieve de la maternidad. Muerte abajo y vida arriba, en la misma piedra, desde 1670.'
+  },
+  {
+    id:17, etapa:2,
+    pista:'Hoy pasáis por el techo del viaje',
+    pregunta:'Esta etapa cruza el punto más alto de todo vuestro Camino. ¿Dónde está?',
+    opciones:['Gonzar','La Sierra de Ligonde','Portomarín','Palas de Rei'],
+    correcta:1,
+    explicacion:'La Sierra de Ligonde, a 722 metros. Desde ahí todo es más bajo hasta Santiago, que está a 260.'
+  },
+  {
+    id:18, etapa:2,
+    pista:'En Ligonde hay algo que no se ve en otras aldeas',
+    pregunta:'En Ligonde se conserva algo poco habitual junto al Camino. ¿Qué es?',
+    opciones:['Un cementerio de peregrinos','Un pozo de nieve medieval','Una muralla romana','Un mercado de ganado del siglo XV'],
+    correcta:0,
+    explicacion:'Un cementerio de peregrinos, anexo a un desaparecido hospital de la Orden de Santiago. Los que no llegaban a Compostela se quedaban ahí.'
   },
 
   /* Etapa 3 · Palas de Rei → Melide */
   {
-    id:15, etapa:3,
+    id:19, etapa:3,
     pista:'Hay algo en Leboreiro que parece una cesta gigante',
-    pregunta:'En Leboreiro hay un cabazo. ¿Qué es exactamente?',
-    opciones:['Un pozo comunal cubierto','Un granero redondo de varas entrelazadas, para el maíz','Un horno de pan compartido por la aldea','Una capilla pequeña sin campanario'],
+    pregunta:'En Leboreiro hay un cabazo. ¿Qué es?',
+    opciones:['Un pozo comunal cubierto','Un granero redondo de varas entrelazadas, para el maíz','Un horno de pan de la aldea','Una capilla sin campanario'],
     correcta:1,
-    explicacion:'Un hórreo primitivo de ramas entrelazadas y techo de paja, sobre base de piedra. Se considera el precursor del hórreo gallego rectangular de granito. El de Leboreiro es el más famoso del Camino.'
+    explicacion:'Un hórreo primitivo de ramas entrelazadas y techo de paja, sobre base de piedra. Se considera el precursor del hórreo gallego de granito. El de Leboreiro es el más famoso del Camino.'
   },
   {
-    id:16, etapa:3,
+    id:20, etapa:3,
     pista:'El nombre de Leboreiro viene de un animal',
-    pregunta:'El Codex Calixtinus llamaba a Leboreiro «Campus Leporarius». ¿Por qué?',
-    opciones:['Por la abundancia de liebres','Por los campos de lino que lo rodeaban','Por una batalla que se libró allí','Por un antiguo leprosario'],
+    pregunta:'El Codex llamaba a Leboreiro «Campus Leporarius». ¿Por qué?',
+    opciones:['Por la abundancia de liebres','Por los campos de lino','Por una batalla','Por un antiguo leprosario'],
     correcta:0,
     explicacion:'Leporarius viene de lepus, liebre en latín.'
   },
   {
-    id:17, etapa:3,
+    id:21, etapa:3,
     pista:'Melide guarda un récord de Galicia',
     pregunta:'Melide es famosa por el pulpo, pero guarda un récord. ¿Cuál?',
-    opciones:['El albergue más antiguo del Camino','El cruceiro más antiguo de Galicia','La iglesia románica más grande de Galicia','El puente medieval más largo del Camino Francés'],
+    opciones:['El albergue más antiguo del Camino','El cruceiro más antiguo de Galicia','La iglesia románica más grande','El puente medieval más largo'],
     correcta:1,
-    explicacion:'El cruceiro de Melide, del siglo XIV, está considerado el más antiguo de Galicia. Está junto a la capilla de San Roque.'
+    explicacion:'El cruceiro de Melide, del siglo XIV, está considerado el más antiguo de Galicia. Junto a la capilla de San Roque.'
+  },
+  {
+    id:22, etapa:3,
+    pista:'Un cruce de caminos, literalmente',
+    pregunta:'En Melide confluyen dos Caminos. ¿Cuáles?',
+    opciones:['El Francés y el Portugués','El Francés y el Primitivo','El Francés y el del Norte','El Francés y el Inglés'],
+    correcta:1,
+    explicacion:'Aquí se une el Camino Primitivo, el que viene de Oviedo, considerado el más antiguo de todos. A partir de Melide caminaréis con peregrinos que llevan otra ruta a las espaldas.'
   },
 
   /* Etapa 4 · Melide → Arzúa */
   {
-    id:18, etapa:4,
+    id:23, etapa:4,
     pista:'En Castañeda los peregrinos dejaban algo que traían de lejos',
     pregunta:'En Castañeda hubo hornos de cal medievales. ¿Qué tenían que ver con los peregrinos?',
-    opciones:['Traían piedra caliza desde Triacastela para la catedral de Santiago','Cocían el pan que llevaban de camino','Blanqueaban sus ropas antes de llegar','Fabricaban las conchas de recuerdo'],
+    opciones:['Traían piedra caliza desde Triacastela para la catedral','Cocían su pan','Blanqueaban sus ropas','Fabricaban conchas'],
     correcta:0,
-    explicacion:'Era tradición cargar una piedra caliza desde Triacastela hasta los hornos de Castañeda. La cal se usaba en las obras de la catedral. Cada peregrino aportaba su piedra.'
+    explicacion:'Era tradición cargar una piedra caliza desde Triacastela, a más de 50 km, hasta los hornos de Castañeda. La cal se usaba en las obras de la catedral. Cada peregrino aportaba su piedra al edificio.'
   },
   {
-    id:19, etapa:4,
+    id:24, etapa:4,
     pista:'En Arzúa hay que probar algo, y no es el pulpo',
     pregunta:'Arzúa es capital de un queso con Denominación de Origen. ¿Cuál?',
     opciones:['Tetilla','San Simón da Costa','Arzúa-Ulloa','Cebreiro'],
     correcta:2,
-    explicacion:'Se elabora con leche entera de vaca en toda la comarca. Desde 1975 se celebra la fiesta del queso.'
+    explicacion:'Leche entera de vaca, elaborado en toda la comarca. Desde 1975 se celebra allí la fiesta del queso.'
+  },
+  {
+    id:25, etapa:4,
+    pista:'El albergue de Ribadiso no siempre fue un albergue',
+    pregunta:'En Ribadiso hay un edificio con una historia larga. ¿Cuál es?',
+    opciones:['Fue un molino harinero','Fue un hospital de peregrinos del siglo XV','Fue una casa de postas','Fue una fábrica de lino'],
+    correcta:1,
+    explicacion:'El Hospital de San Antón de Ponte de Ribadiso, del siglo XV, rehabilitado como albergue público. Sigue haciendo lo mismo que hace 500 años: acoger peregrinos.'
+  },
+  {
+    id:26, etapa:4,
+    pista:'Los últimos kilómetros de hoy tienen truco',
+    pregunta:'La etapa termina con tres kilómetros que la guía avisa que se notan. ¿Por qué?',
+    opciones:['Son de asfalto','Son en subida','No hay sombra','Están mal señalizados'],
+    correcta:1,
+    explicacion:'De Ribadiso a Arzúa se suben unos 80 metros en 3 km. No es mucho sobre el papel, pero al final de la etapa se nota.'
   },
 
   /* Etapa 5 · Arzúa → O Pedrouzo */
   {
-    id:20, etapa:5,
+    id:27, etapa:5,
     pista:'Hay una fuente con fama de milagrosa antes de Santa Irene',
     pregunta:'La fuente barroca de Santa Irene tiene fama. ¿De qué?',
-    opciones:['De no secarse nunca, ni en agosto','De ser curativa: la llaman de la eterna juventud','De marcar la mitad exacta del Camino Francés','De tener el agua más fría de Galicia'],
+    opciones:['De no secarse nunca','De ser curativa: la llaman de la eterna juventud','De marcar la mitad del Camino','De tener el agua más fría de Galicia'],
     correcta:1,
-    explicacion:'La guía de la tita Lucila la recoge como «fuente de la eterna juventud», junto a la ermita de Santa Irene. Está en un desvío corto señalizado, a la izquierda, antes del núcleo.'
+    explicacion:'La guía de la tita Lucila la recoge como «fuente de la eterna juventud», junto a la ermita de Santa Irene, en un desvío corto señalizado antes del núcleo.'
   },
-  /* OJO — SIN VERIFICAR: la pregunta 21 está redactada con lo que dice la guía
-     de la tita Lucila y lo que se cuenta habitualmente del monumento, pero NO
-     se ha podido confirmar en una fuente sólida (julio 2026). Revisar antes de
-     darla por buena. */
+  /* OJO — SIN VERIFICAR: esta pregunta sale de la guía de la tita Lucila y de
+     lo que se cuenta habitualmente del monumento, pero NO se ha confirmado en
+     una fuente sólida (julio 2026). Revisar antes de darla por buena. */
   {
-    id:21, etapa:5, sinVerificar:true,
+    id:28, etapa:5, sinVerificar:true,
     pista:'Un monumento con unas botas, después de Salceda',
     pregunta:'Después de Salceda hay un monumento a Guillermo Watt. ¿Qué recuerda?',
-    opciones:['Al ingeniero que trazó la carretera N-547','A un peregrino que murió en ese punto del Camino','Al fundador del primer albergue de la zona','A un santo local del siglo XV'],
+    opciones:['Al ingeniero de la N-547','A un peregrino que murió ahí','Al fundador del primer albergue','A un santo local'],
     correcta:1,
-    explicacion:'Es un memorial a un peregrino que falleció a pocos kilómetros de Santiago, con sus botas en bronce sobre la piedra. Un recordatorio de que no todo el mundo llega.'
+    explicacion:'Memorial a un peregrino que falleció a pocos kilómetros de Santiago, con sus botas en bronce sobre la piedra. Un recordatorio de que no todo el mundo llega.'
+  },
+  {
+    id:29, etapa:5,
+    pista:'Hay un bar que hay que ver aunque no tengáis sed',
+    pregunta:'Entre A Calle y Boavista hay un bar muy peculiar. ¿Por qué?',
+    opciones:['Está dentro de un hórreo','Está lleno de botellines firmados por peregrinos','Solo abre para peregrinos','Lo lleva un antiguo peregrino alemán'],
+    correcta:1,
+    explicacion:'El Café Bar Veña, con miles de botellines firmados por peregrinos de todo el mundo. La guía de la tita Lucila lo marca con signos de exclamación.'
+  },
+  {
+    id:30, etapa:5,
+    pista:'El pueblo de esta noche tiene dos nombres',
+    pregunta:'O Pedrouzo aparece en los mapas con dos nombres. ¿Cuál es el otro?',
+    opciones:['Arca','Cerceda','O Pino','Amenal'],
+    correcta:0,
+    explicacion:'O Pedrouzo es el núcleo, Arca la parroquia, y O Pino el concello. Los tres aparecen indistintamente en señales y guías, lo que despista bastante.'
   },
 
   /* Etapa 6 · O Pedrouzo → Santiago */
   {
-    id:22, etapa:6,
+    id:31, etapa:6,
     pista:'El nombre de Lavacolla es más explícito de lo que parece',
-    pregunta:'Lavacolla aparece en el Codex Calixtinus como «Lavamentula». ¿Qué hacían allí los peregrinos?',
-    opciones:['Lavaban solo la ropa antes de entrar en Santiago','Se lavaban el cuerpo entero, partes íntimas incluidas','Bebían el agua del río como rito de purificación','Dejaban una prenda como ofrenda al Apóstol'],
+    pregunta:'Lavacolla aparece en el Codex como «Lavamentula». ¿Qué hacían allí los peregrinos?',
+    opciones:['Lavaban solo la ropa','Se lavaban el cuerpo entero, partes íntimas incluidas','Bebían el agua como rito','Dejaban una prenda de ofrenda'],
     correcta:1,
-    explicacion:'El Codex es muy explícito: dice que los peregrinos franceses se quitaban la ropa y se lavaban «no solo sus partes, sino la suciedad de todo el cuerpo», por amor al Apóstol. Lavamentula viene de ahí. Era la purificación antes de entrar en la ciudad del Apóstol, y de paso llegaban presentables.'
+    explicacion:'El Codex es muy explícito. Dice que los peregrinos franceses se quitaban la ropa y se lavaban «no solo sus partes, sino la suciedad de todo el cuerpo», por amor al Apóstol. Lavamentula viene de ahí: era la purificación antes de entrar en la ciudad del Apóstol, y de paso llegaban presentables.'
   },
   {
-    id:23, etapa:6,
+    id:32, etapa:6,
     pista:'Desde Monte do Gozo pasa algo por primera vez',
     pregunta:'¿Por qué se llama Monte do Gozo?',
-    opciones:['Porque desde allí se ven por primera vez las torres de la catedral','Porque era donde los peregrinos celebraban con vino','Por una ermita dedicada a Nuestra Señora del Gozo','Porque marcaba el fin de los peajes medievales'],
+    opciones:['Desde allí se ven por primera vez las torres de la catedral','Ahí se celebraba con vino','Por una ermita del Gozo','Ahí acababan los peajes medievales'],
     correcta:0,
     explicacion:'Tras semanas o meses de camino, allí aparecía por fin la meta. El primero del grupo en verlas era proclamado «rey» de la peregrinación, y de ahí vienen apellidos como Leroy o King.'
+  },
+  {
+    id:33, etapa:6,
+    pista:'Vuestro nombre en la Compostela os va a sorprender',
+    pregunta:'La Compostela lleva vuestro nombre, pero no como lo escribís. ¿Cómo aparece?',
+    opciones:['En gallego','Latinizado','En mayúsculas','Con el nombre del santo del día'],
+    correcta:1,
+    explicacion:'El certificado está en latín y el nombre se latiniza. Alejandro sale como «Alexandrum», Elena como «Helenam». Lola tendrá que ver qué le ponen.'
+  },
+  {
+    id:34, etapa:6,
+    pista:'Los kilómetros nunca cuadran, y hay motivo',
+    pregunta:'Habréis caminado 122 km según el GPS, pero la guía dice 115. ¿Por qué esa diferencia?',
+    opciones:['El GPS se equivoca en el bosque','El GPS sigue cada curva y la guía redondea en línea más recta','La guía cuenta solo caminos oficiales','Los mojones están mal colocados'],
+    correcta:1,
+    explicacion:'Un GPS registra cada zigzag del sendero, mientras que las distancias de guía se miden de forma más esquemática. Un 6 % de diferencia es lo normal. Los dos datos son correctos: miden cosas distintas.'
   }
 ];

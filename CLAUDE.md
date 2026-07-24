@@ -151,11 +151,23 @@ El orden importa: `TRAZAS` antes que `ETAPAS`, y ambos antes que la lógica.
   días o menos; si no, dice que no hay previsión en vez de inventarla.
 - **`Geo`** — geolocalización proyectada sobre la traza.
 - **`Sellos`** — checklist en localStorage (`lolitas2026-sellos`).
-- **`Retos`** — cuestionario en localStorage (`lolitas2026-retos`): guarda solo
-  las preguntas acertadas. Junto con `Sellos`, los dos únicos usos de
-  localStorage. Las tandas de etapa se abren con `retoDesbloqueado(fecha)`:
-  el día de la etapa a partir de las 16:00. Mientras están bloqueadas se
-  muestran las `pista`, **nunca** las preguntas.
+- **`Persona`** — quién juega, en localStorage (`lolitas2026-persona`). Lista
+  fija en `PERSONAS` (datos.js), sin contraseña. Sin persona elegida, Retos no
+  deja jugar; la portada saluda por el nombre si está puesto.
+- **`Retos`** — cuestionario en localStorage (`lolitas2026-retos`). **Guarda un
+  registro por respuesta**: `{id, opcion, acierto, ts}`, más `v` (versión de
+  formato) y `persona`. Está pensado así a propósito: si algún día se
+  sincroniza con un servidor, se enviarían esos mismos registros (añadido, no
+  reescritura). **No hay sincronización.** Reglas: **una sola oportunidad** por
+  pregunta (`Retos.responder` ignora la segunda), y una respondida no se
+  vuelve a ofrecer, se muestra con lo que marcaste y la correcta. Las tandas de
+  etapa se abren con `retoDesbloqueado(fecha)`: el día de la etapa a partir de
+  las 16:00; bloqueadas muestran las `pista`, **nunca** las preguntas. No hay
+  reinicio general, solo un «empezar de cero» con confirmación.
+  El ranking **no es automático**: se comparte por WhatsApp con
+  `compartirTexto()`, que usa el mismo mecanismo que `compartir()`.
+
+Los tres únicos usos de localStorage son `Sellos`, `Retos` y `Persona`.
 - **`perfilEtapa(n)`** — combina la traza GPX con los hitos de la guía.
   Usar esta, no `Marcha.perfil()` directamente.
 
