@@ -3,6 +3,12 @@
 Este archivo lo lee Claude automáticamente al abrir el proyecto. Contiene
 lo que hay que saber antes de tocar nada.
 
+**Existe un diario de sesiones en `PROJECT_STATE.md`.** Léelo al empezar (al
+menos las 2-3 entradas más recientes) para saber en qué punto está el
+proyecto, y actualízalo al final de cada sesión con lo que hayas hecho. Este
+archivo (CLAUDE.md) son las reglas fijas; `PROJECT_STATE.md` es el registro
+cronológico de cambios.
+
 ---
 
 ## Qué es esto
@@ -193,5 +199,12 @@ etapa con sus etiquetas y una tarjeta `og/etapaN.png`. Se regeneran con
 
 **Ideas que quedaron sin hacer:**
 
+- **Identificación por nombre y ubicación compartida del grupo.** Que cada
+  persona indique su nombre al entrar (sin contraseña, solo para identificarse
+  dentro del grupo) y que se pueda ver en el mapa dónde está cada integrante,
+  no solo la posición propia como ahora. Complejidad: `Geo` es local a cada
+  móvil y Pages no tiene backend, así que exige un servicio externo en tiempo
+  real (Firebase, Supabase) y decisiones de privacidad (frecuencia de
+  actualización, retención, y poder desactivarlo por persona). No implementado.
 - Alertas por fecha que aparezcan y desaparezcan solas.
 - Selector de tamaño de letra.

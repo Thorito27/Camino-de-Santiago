@@ -216,6 +216,17 @@ la versión antigua.
 
 Ideas que quedaron sobre la mesa:
 
+- **Identificación por nombre y ubicación compartida del grupo.** Que cada
+  persona, al entrar, indique su nombre (sin contraseña, solo para
+  identificarse dentro del grupo). El objetivo final es que cualquiera pueda
+  ver en el mapa dónde está cada integrante del viaje en cada momento, no solo
+  su propia posición como ahora.
+  Complejidad a tener en cuenta cuando se aborde: la geolocalización actual
+  (`Geo`) es local a cada móvil y GitHub Pages no tiene backend, así que
+  compartir ubicaciones entre las Lolitas exige un servicio externo con
+  almacenamiento en tiempo real (tipo Firebase o Supabase) y decisiones de
+  privacidad: cada cuánto se actualiza, cuánto tiempo se conserva, y si se
+  puede desactivar por persona.
 - Alertas por fecha que aparezcan solas y desaparezcan al pasar.
 - Selector de tamaño de letra, más allá del aumento que ya hay en móvil.
 
