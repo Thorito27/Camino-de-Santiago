@@ -18,7 +18,7 @@
    el móvil: unos 60-80 MB según la zona.
    ============================================================ */
 
-const VERSION      = 'camino-v5';
+const VERSION      = 'camino-v6';
 const CACHE_APP    = VERSION + '-app';
 const CACHE_TILES  = VERSION + '-tiles';
 const CACHE_METEO  = VERSION + '-meteo';
@@ -117,7 +117,29 @@ self.addEventListener('fetch', function(e){
     return;
   }
 
-  /* --- Todo lo demás (página, fuentes, librerías): caché primero --- */
+  /* --- La página (navegación): RED PRIMERO. Así, con conexión, siempre se
+     ve la última versión sin tener que recargar varias veces ni vaciar
+     caché. Sin conexión, se cae a la copia guardada. La copia fresca se
+     guarda bajo './index.html' para que el respaldo offline no se quede
+     viejo. --- */
+  if(req.mode === 'navigate'){
+    e.respondWith(
+      fetch(req).then(function(res){
+        if(res && res.status === 200){
+          const copia = res.clone();
+          caches.open(CACHE_APP).then(function(c){ c.put('./index.html', copia); });
+        }
+        return res;
+      }).catch(function(){
+        return caches.match('./index.html').then(function(hit){
+          return hit || caches.match('./');
+        });
+      })
+    );
+    return;
+  }
+
+  /* --- Todo lo demás (fuentes, librerías): caché primero --- */
   e.respondWith(
     caches.match(req).then(function(hit){
       if(hit) return hit;
