@@ -2326,13 +2326,13 @@ function seccionParadas(et, color, perfil){
     html += '<div class="nota">La tita Lucila no marca puntos de escape en esta etapa.</div>';
   }
 
-  const tels = TAXIS.filter(function(t){ return !t.etapa || t.etapa===n; });
+  const tels = TAXIS.filter(function(t){ return taxiEnEtapa(t, n); });
   if(tels.length){
-    html += '<div class="tels">'+tels.map(function(t){
-      return '<a href="tel:'+t.tel.replace(/\s/g,'')+'" class="tel">'
-        + '<span class="tel-n">'+esc(t.nombre)+'</span>'
-        + '<span class="tel-t">'+esc(t.tel)+'</span></a>';
-    }).join('')+'</div>';
+    html += '<div class="tels">'+tels.map(taxiTel).join('')+'</div>';
+  }
+  if(n === 6){
+    html += '<div class="nota">En O Pedrouzo no hay taxi con base propia. Lo cubren los '
+      + 'de Arzúa (los de la etapa anterior) y los de Santiago. Avisad de que sois varios.</div>';
   }
 
   /* --- Descanso y comida --- */
@@ -2410,10 +2410,60 @@ function seccionSellos(et, color){
 /* ============================================================
    TELÉFONOS ÚTILES (índice)
    ============================================================ */
+/* Taxis por localidad. `etapa` puede ser un número o una lista (algunos
+   cubren varias etapas). `verif:false` = dato sacado de búsquedas web de
+   julio de 2026 (webs de los propios taxistas), SIN comprobar llamando: se
+   muestra "sin verificar por teléfono". Los de la guía de la tita Lucila no
+   llevan esa marca; Alberto sí lleva la suya (no aparece en fuentes públicas). */
 const TAXIS = [
-  {nombre:'Taxi Alberto (Sarria)', tel:'649 850 117', etapa:1},
-  {nombre:'Taxi David (Sarria)',   tel:'669 087 722', etapa:1}
+  /* Sarria — etapa 1 */
+  {nombre:'David Gómez',        zona:'Sarria', tel:'669 087 722', etapa:1, fuente:'guía'},
+  {nombre:'Alberto',            zona:'Sarria', tel:'649 850 117', etapa:1, fuente:'guía',
+     nota:'sin confirmar en fuentes públicas'},
+  {nombre:'Eurotaxi Pepe',      zona:'Sarria', tel:'606 987 878', etapa:1, verif:false},
+  {nombre:'MiRoCar Peregrino',  zona:'Sarria', tel:'630 988 038', etapa:1, verif:false},
+  /* Portomarín / Ferreiros — etapas 1 y 2 */
+  {nombre:'Casa Cruceiro',      zona:'Ferreiros', tel:'982 541 240', etapa:[1,2], verif:false},
+  /* Palas de Rei — etapas 2 y 3 */
+  {nombre:'Taxi Palas de Rei',  zona:'Palas de Rei', tel:'675 625 112', etapa:[2,3], verif:false},
+  {nombre:'Eirexe',             zona:'Ligonde (Monterroso)', tel:'650 965 873', etapa:[2,3], verif:false},
+  /* Melide — etapas 3 y 4 */
+  {nombre:'Taxi Melide',        zona:'Melide', tel:'666 465 022', etapa:[3,4], verif:false},
+  {nombre:'Carlos',             zona:'Melide', tel:'981 507 633', etapa:[3,4], verif:false},
+  /* Melide y Arzúa — etapas 3, 4 y 5 */
+  {nombre:'Taxi Castro',        zona:'Melide y Arzúa', tel:'659 993 139', etapa:[3,4,5], verif:false},
+  /* Arzúa — etapas 4 y 5 */
+  {nombre:'Taxi Rivas',         zona:'Arzúa', tel:'617 754 440', etapa:[4,5], verif:false,
+     nota:'responde por WhatsApp'},
+  {nombre:'Vilariño Moscoso',   zona:'Arzúa', tel:'981 500 068', etapa:[4,5], verif:false}
 ];
+
+/* Centros de salud del recorrido. Los tres son PAC (Punto de Atención
+   Continuada). No hay teléfonos directos fiables, así que NO se inventan:
+   solo nombre, localidad y enlace a su ubicación en el mapa.
+   Fuente: caminodesantiago.fundaciononce.es */
+const CENTROS_SALUD = [
+  {nombre:'Centro de Saúde de Melide',  zona:'Melide',         etapa:[3,4]},
+  {nombre:'Centro de Saúde de Arzúa',   zona:'Arzúa',          etapa:[4,5]},
+  {nombre:'Centro de Saúde de O Pino',  zona:'Pedrouzo-Arca',  etapa:[5,6]}
+];
+
+/* ¿Este taxi sirve para la etapa n? (etapa suelta o lista) */
+function taxiEnEtapa(t, n){
+  return !t.etapa || t.etapa === n || (Array.isArray(t.etapa) && t.etapa.indexOf(n) >= 0);
+}
+
+/* Tarjeta de teléfono de un taxi, con la zona y la marca de verificación. */
+function taxiTel(t){
+  const marcas = [];
+  if(t.zona) marcas.push(esc(t.zona));
+  if(t.nota) marcas.push(esc(t.nota));
+  if(t.verif === false) marcas.push('sin verificar por teléfono');
+  const em = marcas.length ? '<em> · ' + marcas.join(' · ') + '</em>' : '';
+  return '<a href="tel:' + t.tel.replace(/\s/g,'') + '" class="tel">'
+    + '<span class="tel-n">' + esc(t.nombre) + em + '</span>'
+    + '<span class="tel-t">' + esc(t.tel) + '</span></a>';
+}
 
 function panelTelefonos(){
   let html = '<h2>Teléfonos</h2>'
@@ -2421,12 +2471,15 @@ function panelTelefonos(){
     + 'Todo en una pantalla, por si alguien se queda atrás o hay que avisar de algo. '
     + 'Pulsa para llamar.</p></div>';
 
-  html += '<p class="sub">Taxis</p><div class="tels">'
-    + TAXIS.map(function(t){
-        return '<a href="tel:'+t.tel.replace(/\s/g,'')+'" class="tel">'
-          + '<span class="tel-n">'+esc(t.nombre)+'</span>'
-          + '<span class="tel-t">'+esc(t.tel)+'</span></a>';
-      }).join('') + '</div>';
+  html += '<p class="sub">Taxis</p>'
+    + '<div class="tels">' + TAXIS.map(taxiTel).join('') + '</div>'
+    + '<div class="nota">Sois doce: un taxi normal es de hasta 7 plazas, así que no basta '
+    + 'con uno. Avisad de <b>cuántas personas</b> sois al llamar. Conviene además confirmar '
+    + 'por teléfono antes del viaje que siguen operativos. Los marcados «sin verificar por '
+    + 'teléfono» salen de búsquedas web de julio de 2026 (webs de los propios taxistas), no '
+    + 'comprobados llamando.</div>'
+    + '<div class="nota">En <b>O Pedrouzo</b> (etapa 6) no hay taxi con base propia: lo cubren '
+    + 'los de Arzúa y los de Santiago.</div>';
 
   html += '<p class="sub">Dónde dormimos</p><div class="tels">';
   ETAPAS.forEach(function(e){
@@ -2458,8 +2511,25 @@ function panelTelefonos(){
   });
   html += '</div>';
 
+  html += '<p class="sub">Salud y emergencias</p>';
   html += '<div class="nota roja">Emergencias: <b>112</b>. Funciona en toda España, '
     + 'incluso sin cobertura de tu operador y sin saldo.</div>';
+  html += '<div class="tels" style="margin-top:.4rem">'
+    + '<a href="tel:061" class="tel"><span class="tel-n">Urxencias sanitarias de Galicia'
+    + '<em> · atención médica por teléfono</em></span><span class="tel-t">061</span></a>'
+    + CENTROS_SALUD.map(function(c){
+        const q = encodeURIComponent(c.nombre + ', ' + c.zona);
+        return '<a href="https://www.google.com/maps/search/?api=1&query=' + q + '" '
+          + 'target="_blank" rel="noopener" class="tel">'
+          + '<span class="tel-n">' + esc(c.nombre) + '<em> · ' + esc(c.zona) + ' · PAC</em></span>'
+          + '<span class="tel-t">ver en Maps</span></a>';
+      }).join('') + '</div>';
+  html += '<div class="nota"><b>PAC</b> (Punto de Atención Continuada): urgencias no vitales '
+    + 'fuera del horario del centro y en festivos. No hay teléfonos directos fiables, así que '
+    + 'se enlaza solo su ubicación. Fuente: caminodesantiago.fundaciononce.es</div>';
+  html += '<div class="nota">Las <b>farmacias</b> de guardia rotan a diario: cualquier teléfono '
+    + 'fijo estaría mal en agosto. Consultad la de guardia en el momento (está indicada en la '
+    + 'puerta de cualquier farmacia).</div>';
 
   return html;
 }

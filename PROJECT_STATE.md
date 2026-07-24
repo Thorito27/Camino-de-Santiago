@@ -14,6 +14,38 @@ para saber en qué punto está el proyecto.
 
 ---
 
+## 2026-07-24 — Contactos (taxis y salud) + cierre del mapa en móvil
+
+**Rama:** `feat/contactos-taxis-salud`
+**PR:** pendiente contra `main`.
+
+**Contactos.** `TAXIS` (en `index.html`) pasa de 2 a 12, por localidad; `etapa`
+admite lista para los que cubren varias, con filtro `taxiEnEtapa`. Los sacados
+de búsquedas web de julio 2026 se marcan «sin verificar por teléfono»; Alberto
+lleva la suya («sin confirmar en fuentes públicas»). Notas: sois 12 y un taxi de
+7 plazas no basta / confirmar antes del viaje; y O Pedrouzo sin taxi propio (lo
+cubren Arzúa y Santiago), tanto en el índice como en Paradas de la etapa 6.
+Sección nueva «Salud y emergencias»: 112, 061 y los tres PAC (Melide, Arzúa, O
+Pino) sin teléfono inventado, con enlace a Google Maps; notas de qué es un PAC y
+de farmacias de guardia. `sw.js` → `camino-v7`.
+
+**Cierre del mapa en móvil (corrige la entrada de abajo).** El apilado con
+z-index (v3) NO lo arregló. La causa real: la fila `1fr` del grid se colapsaba
+en iOS cuando la barra de geolocalización ocupaba mucho, y el contenedor del
+mapa se quedaba sin alto. Solución: en móvil, al ver el mapa, se saca a PANTALLA
+COMPLETA (`position:fixed`; `APP_VERSION=map-4`). Además `ResizeObserver` sobre
+el contenedor y diagnóstico en pantalla con `?debug`. El service worker pasó a
+RED-PRIMERO para la página (`camino-v6`) para acabar con la fricción de recargas.
+Todo se desplegó por fin a `main` (PRs #3–#7); antes estaba solo en
+`feat/visor-lolitas`. Limpieza: borradas 4 ramas locales; las 3 remotas se
+conservan como respaldo.
+
+**Pendiente:** el mapa a pantalla completa está desplegado pero falta
+confirmarlo en un iOS real (usar `?debug=1&n=…` para saltar la caché). Los
+teléfonos nuevos de taxi siguen sin confirmar llamando.
+
+---
+
 ## 2026-07-24 — Fusión a main y segundo intento del mapa en móvil
 
 **Rama:** `fix/mapa-movil` (y antes, reconciliación de ramas).
