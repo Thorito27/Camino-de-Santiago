@@ -5,9 +5,11 @@
   "private": true,
   "scripts": {
     "validar": "node herramientas/validar.js",
-    "test": "node herramientas/probar.js"
+    "test": "node herramientas/probar.js",
+    "og": "node herramientas/og.js"
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "jsdom": "^24.0.0"
   }
 }

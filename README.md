@@ -32,6 +32,9 @@ haz commit, súbela y abre una Pull Request.
 | `trazas.js` | Copia editable de las trazas. **No la carga la web.** |
 | `.nojekyll` | Vacío. Necesario para GitHub Pages. |
 | `gpx/` | Los seis GPX originales de Wikiloc. |
+| `etapa1.html`…`etapa6.html` | Páginas mínimas con las etiquetas Open Graph propias de cada etapa. Redirigen al visor. **Generadas, no se editan a mano.** |
+| `og/etapa1.png`…`og/etapa6.png` | Las tarjetas de vista previa de WhatsApp. **Generadas.** |
+| `herramientas/og.js` | Genera las dos cosas de arriba a partir de los datos del visor. |
 
 `datos.js` y `trazas.js` están duplicados dentro de `index.html`. Se
 mantienen sueltos porque son más cómodos de editar y de revisar en una PR.
@@ -179,6 +182,28 @@ node --check sw.js
 rm -f _v*.js
 ```
 
+### Regenerar las vistas previas de WhatsApp
+
+Las etiquetas Open Graph no se pueden generar en el cliente: los rastreadores
+de WhatsApp no ejecutan JavaScript. Por eso hay una página estática por etapa
+(`etapaN.html`) con sus etiquetas ya hechas, que redirige al visor, y una
+tarjeta PNG por etapa (`og/etapaN.png`) con el nombre, los km y el desnivel.
+
+Los km y el desnivel salen de las mismas funciones del visor, así que si
+cambias una traza o una etapa, hay que regenerarlas:
+
+```bash
+npm run og
+```
+
+**La URL de publicación está fijada** en la constante `BASE` de
+`herramientas/og.js` (ahora `https://thorito27.github.io/Camino-de-Santiago`),
+porque `og:image` exige URL absoluta. Si el sitio se publica en otra dirección,
+cambia esa línea y vuelve a lanzar `npm run og`.
+
+La primera vez hace falta `npm install` (usa `@resvg/resvg-js` para pasar el
+SVG a PNG; WhatsApp no acepta SVG en `og:image`).
+
 ### Subir el número de versión del caché
 
 Si cambias `index.html`, sube `VERSION` en `sw.js` (`camino-v1` →
@@ -191,9 +216,19 @@ la versión antigua.
 
 Ideas que quedaron sobre la mesa:
 
-- Imagen de vista previa propia por etapa, para cuando se comparte por
-  WhatsApp. Ahora usa una foto genérica de la catedral.
-- Aviso derivado del calor: no solo "33°", sino "el tramo de las 14:00 a las
-  16:00 va sin sombra".
 - Alertas por fecha que aparezcan solas y desaparezcan al pasar.
 - Selector de tamaño de letra, más allá del aumento que ya hay en móvil.
+
+Ya hechas:
+
+- **Portada de bienvenida** (`vistaEtapa = -1`, `panelPortada`): presentación
+  del grupo y del viaje, con el trazado como SVG propio. Es lo primero que se
+  ve salvo si se entra con `?etapa=N`.
+- **Sub-pestañas de etapa**: «El día» pasó a llamarse «Itinerario» y va la
+  primera; la sección por defecto al abrir una etapa es esa (`dia`).
+- **Vista previa propia por etapa** al compartir por WhatsApp (`etapaN.html` +
+  `og/etapaN.png`, `npm run og`).
+- **Avisos derivados en la sección Tiempo** (calor por tramo, lluvia, frío de
+  mañana, viento) sobre los datos ya descargados de Open-Meteo.
+- **Apartado «Decisiones del grupo»** en el índice, con el estado en la
+  constante `DECISIONES` de `datos.js` y un botón de WhatsApp por decisión.
