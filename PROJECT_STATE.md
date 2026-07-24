@@ -14,6 +14,43 @@ para saber en qué punto está el proyecto.
 
 ---
 
+## 2026-07-24 — Repaso de la documentación
+
+**Rama:** `docs/actualizar`
+**PR:** pendiente contra `main`.
+
+Auditoría de los tres documentos contra el código, no de memoria. Lo que se
+encontró **mal**, que es lo que importa:
+
+- **La cabecera de `sw.js` mentía.** Decía «la propia página y sus librerías:
+  cache primero» cuando desde `camino-v6` la página va a **red primero**. Un
+  futuro lector podría haber «restaurado» el comportamiento viejo creyendo que
+  arreglaba una incoherencia. Corregida, y con la razón escrita.
+- **`CLAUDE.md` decía que había tres usos de localStorage.** Son **cuatro**:
+  faltaba `lolitas2026-3d`. También faltaba el módulo `Capa`.
+- **La estimación del caché de tiles estaba obsoleta**: la cabecera del `sw.js`
+  hablaba de «60-80 MB según la zona», cifra heredada de cuando la capa era
+  ESRI. Medido de verdad: la descarga completa son ~510 teselas y **8,4 MB**.
+- **`npm test` no cubre la portada ni los Retos** y en ningún sitio se decía.
+  Recorre 37 vistas (índice + 6 etapas × 6 secciones); las vistas `-1` y `7`
+  quedan fuera. Anotado como aviso.
+- **La tabla de archivos del README estaba a medias**: faltaban
+  `PROJECT_STATE.md`, `CLAUDE.md`, `package.json` y tres de las cuatro
+  herramientas.
+- **El README no describía media web**: no mencionaba portada, Retos, paradas,
+  sellos, geolocalización, decisiones ni teléfonos.
+
+Además se documentó lo que costó averiguar: por qué el service worker es
+red-primero, por qué el mapa va a `position:fixed` en móvil, las dos versiones
+(`VERSION` y `APP_VERSION`) y cuándo toca cada una, el PNOA con su atribución
+obligatoria y su respaldo a ESRI, y los campos de datos (`kmGuia`,
+`desviacion_m`, `fueraDeRuta`, `grupoCamina` frente a `tamanoGrupo`).
+
+Se corrigió también la entrada del 24 de julio sobre el segundo intento del
+mapa, que daba por buena una causa que luego resultó equivocada.
+
+---
+
 ## 2026-07-24 — Fuera la capa topográfica
 
 **Rama:** `fix/quitar-topo`
@@ -272,12 +309,16 @@ PR #3 de `feat/portada-preview-meteo` directamente a `main` y se fusionó, con l
 que por fin se desplegó todo. **Lección: las PR van contra `main`.**
 
 Sobre el mapa en móvil: el arreglo anterior (llamar a `resize()` tras el
-reflow) NO bastó en iOS Safari real; el mapa seguía en negro. Causa de fondo:
-el contenedor `#mapa` arrancaba en `display:none`, así que MapLibre lo creaba
-con tamaño 0 y el lienzo WebGL no se recuperaba. Nuevo enfoque: en móvil el
-mapa ya no se oculta con `display:none`, sino que va apilado detrás del panel
-opaco en la misma celda del grid, siempre a tamaño completo; al ver el mapa
-solo se oculta el panel. `sw.js` sube a `camino-v3`.
+reflow) NO bastó en iOS Safari real; el mapa seguía en negro.
+
+> **CORRECCIÓN posterior.** Lo que sigue era la hipótesis de aquel momento y
+> resultó EQUIVOCADA. Se creyó que la causa era que `#mapa` arrancaba en
+> `display:none` y MapLibre lo creaba con tamaño 0, y se apiló el mapa detrás
+> del panel para que siempre tuviera tamaño (`camino-v3`). **No funcionó.** La
+> causa real, encontrada dos intentos después, era que la fila `1fr` del grid
+> se colapsaba en iOS y el CONTENEDOR se quedaba sin alto: el problema no
+> estaba en el lienzo. Se resolvió sacando el mapa a pantalla completa con
+> `position:fixed`. Se deja escrito el error para que no se repita el camino.
 
 **Pendiente:** este segundo arreglo del mapa TAMPOCO se ha podido probar en un
 iOS real desde el entorno de trabajo; hay que confirmarlo en el móvil tras
