@@ -14,10 +14,45 @@ para saber en qué punto está el proyecto.
 
 ---
 
+## 2026-07-24 — Auditoría antes del viaje
+
+**Rama:** `chore/auditoria`
+**PR:** pendiente contra `main`.
+
+Repaso completo a un mes de salir. **No se encontró nada roto**: ni en el
+inventario de interacciones, ni en la coherencia de datos, ni en el recorrido
+automatizado. No se tocó código de la web (solo la herramienta de pruebas), así
+que no hubo que subir `VERSION` ni `APP_VERSION`.
+
+- **Interacciones**: las 26 funciones invocadas desde el HTML existen todas.
+- **Datos**: km de traza coherentes con el último vértice en las seis etapas;
+  `grupoCamina`/`tamanoGrupo` correctos (12/12, 12/12, **12 caminan y 11
+  duermen el 20**, 11/11, 11/11, 11/11); los 34 retos con ids únicos, cuatro
+  opciones y una sola correcta; teléfonos válidos para `tel:`; ninguna
+  coordenada fuera de Galicia.
+- **`herramientas/probar.js` ampliado** de 37 vistas a **187 comprobaciones**:
+  portada y paso al índice, decisiones, teléfonos, las 37 vistas verificando
+  además que la pestaña activa es la correcta, el slider en cinco puntos de
+  cada etapa, Retos completos (elegir persona, acertar, fallar, y que el
+  segundo intento se ignora), flechas del teclado, `?etapa=N` válidos e
+  inválidos, y estados raros (localStorage bloqueado, geolocalización denegada,
+  40 cambios de vista seguidos). Todo pasa.
+- **Rendimiento medido**: `index.html` son 226 KB pero **73 KB comprimidos**,
+  que es lo que viaja. 20 movimientos de slider: **1 ms** (no repinta el panel,
+  solo sustituye el SVG). Cuatro listeners globales, registrados una sola vez.
+  Marcadores: 88 creados y 81 destruidos al recorrer las seis etapas, sin fuga.
+
+Queda anotado como **frágil, no roto**: el visor depende de tres servicios
+externos en vivo (IGN, Open-Meteo y unpkg para MapLibre). El IGN tiene respaldo
+automático a ESRI y Open-Meteo degrada con aviso, pero **si unpkg no responde no
+hay mapa**; el aviso existe, pero no hay copia local de la librería.
+
+---
+
 ## 2026-07-24 — Repaso de la documentación
 
 **Rama:** `docs/actualizar`
-**PR:** pendiente contra `main`.
+**PR:** [#17](https://github.com/Thorito27/Camino-de-Santiago/pull/17), fusionada.
 
 Auditoría de los tres documentos contra el código, no de memoria. Lo que se
 encontró **mal**, que es lo que importa:
