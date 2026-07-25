@@ -93,6 +93,48 @@ en modo avión. Es justo la primera fila de la tabla.
 
 ---
 
+## 2026-07-25 — Navegación flotante y botón de ubicación en el mapa móvil
+
+**Rama:** `fix/mapa-movil-2`
+**PR:** pendiente de abrir.
+
+Dos mejoras sobre la vista de mapa a pantalla completa en móvil, sin tocar el
+`position:fixed` del mapa (que es lo que arregló la franja en iOS).
+
+- **Barra de etapas flotando sobre el mapa.** Antes, al abrir el mapa en móvil,
+  la única salida era «Ver ficha» y no se podía cambiar de etapa sin salir. Ahora
+  la `nav` de etapas se superpone arriba del mapa (translúcida, con desenfoque)
+  cuando `body.vista-mapa` está activo. Se **oculta/reaparece tocando el mapa**
+  (`mapa.on('click')` alterna `.nav-oculta`); elegí toque-para-alternar en vez del
+  «deslizar hacia abajo» propuesto porque el gesto de arrastre lo consume el
+  propio mapa para desplazarse, y competir con él daba tirones; el toque cubre
+  ocultar y volver a mostrar con el mismo gesto, sin ambigüedad. Al **cambiar de
+  etapa se sigue en vista mapa** (ya era así: `irA` no llama a `mostrarMapa`).
+  Para que la barra no tape los controles, con la barra visible se empujan hacia
+  abajo los controles de MapLibre (zoom/brújula, arriba a la derecha) y los
+  botones de capa (arriba a la izquierda), usando `--nav-h` (alto real de la nav,
+  medido en `mostrarMapa`); al ocultar la barra, vuelven arriba.
+- **FAB «mi ubicación»** abajo a la derecha del mapa (`#miUbi`, sube a `5rem` en
+  móvil para no chocar con «Ver ficha»). Reutiliza `Geo`: si no hay posición,
+  activa la geo y centra en cuanto llega la primera lectura (`_centrarAlLlegar`);
+  si ya la hay, centra con zoom 16 (cómodo para caminar); si el permiso está
+  denegado, sale el aviso de siempre (`alFallar`). El estado visual
+  (inactiva/buscando/siguiendo) se comparte con el botón «Dónde estoy» de la
+  cabecera vía `Geo._pintarBotones`.
+
+Subidas `VERSION` (`camino-v15` → `camino-v16`) y `APP_VERSION` (`map-7` →
+`map-8`). Validada la sintaxis y `npm test` en verde (187/0). Además, prueba
+jsdom aparte simulando viewport móvil vertical: 20 comprobaciones en verde
+(cambiar de etapa sin salir del mapa, alternar la barra al tocar, y las tres
+ramas del FAB).
+
+**Pendiente:** como siempre con el mapa móvil, falta la comprobación en un iOS
+real tras desplegar: que la barra flotante no tape zoom/brújula/capas, que el
+FAB no choque con la escala ni con «Ver ficha», y que al rotar a horizontal
+todo siga en su sitio.
+
+---
+
 ## 2026-07-24 — Auditoría antes del viaje
 
 **Rama:** `chore/auditoria`
