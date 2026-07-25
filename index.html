@@ -307,6 +307,22 @@ h2::after{content:'';flex:1;height:1px;background:#DED8C9}
   font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:.7rem 1.1rem;
   border-radius:var(--radio);box-shadow:0 3px 10px rgba(0,0,0,.35);cursor:pointer}
 
+/* Botón "mi ubicación" sobre el mapa: activa/centra la geolocalización.
+   Abajo a la derecha; en móvil sube para no chocar con "Ver ficha". El estado
+   visual (inactiva/buscando/siguiendo) lo pinta Geo, igual que en #btnGeo. */
+#miUbi{position:absolute;right:10px;bottom:42px;z-index:8;width:42px;height:42px;
+  display:flex;align-items:center;justify-content:center;background:rgba(27,42,35,.86);
+  border:1px solid rgba(237,232,220,.3);border-radius:50%;color:var(--hueso);cursor:pointer;
+  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+  box-shadow:0 2px 8px rgba(0,0,0,.4);transition:background .15s,border-color .15s,color .15s}
+#miUbi:hover{border-color:var(--concha)}
+#miUbi svg{width:22px;height:22px;display:block}
+#miUbi.buscando{border-color:var(--concha);color:var(--concha)}
+#miUbi.buscando svg{animation:girar 1s linear infinite;transform-origin:50% 50%}
+#miUbi.activo{background:var(--musgo);border-color:var(--musgo);color:#fff}
+#miUbi:focus-visible{outline:2px solid var(--concha);outline-offset:2px}
+@keyframes girar{to{transform:rotate(360deg)}}
+
 /* --- Geolocalización --- */
 #btnGeo{font-family:'JetBrains Mono',monospace;font-size:.63rem;font-weight:600;
   letter-spacing:.07em;text-transform:uppercase;background:none;color:var(--piedra);
@@ -454,6 +470,22 @@ body.offline #sinRed{display:block}
      botón "Ver ficha" queda por encima para volver. */
   main.mapa #mapa{position:fixed;top:0;left:0;right:0;bottom:0;z-index:40}
   #verMapa{display:block;z-index:50}
+  /* En vista mapa a pantalla completa, la barra de etapas flota ENCIMA del
+     mapa (arriba, translúcida y con desenfoque) para poder saltar de etapa sin
+     salir del mapa. No se toca el fixed del mapa: solo se superpone la nav.
+     Se oculta/reaparece tocando el mapa (alterna .nav-oculta). La cabecera con
+     el título queda tapada a propósito: lo importante es cambiar de etapa. */
+  body.vista-mapa #nav{position:fixed;top:0;left:0;right:0;z-index:45;
+    background:rgba(46,64,56,.82);-webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px);
+    box-shadow:0 2px 12px rgba(0,0,0,.38);transition:transform .22s ease}
+  body.vista-mapa.nav-oculta #nav{transform:translateY(-100%)}
+  /* Con la barra visible, se apartan hacia abajo los controles de MapLibre
+     (zoom/brújula, arriba a la derecha) y los botones de capa (arriba a la
+     izquierda) para que la barra no los tape. Al ocultarla, vuelven arriba. */
+  body.vista-mapa:not(.nav-oculta) .maplibregl-ctrl-top-right{margin-top:var(--nav-h,52px)}
+  body.vista-mapa:not(.nav-oculta) #capas{top:calc(var(--nav-h,52px) + 8px)}
+  /* El FAB de ubicación sube para no solaparse con el botón "Ver ficha". */
+  #miUbi{bottom:5rem}
   /* Que quepan todos los botones de la cabecera: si no caben en una línea,
      saltan a la siguiente en vez de cortarse. */
   header{flex-wrap:wrap;gap:.5rem;padding-left:.7rem;padding-right:.7rem}
@@ -489,6 +521,17 @@ body.offline #sinRed{display:block}
     </div>
     <div id="mapa">
       <div id="capas"></div>
+      <button id="miUbi" type="button" aria-label="Centrar en mi ubicación" title="Mi ubicación"
+        onclick="Geo.centrarEnMi()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="7"></circle>
+          <circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"></circle>
+          <line x1="12" y1="1.5" x2="12" y2="4.5"></line>
+          <line x1="12" y1="19.5" x2="12" y2="22.5"></line>
+          <line x1="1.5" y1="12" x2="4.5" y2="12"></line>
+          <line x1="19.5" y1="12" x2="22.5" y2="12"></line>
+        </svg>
+      </button>
       <div class="attr" id="attr">PNOA cedido por © Instituto Geográfico Nacional de España<br>Relieve: AWS Terrain · Datos meteo: Open-Meteo.com</div>
     </div>
   </main>
@@ -1474,7 +1517,7 @@ let mapa=null, marcadores=[], marcadorPos=null, mapaListo=false;
 /* Etiqueta de build, visible en el diagnóstico (?debug). Sirve para saber, sin
    Mac ni consola, qué versión ha cargado de verdad el móvil (por si la caché
    sigue sirviendo una vieja). Súbela cuando cambies algo del mapa. */
-const APP_VERSION = 'map-7';
+const APP_VERSION = 'map-8';
 
 function iniciarMapa(){
   if(typeof maplibregl === 'undefined'){
@@ -1487,6 +1530,16 @@ function iniciarMapa(){
     zoom:8.4, attributionControl:false, maxPitch:72});
   mapa.addControl(new maplibregl.NavigationControl({visualizePitch:true}), 'top-right');
   mapa.addControl(new maplibregl.ScaleControl({unit:'metric'}), 'bottom-right');
+  /* En vista mapa a pantalla completa (móvil), tocar el mapa alterna la barra
+     de etapas flotante: se oculta para ganar mapa y reaparece al tocar otra
+     vez. El evento 'click' de MapLibre solo salta en un toque limpio, no al
+     arrastrar o hacer zoom, así que no estorba a la navegación del mapa. */
+  mapa.on('click', function(){
+    if(document.body.classList.contains('vista-mapa')){
+      document.body.classList.toggle('nav-oculta');
+    }
+  });
+
   mapa.on('load', function(){
     mapaListo = true;
     try{ mapa.setTerrain({source:'relieve', exaggeration:1.6}); }catch(e){}
@@ -2474,9 +2527,24 @@ const Geo = {
   watchId: null,
   ultima: null,      // {lat, lon, precision, km, desvio, etapa}
   marcador: null,
+  _centrarAlLlegar: false,   // el FAB pidió centrar en cuanto haya posición
 
   soportado: function(){
     return 'geolocation' in navigator;
+  },
+
+  /* Estado visual compartido por el botón "Dónde estoy" de la cabecera y el
+     FAB de ubicación del mapa. estado: 'off' | 'buscando' | 'activo'. */
+  _pintarBotones: function(estado){
+    const btn = document.getElementById('btnGeo');
+    if(btn){
+      btn.classList.remove('buscando','activo');
+      if(estado==='buscando'){ btn.classList.add('buscando'); btn.textContent='Buscando…'; }
+      else if(estado==='activo'){ btn.classList.add('activo'); btn.textContent='Siguiendo'; }
+      else btn.textContent='Dónde estoy';
+    }
+    const fab = document.getElementById('miUbi');
+    if(fab){ fab.classList.remove('buscando','activo'); if(estado!=='off') fab.classList.add(estado); }
   },
 
   /* Proyecta una coordenada sobre la traza: devuelve el km
@@ -2510,8 +2578,7 @@ const Geo = {
     }
     if(this.activo){ this.parar(); return; }
 
-    const btn = document.getElementById('btnGeo');
-    if(btn){ btn.classList.add('buscando'); btn.textContent = 'Buscando…'; }
+    this._pintarBotones('buscando');
 
     this.watchId = navigator.geolocation.watchPosition(
       this.alRecibir.bind(this),
@@ -2526,9 +2593,9 @@ const Geo = {
     this.watchId = null;
     this.activo = false;
     this.ultima = null;
+    this._centrarAlLlegar = false;
     if(this.marcador){ try{ this.marcador.remove(); }catch(e){} this.marcador = null; }
-    const btn = document.getElementById('btnGeo');
-    if(btn){ btn.classList.remove('buscando','activo'); btn.textContent = 'Dónde estoy'; }
+    this._pintarBotones('off');
     pintarBarraGeo();
   },
 
@@ -2550,9 +2617,7 @@ const Geo = {
     this.ultima = {lat:lat, lon:lon, precision:prec, km:p.km,
                    desvio:p.d, ele:p.ele, etapa:n};
 
-    const btn = document.getElementById('btnGeo');
-    if(btn){ btn.classList.remove('buscando'); btn.classList.add('activo');
-             btn.textContent = 'Siguiendo'; }
+    this._pintarBotones('activo');
 
     if(mapa && mapaListo){
       if(!this.marcador){
@@ -2564,6 +2629,12 @@ const Geo = {
       } else {
         this.marcador.setLngLat([lon,lat]);
       }
+      /* Si el FAB pidió centrar antes de tener posición, se centra ahora,
+         con la primera lectura, y a un zoom cómodo para caminar. */
+      if(this._centrarAlLlegar){
+        this._centrarAlLlegar = false;
+        try{ mapa.flyTo({center:[lon,lat], zoom:16, duration:800}); }catch(e){}
+      }
     }
     pintarBarraGeo();
     /* Si estás mirando la ruta o las paradas de tu etapa, refresca
@@ -2574,8 +2645,8 @@ const Geo = {
   },
 
   alFallar: function(err){
-    const btn = document.getElementById('btnGeo');
-    if(btn){ btn.classList.remove('buscando','activo'); btn.textContent = 'Dónde estoy'; }
+    this._pintarBotones('off');
+    this._centrarAlLlegar = false;
     this.activo = false;
     const msg = err.code===1 ? 'Has denegado el permiso de ubicación. Actívalo en los ajustes del navegador.'
               : err.code===2 ? 'No se ha podido determinar la posición. Prueba a salir a cielo abierto.'
@@ -2588,6 +2659,27 @@ const Geo = {
       mapa.flyTo({center:[this.ultima.lon, this.ultima.lat], zoom:15, duration:800});
       mostrarMapa(true);
     }
+  },
+
+  /* El FAB de ubicación del mapa. Reutiliza toda la lógica de arriba:
+     - Si ya hay posición, centra en ella con zoom cómodo para caminar (16).
+     - Si la geo no está activa (o aún busca), la activa y centra en cuanto
+       llegue la primera lectura (via _centrarAlLlegar en alRecibir).
+     - Si el permiso está denegado, alFallar muestra el aviso de siempre. */
+  centrarEnMi: function(){
+    if(!this.soportado()){
+      avisar('Este navegador no permite geolocalización.');
+      return;
+    }
+    mostrarMapa(true);
+    if(this.ultima){
+      if(mapa && mapaListo){
+        try{ mapa.flyTo({center:[this.ultima.lon, this.ultima.lat], zoom:16, duration:800}); }catch(e){}
+      }
+      return;
+    }
+    this._centrarAlLlegar = true;
+    if(!this.activo) this.iniciar();
   }
 };
 
@@ -3459,6 +3551,16 @@ function abrirHito(nombre){
 function mostrarMapa(si){
   const m = document.getElementById('main');
   m.classList.toggle('mapa', si);
+  /* Clase en <body> para poder flotar la nav (que está FUERA de #main) sobre el
+     mapa a pantalla completa. Al salir del mapa, la barra vuelve a verse. */
+  document.body.classList.toggle('vista-mapa', si);
+  if(!si) document.body.classList.remove('nav-oculta');
+  if(si){
+    /* La barra flotante empuja hacia abajo los controles del mapa; su alto
+       real se mide aquí y se expone como --nav-h para el CSS. */
+    const nav = document.getElementById('nav');
+    if(nav) document.documentElement.style.setProperty('--nav-h', nav.offsetHeight + 'px');
+  }
   document.getElementById('verMapa').textContent = si ? 'Ver ficha' : 'Ver mapa';
   /* En móvil el mapa pasa de display:none a visible. MapLibre no se entera
      del cambio de tamaño solo, y se queda dibujado en una franja. Hay que
