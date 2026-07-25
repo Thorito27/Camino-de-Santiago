@@ -128,10 +128,11 @@ jsdom aparte simulando viewport móvil vertical: 20 comprobaciones en verde
 (cambiar de etapa sin salir del mapa, alternar la barra al tocar, y las tres
 ramas del FAB).
 
-**Pendiente:** como siempre con el mapa móvil, falta la comprobación en un iOS
-real tras desplegar: que la barra flotante no tape zoom/brújula/capas, que el
-FAB no choque con la escala ni con «Ver ficha», y que al rotar a horizontal
-todo siga en su sitio.
+**Confirmado en móvil real (25 jul 2026):** funciona correctamente tras
+desplegar. La barra flotante no tapa zoom/brújula/capas, el FAB no choca con la
+escala ni con «Ver ficha», y al rotar a horizontal todo sigue en su sitio. Es la
+primera vez que un arreglo del mapa móvil se da por bueno en el dispositivo, no
+solo en jsdom.
 
 ---
 
