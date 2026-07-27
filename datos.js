@@ -400,6 +400,94 @@ const DECISIONES = [
 ];
 
 /* ============================================================
+   EQUIPAJE — qué meter en la mochila
+   Transcripción del checklist de la tita Lucila (PDF «Checklist
+   maleta»). Los textos son los suyos; aquí solo se han separado en
+   items marcables.
+
+   Qué se ha cambiado respecto al papel, y por qué (que quede dicho):
+   - La guía trae TRES apartados: «Ropa», «Calzado» y «Otras cosas».
+     «Otras cosas» se ha partido en dos —«Equipo» y «Botiquín y
+     aseo»— porque de una tacada eran diecinueve líneas y repasarlas
+     en el móvil se hacía largo. Ningún item se ha quitado ni añadido.
+   - Las líneas que juntaban varias cosas con comas se han separado
+     en items sueltos, para poder marcarlos uno a uno: el botiquín
+     («vaselina, apósitos, compeed, antiinflamatorios, gel, tiritas»),
+     «pijama, ropita interior», «crema solar, bálsamo labial»,
+     «tapones, antifaz» y la línea de la bolsa de calcetines con las
+     pinzas de tender.
+   - NO se ha añadido nada que no esté en el papel. Si falta algo
+     (credencial, DNI, cargador), se dice en la web pero no se
+     inventa un item de la guía.
+
+   Campos: `uds` es la cantidad que dice la guía; `nota` es su
+   aclaración. Los `id` se guardan en localStorage, así que
+   cambiarlos borra las marcas de quien ya haya hecho la maleta.
+   ============================================================ */
+const EQUIPAJE = [
+  {
+    id:'ropa', titulo:'Ropa', items:[
+      {id:'ropa-camisetas',  texto:'Camisetas de deporte o camisas para caminar', uds:'2-3'},
+      {id:'ropa-calcetines', texto:'Calcetines sin costura', uds:'2-3 pares', nota:'Marcados'},
+      {id:'ropa-pantalones', texto:'Pantalones que no rocen', uds:'1-2 cortos y uno medio o largo',
+         nota:'Los cortos, más culotes'},
+      {id:'ropa-sudadera',   texto:'Sudadera con cremallera o cortaviento', nota:'Mejor con capucha'},
+      {id:'ropa-banador',    texto:'Bañador'},
+      {id:'ropa-pijama',     texto:'Pijama'},
+      {id:'ropa-interior',   texto:'Ropa interior'},
+      {id:'ropa-tardes',     texto:'Ropa para las tardes', nota:'Incluye rebeca, chaleco o chaquetita'},
+      {id:'ropa-panuelo',    texto:'Pañuelito para el cuello', nota:'Por si hace frío'}
+    ]
+  },
+  {
+    id:'calzado', titulo:'Calzado', items:[
+      {id:'calz-senderismo', texto:'Zapatos de senderismo', nota:'Ya usados'},
+      {id:'calz-chanclas',   texto:'Chanclas de plástico para la ducha'},
+      {id:'calz-deporte',    texto:'Zapatillas de deporte', nota:'Por si acaso'},
+      {id:'calz-sandalias',  texto:'Sandalias para las tardes', nota:'Calzado abierto y plano'},
+      {id:'calz-casa',       texto:'Zapatillas de estar en casa'}
+    ]
+  },
+  {
+    id:'equipo', titulo:'Equipo', de:'Otras cosas', items:[
+      {id:'eq-mochilita',  texto:'Mochilita pequeña', nota:'Para el agua y lo de cada día'},
+      {id:'eq-rinonera',   texto:'Riñonera', nota:'Para el móvil, las gafas de sol, el dinero y demás'},
+      {id:'eq-gorra',      texto:'Gorra o sombrero'},
+      {id:'eq-impermeable',texto:'Impermeable', nota:'De los chinos o del Decathlon'},
+      {id:'eq-tapones',    texto:'Tapones'},
+      {id:'eq-antifaz',    texto:'Antifaz'},
+      {id:'eq-bastones',   texto:'Bastones para caminar'},
+      {id:'eq-cascos',     texto:'Cascos para oír música'},
+      {id:'eq-saco',       texto:'Saco de dormir'},
+      {id:'eq-bolsa',      texto:'Bolsa para meter los calcetines en la lavadora o secadora',
+         nota:'Avisa la tita Lucila: al final no se usa'},
+      {id:'eq-pinzas',     texto:'Pinzas de tender', uds:'2-3', nota:'Aunque suele haber'},
+      {id:'eq-dinero',     texto:'Dinero en efectivo'}
+    ]
+  },
+  {
+    id:'botiquin', titulo:'Botiquín y aseo', de:'Otras cosas', items:[
+      {id:'bot-vaselina', texto:'Vaselina', nota:'Con guantes para ponérnosla'},
+      {id:'bot-aposito',  texto:'Apósitos cuadrados'},
+      {id:'bot-compeed',  texto:'Barrita Compeed'},
+      {id:'bot-antiinf',  texto:'Antiinflamatorios'},
+      {id:'bot-gel',      texto:'Gel hidroalcohólico'},
+      {id:'bot-tiritas',  texto:'Tiritas'},
+      {id:'bot-solar',    texto:'Crema solar'},
+      {id:'bot-labial',   texto:'Bálsamo labial'},
+      {id:'bot-aseo',     texto:'Aseo personal'},
+      {id:'bot-toalla',   texto:'Toalla de microfibra', nota:'Una grande y otra de la cara'},
+      {id:'bot-tarjeta',  texto:'Tarjeta sanitaria'}
+    ]
+  }
+];
+
+/* Cuántas cosas hay en total en la lista. */
+function totalEquipaje(){
+  return EQUIPAJE.reduce(function(n, g){ return n + g.items.length; }, 0);
+}
+
+/* ============================================================
    PERSONAS — quién juega a los Retos
    Lista fija del grupo. Sin contraseña: solo sirve para saber de quién
    es la puntuación en este móvil. Se guarda en 'lolitas2026-persona'.
