@@ -208,7 +208,23 @@ console.log('5 bis. Equipaje');
     s.w.eval('EQUIPAJE').every(g => html(s).indexOf(g.titulo) >= 0));
   comprobar('al empezar no hay nada marcado', s.w.eval('Equipaje.cuenta().hechos') === 0);
   comprobar('dice de quién es la lista', html(s).indexOf('tita Lucila') >= 0);
-  comprobar('avisa de lo que NO trae la lista', html(s).indexOf('credencial') >= 0);
+
+  /* Lo que NO es de la guía tiene que ir aparte y estar dicho. El día que
+     alguien mueva un item de estos a un grupo de la guía, esto salta. */
+  const extras = s.w.eval('EQUIPAJE.filter(g=>g.extra)');
+  comprobar('hay un grupo marcado como ajeno a la guía', extras.length === 1);
+  comprobar('el grupo añadido avisa de que no es de la guía',
+    html(s).indexOf('no viene en la guía') >= 0);
+  comprobar('la credencial está, y en el grupo añadido',
+    s.w.eval("EQUIPAJE.find(g=>g.items.some(i=>/Credencial/.test(i.texto))).extra") === true);
+  ['Cargador del móvil','Batería portátil','DNI o pasaporte'].forEach(function(t){
+    comprobar('está «' + t + '»',
+      s.w.eval(`EQUIPAJE.some(g=>g.extra && g.items.some(i=>i.texto===${JSON.stringify(t)}))`));
+  });
+  comprobar('ningún grupo de la guía se cuela como añadido',
+    s.w.eval('EQUIPAJE.filter(g=>!g.extra).length') === 4);
+  comprobar('el texto compartido marca lo añadido',
+    s.w.eval('Equipaje.comoTexto()').indexOf('añadido por el grupo') >= 0);
 
   /* marcar y desmarcar */
   const prim = s.w.eval('EQUIPAJE[0].items[0].id');

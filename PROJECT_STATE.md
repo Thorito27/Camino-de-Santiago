@@ -103,8 +103,9 @@ Pestaña nueva al final de la barra, junto a Retos: **Equipaje** (`vistaEtapa =
 maleta»).
 
 **Los datos.** Constante `EQUIPAJE` en `datos.js`, reincrustada en
-`index.html`. Son **37 cosas en cuatro grupos**. Qué se cambió respecto al
-papel, que quede escrito:
+`index.html`. Son **43 cosas en cinco grupos**: las **37** de la tita Lucila en
+los cuatro primeros y **6 añadidas por el grupo** en el quinto. Qué se cambió
+respecto al papel, que quede escrito:
 
 - Su lista trae **tres** apartados: Ropa, Calzado y «Otras cosas». Aquí «Otras
   cosas» se partió en **«Equipo»** y **«Botiquín y aseo»**, porque de una
@@ -114,9 +115,16 @@ papel, que quede escrito:
   antiinflamatorios, gel, tiritas»), «pijama, ropita interior», «crema solar,
   bálsamo labial», «tapones, antifaz» y la línea de la bolsa de calcetines con
   las pinzas de tender.
-- **No se añadió nada.** Por eso no están la credencial del peregrino, el DNI
-  ni el cargador del móvil, aunque hagan falta: la web lo dice en una nota al
-  pie en vez de inventarse items que la tita Lucila no escribió.
+- **A sus grupos no se les añadió nada.** Sus 28 viñetas dan 37 items y ahí se
+  para. Lo que hace falta pero ella no escribió va en un **quinto grupo aparte**
+  (`extra:true`, «Además de la guía»): credencial del peregrino, DNI, cargador
+  del móvil, batería portátil, gafas de sol y tarjeta bancaria. Se pinta con
+  contador de borde discontinuo y un aviso encima de la lista, y en el texto de
+  WhatsApp sale como «(añadido por el grupo)». Así nunca se le atribuye a la
+  tita Lucila algo que no es suyo. Comprobado en el texto del PDF: «cargador»,
+  «batería», «DNI» y «documentación» no aparecen ni una vez; «móvil» sale una
+  sola vez, dentro de «Riñonera, para el móvil, gafas de sol, dinero y demás»
+  (por eso las gafas llevan esa aclaración en su item).
 
 **El módulo.** `Equipaje` en `index.html`, calcado de `Sellos`: es personal,
 vive en localStorage (`lolitas2026-equipaje`, **quinta clave**) y no se
@@ -147,8 +155,12 @@ inferior derecha.
 **Pruebas.** `probar.js` gana un bloque de Equipaje (marcar, desmarcar,
 contadores por grupo, el texto de WhatsApp, ids únicos, el enlace del índice),
 casos de teclado hasta la vista 8, entrada por `?equipaje=1`, `Equipaje.cargar`
-con localStorage bloqueado y el aporreo de vistas ampliado a las nueve.
-**213 comprobaciones, 0 fallos** (eran 187). `npm run validar`: OK.
+con localStorage bloqueado y el aporreo de vistas ampliado a las nueve. Hay
+además un grupo de comprobaciones dedicado a la **procedencia**: que solo haya
+un grupo `extra`, que sean cuatro los de la guía, que la credencial esté en el
+añadido y no en los suyos, y que el texto compartido lo marque. Si alguien mueve
+un item de sitio, salta. **220 comprobaciones, 0 fallos** (eran 187).
+`npm run validar`: OK.
 
 Comprobado además en Chromium con Playwright a 414 px y a 1280 px: sin errores
 de JavaScript, la pestaña se marca, los contadores suben y la barra avanza. Lo

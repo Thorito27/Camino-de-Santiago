@@ -416,13 +416,17 @@ const DECISIONES = [
      «pijama, ropita interior», «crema solar, bálsamo labial»,
      «tapones, antifaz» y la línea de la bolsa de calcetines con las
      pinzas de tender.
-   - NO se ha añadido nada que no esté en el papel. Si falta algo
-     (credencial, DNI, cargador), se dice en la web pero no se
-     inventa un item de la guía.
+   - Lo que NO está en su papel va en un grupo aparte, marcado
+     `extra:true` («Además de la guía»). Se comprobó buscando en el
+     texto del PDF: «cargador», «batería», «DNI» y «documentación»
+     no aparecen ni una vez. Ese grupo se ve claramente separado
+     para que nunca se le atribuya a la tita Lucila algo que no
+     escribió. Los cuatro primeros grupos son suyos y solo suyos.
 
    Campos: `uds` es la cantidad que dice la guía; `nota` es su
-   aclaración. Los `id` se guardan en localStorage, así que
-   cambiarlos borra las marcas de quien ya haya hecho la maleta.
+   aclaración. `extra:true` en un grupo = no viene de la guía.
+   Los `id` se guardan en localStorage, así que cambiarlos borra
+   las marcas de quien ya haya hecho la maleta.
    ============================================================ */
 const EQUIPAJE = [
   {
@@ -478,6 +482,21 @@ const EQUIPAJE = [
       {id:'bot-aseo',     texto:'Aseo personal'},
       {id:'bot-toalla',   texto:'Toalla de microfibra', nota:'Una grande y otra de la cara'},
       {id:'bot-tarjeta',  texto:'Tarjeta sanitaria'}
+    ]
+  },
+  {
+    /* ESTE GRUPO NO ES DE LA GUÍA. Lo pidió el grupo al repasar la lista:
+       hacen falta y en el PDF no están. Va aparte y marcado para que se
+       vea de un vistazo qué escribió la tita Lucila y qué no. */
+    id:'extra', titulo:'Además de la guía', extra:true, items:[
+      {id:'ex-credencial', texto:'Credencial del peregrino',
+         nota:'Sin ella no hay sellos ni Compostela'},
+      {id:'ex-dni',        texto:'DNI o pasaporte'},
+      {id:'ex-cargador',   texto:'Cargador del móvil'},
+      {id:'ex-bateria',    texto:'Batería portátil', nota:'Un power bank, que el móvil hace de mapa todo el día'},
+      {id:'ex-gafas',      texto:'Gafas de sol',
+         nota:'La guía las nombra dentro de la riñonera, no como cosa aparte'},
+      {id:'ex-banco',      texto:'Tarjeta bancaria'}
     ]
   }
 ];

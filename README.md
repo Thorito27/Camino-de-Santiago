@@ -76,11 +76,14 @@ las tandas de cada etapa se abren el día de la etapa a las 16:00 y hasta
 entonces solo enseñan pistas. Una sola oportunidad por pregunta. El ranking del
 grupo **no es automático**: se comparte por WhatsApp pegando el mensaje.
 
-**Equipaje.** Octava pestaña: el checklist de la maleta que preparó la tita
-Lucila, 37 cosas en cuatro grupos (ropa, calzado, equipo, botiquín y aseo), con
-barra de progreso y contador por grupo. Se marca en el móvil de cada una y no
-se comparte con nadie, igual que los sellos. Los textos son los de su papel:
-la web no añade nada por su cuenta. Se llega también con `?equipaje=1`.
+**Equipaje.** Octava pestaña: el checklist de la maleta, **43 cosas en cinco
+grupos**, con barra de progreso y contador por grupo. Los cuatro primeros
+(ropa, calzado, equipo, botiquín y aseo) son las **37** de la lista de la tita
+Lucila, entera. El quinto, «Además de la guía», son **6** que añadió el grupo y
+que en su papel no están (credencial, DNI, cargador, batería portátil, gafas de
+sol y tarjeta bancaria): va aparte y marcado, para no atribuirle nada que no
+escribiera. Se marca en el móvil de cada una y no se comparte con nadie, igual
+que los sellos. Se llega también con `?equipaje=1`.
 
 **En el mapa y la cabecera.** Botón «Hoy» que salta a la etapa del día,
 «Dónde estoy» que sitúa al peregrino sobre la traza, cuenta atrás en horas y
@@ -296,8 +299,11 @@ Ya hechas:
   `EQUIPAJE` de `datos.js`. Su papel trae tres apartados (Ropa, Calzado y
   Otras cosas); aquí «Otras cosas» se partió en «Equipo» y «Botiquín y aseo»
   para que fuese más corto de repasar, y las líneas que juntaban varias cosas
-  con comas se separaron en items marcables. **No se añadió ni se quitó nada**:
-  por eso no están la credencial ni el DNI, y la propia web lo dice.
+  con comas se separaron en items marcables: **37 items de sus 28 viñetas**, sin
+  quitar ni añadir nada. Lo que su papel no trae va en un quinto grupo con
+  `extra:true` («Además de la guía»: credencial, DNI, cargador, batería, gafas y
+  tarjeta bancaria), pintado aparte y con su aviso, para que nunca se le
+  atribuya a ella algo que no escribió.
 - **Retos** (`vistaEtapa = 7`, `panelRetos`): cuestionario de **34 preguntas**
   en dos bloques (10 previas + 4 por etapa). Primero eliges **quién eres** de
   la lista del grupo (`PERSONAS`). El bloque previo está siempre abierto; las
