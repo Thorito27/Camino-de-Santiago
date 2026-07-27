@@ -217,6 +217,11 @@ El orden importa: `TRAZAS` antes que `ETAPAS`, y ambos antes que la lógica.
   `cuenta(grupo)` sin argumento devuelve el total. **Los `id` de los items son
   la clave de guardado: cambiarlos borra las marcas de quien ya haya hecho la
   maleta.**
+  Los cuatro primeros grupos son la lista de la tita Lucila, entera. El quinto
+  lleva **`extra:true`** y NO es suyo: lo añadió el grupo (credencial, DNI,
+  cargador, batería, gafas, tarjeta). Se pinta aparte y con su aviso a
+  propósito. **No muevas un item con `extra` a un grupo de la guía**: sería
+  atribuirle algo que no escribió, y hay una prueba que lo caza.
 
 **Las cinco claves de localStorage** (no hay más, y no se usa para nada más):
 

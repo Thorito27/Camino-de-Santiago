@@ -208,6 +208,10 @@ h2::after{content:'';flex:1;height:1px;background:#DED8C9}
   color:var(--hueso);border-radius:var(--radio);padding:.3rem .6rem;margin-top:.35rem}
 .reto-marcador b{font-family:'JetBrains Mono',monospace;font-size:.85rem}
 .reto-marcador span{font-size:.6rem;letter-spacing:.07em;text-transform:uppercase;color:var(--piedra)}
+/* Grupo del equipaje que NO viene de la guía: en hueso y con borde, para que
+   se distinga a simple vista de los que sí son de la tita Lucila. */
+.reto-marcador.fuera{background:none;border:1px dashed #C4BCA6;color:var(--tinta)}
+.reto-marcador.fuera span{color:#7C776B}
 .decisiones{display:flex;flex-direction:column;gap:.5rem;margin-top:.5rem}
 .decision{background:#fff;border:1px solid #E2DCCC;border-left:3px solid var(--concha);
   border-radius:var(--radio);padding:.6rem .7rem}
@@ -993,13 +997,17 @@ const DECISIONES = [
      «pijama, ropita interior», «crema solar, bálsamo labial»,
      «tapones, antifaz» y la línea de la bolsa de calcetines con las
      pinzas de tender.
-   - NO se ha añadido nada que no esté en el papel. Si falta algo
-     (credencial, DNI, cargador), se dice en la web pero no se
-     inventa un item de la guía.
+   - Lo que NO está en su papel va en un grupo aparte, marcado
+     `extra:true` («Además de la guía»). Se comprobó buscando en el
+     texto del PDF: «cargador», «batería», «DNI» y «documentación»
+     no aparecen ni una vez. Ese grupo se ve claramente separado
+     para que nunca se le atribuya a la tita Lucila algo que no
+     escribió. Los cuatro primeros grupos son suyos y solo suyos.
 
    Campos: `uds` es la cantidad que dice la guía; `nota` es su
-   aclaración. Los `id` se guardan en localStorage, así que
-   cambiarlos borra las marcas de quien ya haya hecho la maleta.
+   aclaración. `extra:true` en un grupo = no viene de la guía.
+   Los `id` se guardan en localStorage, así que cambiarlos borra
+   las marcas de quien ya haya hecho la maleta.
    ============================================================ */
 const EQUIPAJE = [
   {
@@ -1055,6 +1063,21 @@ const EQUIPAJE = [
       {id:'bot-aseo',     texto:'Aseo personal'},
       {id:'bot-toalla',   texto:'Toalla de microfibra', nota:'Una grande y otra de la cara'},
       {id:'bot-tarjeta',  texto:'Tarjeta sanitaria'}
+    ]
+  },
+  {
+    /* ESTE GRUPO NO ES DE LA GUÍA. Lo pidió el grupo al repasar la lista:
+       hacen falta y en el PDF no están. Va aparte y marcado para que se
+       vea de un vistazo qué escribió la tita Lucila y qué no. */
+    id:'extra', titulo:'Además de la guía', extra:true, items:[
+      {id:'ex-credencial', texto:'Credencial del peregrino',
+         nota:'Sin ella no hay sellos ni Compostela'},
+      {id:'ex-dni',        texto:'DNI o pasaporte'},
+      {id:'ex-cargador',   texto:'Cargador del móvil'},
+      {id:'ex-bateria',    texto:'Batería portátil', nota:'Un power bank, que el móvil hace de mapa todo el día'},
+      {id:'ex-gafas',      texto:'Gafas de sol',
+         nota:'La guía las nombra dentro de la riñonera, no como cosa aparte'},
+      {id:'ex-banco',      texto:'Tarjeta bancaria'}
     ]
   }
 ];
@@ -3179,7 +3202,7 @@ const Equipaje = {
     const d = this.cargar();
     let t = 'Equipaje del Camino — lista de la tita Lucila\n\n';
     EQUIPAJE.forEach(function(g){
-      t += g.titulo.toUpperCase() + '\n';
+      t += g.titulo.toUpperCase() + (g.extra ? ' (añadido por el grupo)' : '') + '\n';
       g.items.forEach(function(it){
         t += (d[it.id] ? '  [x] ' : '  [ ] ') + it.texto
            + (it.uds ? ' (' + it.uds + ')' : '') + '\n';
@@ -3219,10 +3242,11 @@ function equipajeIndice(){
   return '<h2>La maleta</h2>'
     + '<div class="bloque"><p style="font-size:.78rem">'
     + (listo
-        ? 'Tienes marcadas las <b>' + c.total + '</b> cosas de la lista de la tita Lucila. '
+        ? 'Tienes marcadas las <b>' + c.total + '</b> cosas de la lista. '
         : (c.hechos
             ? 'Llevas <b>' + c.hechos + ' de ' + c.total + '</b> cosas metidas. '
-            : 'La lista de la tita Lucila trae <b>' + c.total + '</b> cosas. '))
+            : 'Son <b>' + c.total + '</b> cosas: la lista de la tita Lucila y unas pocas '
+              + 'que añadió el grupo. '))
     + 'Se marca en la pestaña <b>Equipaje</b>, y se guarda solo en este móvil.</p>'
     + '<button class="btn-recargar" style="margin-top:.5rem" onclick="irA(8)">'
     + 'Ver la lista del equipaje</button></div>';
@@ -3262,8 +3286,15 @@ function panelEquipaje(){
   EQUIPAJE.forEach(function(g){
     const cg = Equipaje.cuenta(g);
     html += '<h2>' + esc(g.titulo) + '</h2>'
-      + '<div class="reto-marcador"><b>' + cg.hechos + ' de ' + cg.total + '</b>'
-      + '<span>' + (g.de ? 'de «' + esc(g.de) + '» en la guía' : 'en la guía') + '</span></div>'
+      + '<div class="reto-marcador' + (g.extra ? ' fuera' : '') + '">'
+      + '<b>' + cg.hechos + ' de ' + cg.total + '</b>'
+      + '<span>' + (g.extra ? 'no viene en la guía'
+                  : g.de ? 'de «' + esc(g.de) + '» en la guía'
+                  : 'en la guía') + '</span></div>'
+      /* El grupo añadido lleva su aviso encima de la lista, no solo la
+         etiqueta: que no se le atribuya a la tita Lucila lo que no escribió. */
+      + (g.extra ? '<div class="nota">Esto <b>no</b> está en la lista de la tita '
+          + 'Lucila. Lo añadió el grupo al repasarla, porque hace falta igual.</div>' : '')
       + '<ul class="sellos">' + g.items.map(function(it){
           const m = Equipaje.marcado(it.id);
           return '<li><button class="sello-item' + (m ? ' hecho' : '') + '" '
@@ -3279,14 +3310,17 @@ function panelEquipaje(){
         }).join('') + '</ul>';
   });
 
-  /* Honestidad con la fuente: lo que hay aquí es lo que hay en su papel,
-     ni una cosa más. Si alguien echa en falta algo, que lo diga en el grupo
-     en vez de que la web se lo invente. */
-  html += '<div class="nota"><b>Esto es la lista de la tita Lucila, tal cual.</b> La guía '
-    + 'trae tres apartados (Ropa, Calzado y Otras cosas); aquí «Otras cosas» se ha partido '
-    + 'en «Equipo» y «Botiquín y aseo» para que sea más corto de repasar, pero no se ha '
-    + 'quitado ni añadido nada. Así que <b>no están</b> la credencial del peregrino, el DNI '
-    + 'ni el cargador del móvil: si crees que faltan, dilo en el grupo y se añaden.</div>';
+  /* Honestidad con la fuente: se dice de dónde sale cada cosa. Lo que no es
+     suyo está arriba, en su grupo aparte, no mezclado. */
+  const nExtra = EQUIPAJE.filter(function(g){ return g.extra; })
+                         .reduce(function(n,g){ return n+g.items.length; }, 0);
+  html += '<div class="nota"><b>De dónde sale esta lista.</b> Los cuatro primeros grupos '
+    + 'son la lista de la tita Lucila, entera y sin quitar nada. Su guía trae tres '
+    + 'apartados (Ropa, Calzado y Otras cosas); aquí «Otras cosas» se ha partido en '
+    + '«Equipo» y «Botiquín y aseo» para que sea más corto de repasar, y las líneas que '
+    + 'juntaban varias cosas se han separado para poder marcarlas una a una. '
+    + 'Las ' + nExtra + ' de «Además de la guía» <b>no son suyas</b>: las añadió el grupo. '
+    + 'Si echas algo más en falta, dilo y se añade ahí.</div>';
 
   /* El botón de WhatsApp va antes que los discretos: en móvil el botón
      flotante «Ver mapa» tapa la esquina inferior derecha del panel, y ahí
