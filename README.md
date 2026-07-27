@@ -36,7 +36,7 @@ haz commit, súbela y abre una Pull Request.
 | `og/etapa1.png`…`og/etapa6.png` | Las tarjetas de vista previa de WhatsApp. **Generadas.** |
 | `herramientas/og.js` | Genera las dos cosas de arriba a partir de los datos del visor. |
 | `herramientas/validar.js` | `npm run validar`: comprueba la sintaxis del JS incrustado. |
-| `herramientas/probar.js` | `npm test`: recorre 37 vistas con jsdom. |
+| `herramientas/probar.js` | `npm test`: recorre las 37 vistas de etapa con jsdom, más portada, retos y equipaje. |
 | `herramientas/ajustar-puntos.js` | Lleva los puntos de `datos.js` a la traza GPX. |
 | `CLAUDE.md` | Reglas fijas del proyecto, para trabajar con Claude. |
 | `PROJECT_STATE.md` | Diario de sesiones: qué se hizo y cuándo. |
@@ -76,6 +76,12 @@ las tandas de cada etapa se abren el día de la etapa a las 16:00 y hasta
 entonces solo enseñan pistas. Una sola oportunidad por pregunta. El ranking del
 grupo **no es automático**: se comparte por WhatsApp pegando el mensaje.
 
+**Equipaje.** Octava pestaña: el checklist de la maleta que preparó la tita
+Lucila, 37 cosas en cuatro grupos (ropa, calzado, equipo, botiquín y aseo), con
+barra de progreso y contador por grupo. Se marca en el móvil de cada una y no
+se comparte con nadie, igual que los sellos. Los textos son los de su papel:
+la web no añade nada por su cuenta. Se llega también con `?equipaje=1`.
+
 **En el mapa y la cabecera.** Botón «Hoy» que salta a la etapa del día,
 «Dónde estoy» que sitúa al peregrino sobre la traza, cuenta atrás en horas y
 minutos hasta la llegada a Santiago, botón 3D y compartir.
@@ -100,8 +106,9 @@ No hace falta reevaluarlas:
   entonces los textos desaparecen sin dar error. Todos los marcadores son
   `maplibregl.Marker` con un `div` HTML.
 - **localStorage solo para lo personal de cada móvil:** los sellos
-  (`lolitas2026-sellos`), las respuestas de los retos (`lolitas2026-retos`) y
-  quién juega (`lolitas2026-persona`). Son marcas de cada peregrino; si se
+  (`lolitas2026-sellos`), las respuestas de los retos (`lolitas2026-retos`),
+  quién juega (`lolitas2026-persona`) y el equipaje ya metido
+  (`lolitas2026-equipaje`). Son marcas de cada peregrino; si se
   pierden no se pierde nada del viaje. Todo lo demás vive en memoria o en el
   propio HTML. **No hay servidor ni sincronización**: el ranking de los retos
   se lleva a mano, pegando mensajes en el chat de WhatsApp.
@@ -284,6 +291,13 @@ Ideas que quedaron sobre la mesa:
 
 Ya hechas:
 
+- **Equipaje** (`vistaEtapa = 8`, `panelEquipaje`): checklist de la maleta a
+  partir del PDF «Checklist maleta» de la tita Lucila, en la constante
+  `EQUIPAJE` de `datos.js`. Su papel trae tres apartados (Ropa, Calzado y
+  Otras cosas); aquí «Otras cosas» se partió en «Equipo» y «Botiquín y aseo»
+  para que fuese más corto de repasar, y las líneas que juntaban varias cosas
+  con comas se separaron en items marcables. **No se añadió ni se quitó nada**:
+  por eso no están la credencial ni el DNI, y la propia web lo dice.
 - **Retos** (`vistaEtapa = 7`, `panelRetos`): cuestionario de **34 preguntas**
   en dos bloques (10 previas + 4 por etapa). Primero eliges **quién eres** de
   la lista del grupo (`PERSONAS`). El bloque previo está siempre abierto; las

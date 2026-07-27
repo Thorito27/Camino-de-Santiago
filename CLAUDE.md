@@ -161,9 +161,12 @@ Hace falta `npm install jsdom` la primera vez.
 **Comprobar siempre las 37 vistas**: el índice más 6 etapas × 6 secciones.
 Un cambio en el enrutado puede dejar una en blanco sin que salte ningún error.
 
-**Ojo: `npm test` NO cubre la portada (`vistaEtapa -1`) ni los Retos
-(`vistaEtapa 7`).** Recorre solo esas 37. Si tocas alguna de esas dos vistas,
-pruébala aparte con jsdom (y **cierra la ventana** al terminar, ver más abajo).
+`npm test` recorre además la portada (`vistaEtapa -1`), los Retos
+(`vistaEtapa 7`) y el Equipaje (`vistaEtapa 8`), cada uno en su propio bloque.
+(Esta nota decía antes que la portada y los Retos se quedaban fuera; ya no es
+cierto, `probar.js` los cubre en los apartados 1 y 5.) Si añades una vista
+nueva, añádele su bloque: no basta con que no salte error, hay que comprobar
+que pinta algo.
 
 ---
 
@@ -207,7 +210,15 @@ El orden importa: `TRAZAS` antes que `ETAPAS`, y ambos antes que la lógica.
   se retiró): solo guarda si la vista es 3D, en `lolitas2026-3d`. `aplicar3D()`
   pone pitch 0 o 60.
 
-**Las cuatro claves de localStorage** (no hay más, y no se usa para nada más):
+- **`Equipaje`** — checklist de la maleta en localStorage
+  (`lolitas2026-equipaje`). Mismo planteamiento que `Sellos`: es personal, se
+  guarda solo en el navegador de cada uno y no se comparte. Los datos (grupos e
+  items) están en `EQUIPAJE`, en `datos.js`; el módulo solo lleva el estado.
+  `cuenta(grupo)` sin argumento devuelve el total. **Los `id` de los items son
+  la clave de guardado: cambiarlos borra las marcas de quien ya haya hecho la
+  maleta.**
+
+**Las cinco claves de localStorage** (no hay más, y no se usa para nada más):
 
 | Clave | Qué guarda |
 |---|---|
@@ -215,6 +226,7 @@ El orden importa: `TRAZAS` antes que `ETAPAS`, y ambos antes que la lógica.
 | `lolitas2026-retos` | respuestas del cuestionario (`{v, persona, respuestas}`) |
 | `lolitas2026-persona` | quién juega en este móvil |
 | `lolitas2026-3d` | si el mapa está en vista 3D |
+| `lolitas2026-equipaje` | qué está ya metido en la maleta |
 - **`Marcha.coordEnKm(puntos, km, n)`** — interpola sobre `TRAZAS[n].linea`,
   NO sobre los hitos. Pásale siempre el número de etapa; sin él cae al respaldo
   por hitos, que corta campo a través.
@@ -259,13 +271,22 @@ vuela al terminar la etapa 3.
 
 ### Navegación
 
-`vistaEtapa` (**-1 = portada**, 0 = índice, 1-6 = etapa, **7 = retos**) y
-`seccionActual`. Las funciones son `irA(n)` e `irASeccion(id)`.
+`vistaEtapa` (**-1 = portada**, 0 = índice, 1-6 = etapa, **7 = retos**,
+**8 = equipaje**) y `seccionActual`. Las funciones son `irA(n)` e
+`irASeccion(id)`.
 
 Ojo al añadir vistas: **solo las etapas 1-6** tienen traza, color, sub-pestañas
-y `etapaN.html`. Portada, índice y retos comparten el mapa general, ocultan el
-subnav y comparten la raíz al usar `compartir()`. Los retos se enlazan con
-`?retos=1`.
+y `etapaN.html`. Portada, índice, retos y equipaje comparten el mapa general,
+ocultan el subnav y comparten la raíz al usar `compartir()`. Los retos se
+enlazan con `?retos=1` y el equipaje con `?equipaje=1`.
+
+**Añadir una vista al final son seis sitios, no uno.** Con el equipaje (8)
+hubo que tocar: `pintarNav`, `pintarSubnav` (que la oculta), `pintarPanel` (el
+despacho y el color `--et`), `irA` (la URL de `replaceState`), el `keydown` de
+las flechas (**el tope de la derecha**, que era `< 7`) y el bloque de arranque
+que lee los parámetros de la URL. Si te dejas el `keydown`, la pestaña existe
+pero no se llega a ella con el teclado, y ninguna prueba lo cantaba hasta que
+se añadió el caso.
 
 La portada es la pantalla de bienvenida (`panelPortada`), lo primero que se
 ve al entrar sin `?etapa=N`; con `?etapa=N` se salta directo a esa etapa. El
@@ -285,8 +306,9 @@ en la declaración de `seccionActual` y en `irA(0)`. Ojo: `abrirHito` sí fuerza
 
 Funciona: portada de bienvenida, navegación completa, mapa con las trazas
 reales, perfil interactivo, geolocalización, previsión meteorológica con
-avisos derivados (calor, lluvia, frío de mañana, viento), sellos, teléfonos,
-modo sin cobertura, compartir y vista previa propia por etapa en WhatsApp.
+avisos derivados (calor, lluvia, frío de mañana, viento), sellos, retos,
+checklist del equipaje, teléfonos, modo sin cobertura, compartir y vista previa
+propia por etapa en WhatsApp.
 
 **Pendiente del viaje** (no del código). Estas cinco viven ahora en la
 constante `DECISIONES` de `datos.js` y se ven en el apartado «Decisiones del

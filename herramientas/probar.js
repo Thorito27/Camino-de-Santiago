@@ -5,9 +5,9 @@
    queda vacío y que la pestaña activa es la que toca.
 
    Cubre: portada, índice, las 6 etapas × 6 secciones, Retos (elegir persona,
-   responder, no poder responder dos veces), decisiones, teléfonos, el slider
-   del perfil, las flechas del teclado y la entrada por ?etapa=N (válidos e
-   inválidos).
+   responder, no poder responder dos veces), Equipaje (marcar, desmarcar,
+   contadores, texto), decisiones, teléfonos, el slider del perfil, las flechas
+   del teclado y la entrada por ?etapa=N (válidos e inválidos).
 
    OJO: jsdom no pinta nada. Esto detecta errores de JavaScript, vistas vacías
    y estados incoherentes; NO detecta problemas visuales, de tamaño de botón ni
@@ -193,6 +193,58 @@ console.log('5. Retos');
   s.dom.window.close();
 }
 
+/* ---------- 5 bis. Equipaje ---------- */
+console.log('5 bis. Equipaje');
+{
+  const s = abrir();
+  s.w.irA(8);
+  const total = s.w.eval('totalEquipaje()');
+  comprobar('la vista del equipaje no sale vacía', largo(s) > 1000);
+  comprobar('el subnav está oculto en el equipaje',
+    s.d.getElementById('subnav').style.display === 'none');
+  comprobar('hay un botón por cosa de la lista',
+    (html(s).match(/onclick="Equipaje\.alternar/g)||[]).length === total);
+  comprobar('los grupos de la guía tienen su encabezado',
+    s.w.eval('EQUIPAJE').every(g => html(s).indexOf(g.titulo) >= 0));
+  comprobar('al empezar no hay nada marcado', s.w.eval('Equipaje.cuenta().hechos') === 0);
+  comprobar('dice de quién es la lista', html(s).indexOf('tita Lucila') >= 0);
+  comprobar('avisa de lo que NO trae la lista', html(s).indexOf('credencial') >= 0);
+
+  /* marcar y desmarcar */
+  const prim = s.w.eval('EQUIPAJE[0].items[0].id');
+  s.w.eval(`Equipaje.alternar('${prim}')`);
+  comprobar('marcar una cosa se guarda', s.w.eval('Equipaje.cuenta().hechos') === 1);
+  comprobar('marcar la pinta como hecha', (html(s).match(/sello-item hecho/g)||[]).length === 1);
+  comprobar('la marca llega a localStorage',
+    !!JSON.parse(s.w.localStorage.getItem('lolitas2026-equipaje'))[prim]);
+  comprobar('el contador de la pestaña aparece',
+    s.d.getElementById('nav').innerHTML.indexOf('nav-sellos') >= 0);
+  comprobar('el contador del grupo cuenta bien', s.w.eval('Equipaje.cuenta(EQUIPAJE[0]).hechos') === 1);
+  comprobar('el otro grupo sigue a cero', s.w.eval('Equipaje.cuenta(EQUIPAJE[1]).hechos') === 0);
+  s.w.eval(`Equipaje.alternar('${prim}')`);
+  comprobar('volver a pulsar desmarca', s.w.eval('Equipaje.cuenta().hechos') === 0);
+
+  /* marcarlo todo */
+  s.w.eval('EQUIPAJE.forEach(g=>g.items.forEach(it=>{if(!Equipaje.marcado(it.id))Equipaje.alternar(it.id)}))');
+  comprobar('se pueden marcar todas', s.w.eval('Equipaje.cuenta().hechos') === total);
+  comprobar('con todo marcado, la maleta sale lista', html(s).indexOf('Maleta lista') >= 0);
+
+  /* el texto para WhatsApp */
+  const txt = s.w.eval('Equipaje.comoTexto()');
+  comprobar('el texto trae todas las cosas', (txt.match(/\[x\]/g)||[]).length === total);
+  comprobar('el texto dice de quién es la lista', txt.indexOf('tita Lucila') >= 0);
+
+  /* el índice enseña cómo va */
+  s.w.irA(0);
+  comprobar('el índice enlaza con el equipaje', html(s).indexOf('irA(8)') >= 0);
+
+  comprobar('ids del equipaje únicos',
+    s.w.eval('new Set(EQUIPAJE.flatMap(g=>g.items.map(i=>i.id))).size') === total);
+  comprobar('equipaje sin errores', s.errores.length === 0);
+  if(s.errores.length) s.errores.slice(0,3).forEach(e => console.error('   ' + e));
+  s.dom.window.close();
+}
+
 /* ---------- 6. Flechas del teclado ---------- */
 console.log('6. Flechas del teclado');
 {
@@ -205,10 +257,14 @@ console.log('6. Flechas del teclado');
   flecha('ArrowRight');
   comprobar('derecha desde el índice va a la etapa 1', s.w.eval('vistaEtapa') === 1);
   for(let i=0;i<6;i++) flecha('ArrowRight');
-  comprobar('derecha se detiene en Retos (7)', s.w.eval('vistaEtapa') === 7);
+  comprobar('derecha llega a Retos (7)', s.w.eval('vistaEtapa') === 7);
+  flecha('ArrowRight');
+  comprobar('derecha se detiene en Equipaje (8)', s.w.eval('vistaEtapa') === 8);
+  flecha('ArrowRight');
+  comprobar('derecha no pasa de Equipaje', s.w.eval('vistaEtapa') === 8);
   flecha('ArrowLeft');
-  comprobar('izquierda desde Retos vuelve a la etapa 6', s.w.eval('vistaEtapa') === 6);
-  for(let i=0;i<8;i++) flecha('ArrowLeft');
+  comprobar('izquierda desde Equipaje vuelve a Retos', s.w.eval('vistaEtapa') === 7);
+  for(let i=0;i<9;i++) flecha('ArrowLeft');
   comprobar('izquierda no baja del índice', s.w.eval('vistaEtapa') === 0);
   comprobar('teclado sin errores', s.errores.length === 0);
   s.dom.window.close();
@@ -235,6 +291,11 @@ console.log('7. Entrada por ?etapa=N');
   const s = abrir('https://ejemplo.org/?retos=1');
   comprobar('?retos=1 abre los Retos', s.w.eval('vistaEtapa') === 7);
   s.dom.window.close();
+  const q = abrir('https://ejemplo.org/?equipaje=1');
+  comprobar('?equipaje=1 abre el Equipaje', q.w.eval('vistaEtapa') === 8);
+  comprobar('?equipaje=1 no sale vacía', largo(q) > 1000);
+  comprobar('?equipaje=1 sin errores', q.errores.length === 0);
+  q.dom.window.close();
 }
 
 /* ---------- 8. Estados raros ---------- */
@@ -247,8 +308,10 @@ console.log('8. Estados raros');
   try{
     s.w.eval('Sellos.datos=null; Sellos.cargar();');
     s.w.eval('Retos.datos=null; Retos.cargar();');
+    s.w.eval('Equipaje.datos=null; Equipaje.cargar();');
     s.w.eval('Persona.nombre()');
     s.w.irA(7);
+    s.w.irA(8);
   }catch(e){ rompe = true; }
   comprobar('localStorage bloqueado no rompe la web', !rompe);
   s.dom.window.close();
@@ -267,7 +330,9 @@ console.log('8. Estados raros');
   const r = abrir();
   let rompeRapido = false;
   try{
-    for(let i=0;i<40;i++){ r.w.irA(i%8===7?7:(i%7)); r.w.irASeccion(['dia','ruta','perfil','tiempo'][i%4]); }
+    /* Recorre las nueve vistas de la barra: índice (0), etapas 1-6, retos (7)
+       y equipaje (8), cambiando además de sección a lo bruto. */
+    for(let i=0;i<45;i++){ r.w.irA(i%9); r.w.irASeccion(['dia','ruta','perfil','tiempo'][i%4]); }
   }catch(e){ rompeRapido = true; }
   comprobar('40 cambios rápidos de vista no rompen', !rompeRapido);
   comprobar('tras el aporreo el panel sigue pintando', largo(r) > 400);

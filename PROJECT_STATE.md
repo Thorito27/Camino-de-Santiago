@@ -93,6 +93,76 @@ en modo avión. Es justo la primera fila de la tabla.
 
 ---
 
+## 2026-07-27 — Pestaña de Equipaje: la checklist de la maleta
+
+**Rama:** `claude/luggage-checklist-tab-4zqh2v`
+**PR:** pendiente de abrir.
+
+Pestaña nueva al final de la barra, junto a Retos: **Equipaje** (`vistaEtapa =
+8`), con la checklist de la maleta que preparó la tita Lucila (PDF «Checklist
+maleta»).
+
+**Los datos.** Constante `EQUIPAJE` en `datos.js`, reincrustada en
+`index.html`. Son **37 cosas en cuatro grupos**. Qué se cambió respecto al
+papel, que quede escrito:
+
+- Su lista trae **tres** apartados: Ropa, Calzado y «Otras cosas». Aquí «Otras
+  cosas» se partió en **«Equipo»** y **«Botiquín y aseo»**, porque de una
+  tacada eran diecinueve líneas y repasarlas en el móvil se hacía largo.
+- Las líneas que juntaban varias cosas con comas se separaron en items sueltos
+  para poder marcarlos uno a uno: el botiquín («vaselina, apósitos, compeed,
+  antiinflamatorios, gel, tiritas»), «pijama, ropita interior», «crema solar,
+  bálsamo labial», «tapones, antifaz» y la línea de la bolsa de calcetines con
+  las pinzas de tender.
+- **No se añadió nada.** Por eso no están la credencial del peregrino, el DNI
+  ni el cargador del móvil, aunque hagan falta: la web lo dice en una nota al
+  pie en vez de inventarse items que la tita Lucila no escribió.
+
+**El módulo.** `Equipaje` en `index.html`, calcado de `Sellos`: es personal,
+vive en localStorage (`lolitas2026-equipaje`, **quinta clave**) y no se
+comparte. Barra de progreso, contador por grupo, contador en la propia pestaña
+cuando hay algo marcado, copiar como texto, mandar por WhatsApp
+(`compartirTexto`, el mismo mecanismo que los Retos) y desmarcar todo con
+confirmación. **Los `id` de los items son la clave de guardado**: cambiarlos
+borra la maleta de quien ya la haya hecho.
+
+También se añadió un bloque «La maleta» en el índice, entre los teléfonos y el
+modo sin cobertura, para que la lista se encuentre sin descubrir la pestaña.
+
+**Añadir una vista fueron seis sitios, no uno**, y queda apuntado en CLAUDE.md:
+`pintarNav`, `pintarSubnav`, `pintarPanel`, la URL de `irA`, el `keydown` de
+las flechas y el arranque que lee los parámetros. El tope de la flecha derecha
+era `vistaEtapa < 7`; sin tocarlo la pestaña existía pero no se llegaba con el
+teclado, y ninguna prueba lo cantaba. Ahora sí hay caso.
+
+**De paso, dos cosas menores.** `pintarPanel` llamaba a `cargarMeteoEtapa` con
+`vistaEtapa >= 1`, así que al saltar de una etapa con la sección «tiempo»
+abierta a Retos intentaba pedir el tiempo de `ETAPAS[6]`, que no existe. No
+reventaba de milagro (el contenedor `#meteoEtapa` no está en esa vista y el
+`if` cortaba antes), pero con el equipaje habría sido lo mismo con `ETAPAS[7]`.
+Acotado a `1..6`. Y en el pie del panel el botón de WhatsApp se puso **antes**
+que los discretos: en móvil el botón flotante «Ver mapa» tapa la esquina
+inferior derecha.
+
+**Pruebas.** `probar.js` gana un bloque de Equipaje (marcar, desmarcar,
+contadores por grupo, el texto de WhatsApp, ids únicos, el enlace del índice),
+casos de teclado hasta la vista 8, entrada por `?equipaje=1`, `Equipaje.cargar`
+con localStorage bloqueado y el aporreo de vistas ampliado a las nueve.
+**213 comprobaciones, 0 fallos** (eran 187). `npm run validar`: OK.
+
+Comprobado además en Chromium con Playwright a 414 px y a 1280 px: sin errores
+de JavaScript, la pestaña se marca, los contadores suben y la barra avanza. Lo
+que **no** se ha probado es un móvil de verdad.
+
+`VERSION` de `sw.js` sube a `camino-v17` (se tocó `index.html`). `APP_VERSION`
+se queda en `map-8`: no se tocó el mapa.
+
+Una nota de CLAUDE.md estaba desfasada de antes: decía que `npm test` no cubría
+la portada ni los Retos, cuando `probar.js` los recorre en sus apartados 1 y 5.
+Corregida.
+
+---
+
 ## 2026-07-25 — Navegación flotante y botón de ubicación en el mapa móvil
 
 **Rama:** `fix/mapa-movil-2`

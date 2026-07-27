@@ -403,6 +403,19 @@ h2::after{content:'';flex:1;height:1px;background:#DED8C9}
   font-size:.5rem;background:var(--concha);color:var(--tinta);border-radius:6px;
   padding:0 .25rem;font-weight:700;line-height:1.5}
 
+/* --- Equipaje (reutiliza .sellos / .sello-item para la lista) --- */
+.eq-estado{display:flex;align-items:center;gap:.7rem;background:var(--tinta);
+  color:var(--hueso);border-radius:var(--radio);padding:.7rem .8rem}
+.eq-estado b{font-family:'JetBrains Mono',monospace;font-size:1.5rem;
+  color:var(--concha);line-height:1;flex-shrink:0}
+.eq-estado.ok b{color:#7FBF7F}
+.eq-estado>span{font-size:.71rem;line-height:1.4;color:var(--piedra);flex:1}
+.eq-barra{display:block;height:5px;margin-top:.4rem;background:rgba(237,232,220,.16);
+  border-radius:3px;overflow:hidden}
+.eq-barra i{display:block;height:100%;background:var(--concha);border-radius:3px;
+  transition:width .2s}
+.eq-estado.ok .eq-barra i{background:#7FBF7F}
+
 /* --- Perfil interactivo --- */
 .perfil svg{cursor:crosshair;touch-action:none}
 .perfil .zona-toque{fill:transparent}
@@ -962,6 +975,94 @@ const DECISIONES = [
     wa:'Mesón A Lareira (Palas de Rei): hay que decirles antes del 12 de agosto qué cena cada uno. ¿Vamos apuntando los platos?'
   }
 ];
+
+/* ============================================================
+   EQUIPAJE — qué meter en la mochila
+   Transcripción del checklist de la tita Lucila (PDF «Checklist
+   maleta»). Los textos son los suyos; aquí solo se han separado en
+   items marcables.
+
+   Qué se ha cambiado respecto al papel, y por qué (que quede dicho):
+   - La guía trae TRES apartados: «Ropa», «Calzado» y «Otras cosas».
+     «Otras cosas» se ha partido en dos —«Equipo» y «Botiquín y
+     aseo»— porque de una tacada eran diecinueve líneas y repasarlas
+     en el móvil se hacía largo. Ningún item se ha quitado ni añadido.
+   - Las líneas que juntaban varias cosas con comas se han separado
+     en items sueltos, para poder marcarlos uno a uno: el botiquín
+     («vaselina, apósitos, compeed, antiinflamatorios, gel, tiritas»),
+     «pijama, ropita interior», «crema solar, bálsamo labial»,
+     «tapones, antifaz» y la línea de la bolsa de calcetines con las
+     pinzas de tender.
+   - NO se ha añadido nada que no esté en el papel. Si falta algo
+     (credencial, DNI, cargador), se dice en la web pero no se
+     inventa un item de la guía.
+
+   Campos: `uds` es la cantidad que dice la guía; `nota` es su
+   aclaración. Los `id` se guardan en localStorage, así que
+   cambiarlos borra las marcas de quien ya haya hecho la maleta.
+   ============================================================ */
+const EQUIPAJE = [
+  {
+    id:'ropa', titulo:'Ropa', items:[
+      {id:'ropa-camisetas',  texto:'Camisetas de deporte o camisas para caminar', uds:'2-3'},
+      {id:'ropa-calcetines', texto:'Calcetines sin costura', uds:'2-3 pares', nota:'Marcados'},
+      {id:'ropa-pantalones', texto:'Pantalones que no rocen', uds:'1-2 cortos y uno medio o largo',
+         nota:'Los cortos, más culotes'},
+      {id:'ropa-sudadera',   texto:'Sudadera con cremallera o cortaviento', nota:'Mejor con capucha'},
+      {id:'ropa-banador',    texto:'Bañador'},
+      {id:'ropa-pijama',     texto:'Pijama'},
+      {id:'ropa-interior',   texto:'Ropa interior'},
+      {id:'ropa-tardes',     texto:'Ropa para las tardes', nota:'Incluye rebeca, chaleco o chaquetita'},
+      {id:'ropa-panuelo',    texto:'Pañuelito para el cuello', nota:'Por si hace frío'}
+    ]
+  },
+  {
+    id:'calzado', titulo:'Calzado', items:[
+      {id:'calz-senderismo', texto:'Zapatos de senderismo', nota:'Ya usados'},
+      {id:'calz-chanclas',   texto:'Chanclas de plástico para la ducha'},
+      {id:'calz-deporte',    texto:'Zapatillas de deporte', nota:'Por si acaso'},
+      {id:'calz-sandalias',  texto:'Sandalias para las tardes', nota:'Calzado abierto y plano'},
+      {id:'calz-casa',       texto:'Zapatillas de estar en casa'}
+    ]
+  },
+  {
+    id:'equipo', titulo:'Equipo', de:'Otras cosas', items:[
+      {id:'eq-mochilita',  texto:'Mochilita pequeña', nota:'Para el agua y lo de cada día'},
+      {id:'eq-rinonera',   texto:'Riñonera', nota:'Para el móvil, las gafas de sol, el dinero y demás'},
+      {id:'eq-gorra',      texto:'Gorra o sombrero'},
+      {id:'eq-impermeable',texto:'Impermeable', nota:'De los chinos o del Decathlon'},
+      {id:'eq-tapones',    texto:'Tapones'},
+      {id:'eq-antifaz',    texto:'Antifaz'},
+      {id:'eq-bastones',   texto:'Bastones para caminar'},
+      {id:'eq-cascos',     texto:'Cascos para oír música'},
+      {id:'eq-saco',       texto:'Saco de dormir'},
+      {id:'eq-bolsa',      texto:'Bolsa para meter los calcetines en la lavadora o secadora',
+         nota:'Avisa la tita Lucila: al final no se usa'},
+      {id:'eq-pinzas',     texto:'Pinzas de tender', uds:'2-3', nota:'Aunque suele haber'},
+      {id:'eq-dinero',     texto:'Dinero en efectivo'}
+    ]
+  },
+  {
+    id:'botiquin', titulo:'Botiquín y aseo', de:'Otras cosas', items:[
+      {id:'bot-vaselina', texto:'Vaselina', nota:'Con guantes para ponérnosla'},
+      {id:'bot-aposito',  texto:'Apósitos cuadrados'},
+      {id:'bot-compeed',  texto:'Barrita Compeed'},
+      {id:'bot-antiinf',  texto:'Antiinflamatorios'},
+      {id:'bot-gel',      texto:'Gel hidroalcohólico'},
+      {id:'bot-tiritas',  texto:'Tiritas'},
+      {id:'bot-solar',    texto:'Crema solar'},
+      {id:'bot-labial',   texto:'Bálsamo labial'},
+      {id:'bot-aseo',     texto:'Aseo personal'},
+      {id:'bot-toalla',   texto:'Toalla de microfibra', nota:'Una grande y otra de la cara'},
+      {id:'bot-tarjeta',  texto:'Tarjeta sanitaria'}
+    ]
+  }
+];
+
+/* Cuántas cosas hay en total en la lista. */
+function totalEquipaje(){
+  return EQUIPAJE.reduce(function(n, g){ return n + g.items.length; }, 0);
+}
 
 /* ============================================================
    PERSONAS — quién juega a los Retos
@@ -1717,8 +1818,8 @@ function dibujarDesvios(n, et, color){
 
 function dibujar(v){
   if(!mapa || !mapaListo) return;
-  /* Solo las etapas 1-6 tienen traza propia; portada (-1), índice (0) y
-     retos (7) muestran el conjunto. */
+  /* Solo las etapas 1-6 tienen traza propia; portada (-1), índice (0),
+     retos (7) y equipaje (8) muestran el conjunto. */
   try{ (v >= 1 && v <= 6) ? dibujarEtapa(v) : dibujarIndice(); }
   catch(e){ console.warn('No se ha podido dibujar el mapa:', e.message); }
 }
@@ -1844,8 +1945,8 @@ let kmSlider = 0;
 
 function pintarSubnav(){
   const sn = document.getElementById('subnav');
-  /* Portada, índice y retos no tienen sub-pestañas */
-  if(vistaEtapa <= 0 || vistaEtapa === 7){ sn.style.display='none'; sn.innerHTML=''; return; }
+  /* Portada, índice, retos y equipaje no tienen sub-pestañas */
+  if(vistaEtapa <= 0 || vistaEtapa >= 7){ sn.style.display='none'; sn.innerHTML=''; return; }
   sn.style.display='flex';
   const color = COLORES_ETAPA[vistaEtapa-1];
   const cs = (typeof Sellos!=='undefined' && vistaEtapa>=1)
@@ -2079,6 +2180,8 @@ function panelIndice(){
     + decisionesIndice()
 
     + panelTelefonos()
+
+    + equipajeIndice()
 
     + '<h2>Para cuando no haya cobertura</h2>'
     + '<div class="descarga"><p>Entre Ferreiros y Portomarín, o cruzando la Sierra de Ligonde, '
@@ -2331,11 +2434,14 @@ function pintarPanel(){
   p.innerHTML = vistaEtapa===-1 ? panelPortada()
               : vistaEtapa===0  ? panelIndice()
               : vistaEtapa===7  ? panelRetos()
+              : vistaEtapa===8  ? panelEquipaje()
               : panelEtapa(vistaEtapa);
   p.style.setProperty('--et', (vistaEtapa>=1 && vistaEtapa<=6)
-    ? COLORES_ETAPA[vistaEtapa-1] : '#D8A33C');
+    ? COLORES_ETAPA[vistaEtapa-1] : vistaEtapa===8 ? '#8A6D3B' : '#D8A33C');
   if(vistaEtapa===0) cargarMeteoIndice();
-  else if(vistaEtapa>=1 && seccionActual==='tiempo') cargarMeteoEtapa(vistaEtapa);
+  /* Solo las etapas tienen sección de tiempo. `seccionActual` puede seguir
+     valiendo 'tiempo' al saltar a Retos o Equipaje, y ETAPAS[6] no existe. */
+  else if(vistaEtapa>=1 && vistaEtapa<=6 && seccionActual==='tiempo') cargarMeteoEtapa(vistaEtapa);
 }
 
 /* ============================================================
@@ -2867,8 +2973,8 @@ function compartir(n){
   /* Para una etapa se comparte etapaN.html, la página con las etiquetas Open
      Graph propias (mapa, km, desnivel): así WhatsApp muestra su vista previa
      y no la genérica. Esa página redirige al visor. El índice comparte la raíz. */
-  /* Solo las etapas 1-6 tienen su etapaN.html; portada, índice y retos (7)
-     comparten la raíz. */
+  /* Solo las etapas 1-6 tienen su etapaN.html; portada, índice, retos (7) y
+     equipaje (8) comparten la raíz. */
   const esEtapa = n >= 1 && n <= 6;
   const url = esEtapa ? raiz + 'etapa' + n + '.html' : raiz;
   const et = esEtapa ? ETAPAS[n-1] : null;
@@ -3014,6 +3120,183 @@ function seccionSellos(et, color){
   html += '<div class="sellos-acciones">'
     + '<button class="btn-recargar" onclick="Sellos.copiar()">Copiar todos como texto</button>'
     + '<button class="btn-recargar" onclick="Sellos.borrar()">Borrar marcas</button></div>';
+
+  return html;
+}
+
+/* ============================================================
+   EQUIPAJE — la maleta y la mochila
+   Mismo planteamiento que los sellos: es una lista PERSONAL, se guarda
+   solo en el navegador de cada uno y no se comparte con nadie. Cada
+   Lolita hace su maleta; no tiene sentido que lo que marque una le
+   aparezca marcado a otra.
+   Los datos (los grupos y sus items) están en EQUIPAJE, dentro de
+   datos.js; aquí solo vive el estado de lo que ya está metido.
+   ============================================================ */
+const Equipaje = {
+  CLAVE: 'lolitas2026-equipaje',
+  datos: null,
+
+  cargar: function(){
+    if(this.datos) return this.datos;
+    try{
+      const s = localStorage.getItem(this.CLAVE);
+      this.datos = s ? JSON.parse(s) : {};
+    }catch(e){ this.datos = {}; }
+    return this.datos;
+  },
+
+  guardar: function(){
+    try{ localStorage.setItem(this.CLAVE, JSON.stringify(this.datos)); }
+    catch(e){ /* modo privado o sin espacio: se pierde al cerrar, no es grave */ }
+  },
+
+  marcado: function(id){
+    return !!this.cargar()[id];
+  },
+
+  alternar: function(id){
+    this.cargar();
+    if(this.datos[id]) delete this.datos[id];
+    else this.datos[id] = new Date().toISOString().slice(0,16).replace('T',' ');
+    this.guardar();
+    if(vistaEtapa === 8) pintarPanel();
+    pintarNav();
+  },
+
+  /* Cuántos items de un grupo están metidos. Sin grupo, el total. */
+  cuenta: function(grupo){
+    const d = this.cargar();
+    const grupos = grupo ? [grupo] : EQUIPAJE;
+    let hechos = 0, total = 0;
+    grupos.forEach(function(g){
+      g.items.forEach(function(it){ total++; if(d[it.id]) hechos++; });
+    });
+    return {hechos:hechos, total:total};
+  },
+
+  comoTexto: function(){
+    const d = this.cargar();
+    let t = 'Equipaje del Camino — lista de la tita Lucila\n\n';
+    EQUIPAJE.forEach(function(g){
+      t += g.titulo.toUpperCase() + '\n';
+      g.items.forEach(function(it){
+        t += (d[it.id] ? '  [x] ' : '  [ ] ') + it.texto
+           + (it.uds ? ' (' + it.uds + ')' : '') + '\n';
+      });
+      t += '\n';
+    });
+    const c = this.cuenta();
+    t += 'Metido: ' + c.hechos + ' de ' + c.total + '.\n';
+    return t;
+  },
+
+  copiar: function(){
+    const t = this.comoTexto();
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(t).then(function(){
+        avisar('Lista del equipaje copiada al portapapeles.');
+      }).catch(function(){ avisar('No se ha podido copiar.'); });
+    } else {
+      avisar(t);
+    }
+  },
+
+  borrar: function(){
+    if(!confirm('¿Desmarcar todo el equipaje? No se puede deshacer.')) return;
+    this.datos = {};
+    this.guardar();
+    pintarPanel();
+    pintarNav();
+  }
+};
+
+/* Aviso del equipaje en el índice, para que la lista se encuentre sin
+   tener que descubrir la pestaña. Dice cómo va la maleta de este móvil. */
+function equipajeIndice(){
+  const c = Equipaje.cuenta();
+  const listo = c.hechos === c.total;
+  return '<h2>La maleta</h2>'
+    + '<div class="bloque"><p style="font-size:.78rem">'
+    + (listo
+        ? 'Tienes marcadas las <b>' + c.total + '</b> cosas de la lista de la tita Lucila. '
+        : (c.hechos
+            ? 'Llevas <b>' + c.hechos + ' de ' + c.total + '</b> cosas metidas. '
+            : 'La lista de la tita Lucila trae <b>' + c.total + '</b> cosas. '))
+    + 'Se marca en la pestaña <b>Equipaje</b>, y se guarda solo en este móvil.</p>'
+    + '<button class="btn-recargar" style="margin-top:.5rem" onclick="irA(8)">'
+    + 'Ver la lista del equipaje</button></div>';
+}
+
+/* ============================================================
+   PANEL — EQUIPAJE
+   ============================================================ */
+function panelEquipaje(){
+  const c = Equipaje.cuenta();
+  const listo = c.hechos === c.total;
+  const faltan = c.total - c.hechos;
+  const pct = c.total ? Math.round(c.hechos * 100 / c.total) : 0;
+
+  let html = '<div class="et-cab" style="--et:#8A6D3B">'
+    + '<div class="fecha">Antes de salir</div>'
+    + '<h1>Qué meter en la <em>mochila</em></h1>'
+    + '<div class="metricas">'
+    + '<div class="metrica"><b>' + c.hechos + '</b><span>metidas</span></div>'
+    + '<div class="metrica"><b>' + faltan + '</b><span>por meter</span></div>'
+    + '<div class="metrica"><b>' + c.total + '</b><span>en la lista</span></div>'
+    + '</div></div>';
+
+  html += '<div class="eq-estado' + (listo ? ' ok' : '') + '">'
+    + '<b>' + pct + '%</b>'
+    + '<span>' + (listo
+        ? 'Maleta lista: has marcado las ' + c.total + ' cosas de la lista.'
+        : 'Te quedan ' + faltan + ' cosas por meter.')
+    + '<span class="eq-barra"><i style="width:' + pct + '%"></i></span></span>'
+    + '</div>';
+
+  html += '<div class="bloque" style="margin:.6rem 0"><p style="font-size:.74rem;color:#5A554A">'
+    + 'La lista es la que preparó <b>la tita Lucila</b>. Marca lo que vayas metiendo: '
+    + 'se guarda en este móvil y no lo ve nadie más, igual que los sellos. Cada una hace '
+    + 'su maleta.</p></div>';
+
+  EQUIPAJE.forEach(function(g){
+    const cg = Equipaje.cuenta(g);
+    html += '<h2>' + esc(g.titulo) + '</h2>'
+      + '<div class="reto-marcador"><b>' + cg.hechos + ' de ' + cg.total + '</b>'
+      + '<span>' + (g.de ? 'de «' + esc(g.de) + '» en la guía' : 'en la guía') + '</span></div>'
+      + '<ul class="sellos">' + g.items.map(function(it){
+          const m = Equipaje.marcado(it.id);
+          return '<li><button class="sello-item' + (m ? ' hecho' : '') + '" '
+            + 'onclick="Equipaje.alternar(\'' + it.id + '\')" aria-pressed="' + m + '">'
+            + '<span class="caja">' + (m ? '✓' : '') + '</span>'
+            + '<span class="txt"><b>' + esc(it.texto) + '</b>'
+            + (it.uds ? '<span class="km">' + esc(it.uds) + '</span>' : '')
+            /* El punto separa cantidad y aclaración cuando van las dos:
+               sin él se leían pegadas ("2-3 pares Marcados"). */
+            + (it.nota ? '<span class="hor">' + (it.uds ? '· ' : '')
+                + esc(it.nota) + '</span>' : '')
+            + '</span></button></li>';
+        }).join('') + '</ul>';
+  });
+
+  /* Honestidad con la fuente: lo que hay aquí es lo que hay en su papel,
+     ni una cosa más. Si alguien echa en falta algo, que lo diga en el grupo
+     en vez de que la web se lo invente. */
+  html += '<div class="nota"><b>Esto es la lista de la tita Lucila, tal cual.</b> La guía '
+    + 'trae tres apartados (Ropa, Calzado y Otras cosas); aquí «Otras cosas» se ha partido '
+    + 'en «Equipo» y «Botiquín y aseo» para que sea más corto de repasar, pero no se ha '
+    + 'quitado ni añadido nada. Así que <b>no están</b> la credencial del peregrino, el DNI '
+    + 'ni el cargador del móvil: si crees que faltan, dilo en el grupo y se añaden.</div>';
+
+  /* El botón de WhatsApp va antes que los discretos: en móvil el botón
+     flotante «Ver mapa» tapa la esquina inferior derecha del panel, y ahí
+     conviene que esté lo que menos se pulsa. */
+  html += '<button class="reto-wa" onclick="compartirTexto(Equipaje.comoTexto())">'
+    + 'Mandar mi lista por WhatsApp</button>';
+
+  html += '<div class="sellos-acciones">'
+    + '<button class="btn-recargar" onclick="Equipaje.copiar()">Copiar la lista como texto</button>'
+    + '<button class="btn-recargar" onclick="Equipaje.borrar()">Desmarcar todo</button></div>';
 
   return html;
 }
@@ -3454,7 +3737,19 @@ function pintarNav(){
           + ' ago</span><span class="d">'+esc(e.destino)+'</span></button>';
       }).join('')
     + '<button role="tab" onclick="irA(7)" aria-selected="'+(vistaEtapa===7)
-    + '" style="--et:#D8A33C"><span class="n">Juego</span><span class="d">Retos</span></button>';
+    + '" style="--et:#D8A33C"><span class="n">Juego</span><span class="d">Retos</span></button>'
+    + '<button role="tab" onclick="irA(8)" aria-selected="'+(vistaEtapa===8)
+    + '" style="--et:#8A6D3B;position:relative"><span class="n">Maleta</span>'
+    + '<span class="d">Equipaje</span>' + badgeEquipaje() + '</button>';
+}
+
+/* Contador de lo ya metido en la maleta, en la propia pestaña. Solo aparece
+   cuando hay algo marcado, para no meter ruido a quien no la use. */
+function badgeEquipaje(){
+  if(typeof Equipaje === 'undefined') return '';
+  const c = Equipaje.cuenta();
+  if(!c.hechos) return '';
+  return '<span class="nav-sellos">' + c.hechos + '</span>';
 }
 
 function irA(n, sinHistoria){
@@ -3471,6 +3766,7 @@ function irA(n, sinHistoria){
     try{
       const url = (n>=1 && n<=6) ? location.pathname+'?etapa='+n
                 : n===7          ? location.pathname+'?retos=1'
+                : n===8          ? location.pathname+'?equipaje=1'
                 : location.pathname;
       history.replaceState({etapa:n}, '', url);
     }catch(e){}
@@ -3626,7 +3922,7 @@ function metaSantiago(){
 /* Flechas del teclado para cambiar de etapa */
 document.addEventListener('keydown', function(e){
   if(e.target && e.target.tagName === 'INPUT') return;
-  if(e.key === 'ArrowRight' && vistaEtapa < 7) irA(vistaEtapa+1);
+  if(e.key === 'ArrowRight' && vistaEtapa < 8) irA(vistaEtapa+1);
   else if(e.key === 'ArrowLeft' && vistaEtapa > 0) irA(vistaEtapa-1);
 });
 
@@ -3779,12 +4075,14 @@ document.getElementById('verMapa').onclick = function(){
   mostrarMapa(!document.getElementById('main').classList.contains('mapa'));
 };
 
-/* Con ?etapa=N se entra directo a esa etapa y con ?retos a los retos, saltándose
-   la portada. Sin parámetro válido, lo primero que se ve es la portada (-1). */
+/* Con ?etapa=N se entra directo a esa etapa, con ?retos a los retos y con
+   ?equipaje a la maleta, saltándose la portada. Sin parámetro válido, lo
+   primero que se ve es la portada (-1). */
 const params = new URLSearchParams(location.search);
 const pedida = Number(params.get('etapa'));
 vistaEtapa = (pedida>=1 && pedida<=6) ? pedida
            : params.has('retos')      ? 7
+           : params.has('equipaje')   ? 8
            : -1;
 
 pintarCuenta();
