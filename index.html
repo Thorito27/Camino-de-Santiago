@@ -425,6 +425,60 @@ h2::after{content:'';flex:1;height:1px;background:#DED8C9}
 .perfil .zona-toque{fill:transparent}
 
 /* --- Compartir --- */
+/* --- ¿Cuánto queda? --- */
+#btnQueda{font-family:'JetBrains Mono',monospace;font-size:.63rem;font-weight:600;
+  letter-spacing:.07em;text-transform:uppercase;background:none;
+  border:1px solid rgba(216,163,60,.55);color:var(--concha);
+  padding:.42rem .7rem;border-radius:var(--radio);cursor:pointer;white-space:nowrap;
+  transition:border-color .15s,color .15s,background .15s}
+#btnQueda:hover{border-color:var(--concha);background:rgba(216,163,60,.12);color:var(--hueso)}
+#btnQueda:focus-visible{outline:2px solid var(--concha);outline-offset:2px}
+
+.modal[hidden]{display:none}
+.modal{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;
+  justify-content:center;padding:1rem}
+.modal-fondo{position:absolute;inset:0;background:rgba(10,15,12,.72)}
+.modal-caja{position:relative;background:var(--papel);color:var(--tinta);
+  border-radius:var(--radio);width:min(430px,100%);max-height:88vh;overflow-y:auto;
+  overscroll-behavior:contain;padding:1.15rem 1.15rem 1.3rem;
+  box-shadow:0 14px 40px rgba(0,0,0,.45)}
+.modal-x{position:absolute;top:.35rem;right:.5rem;background:none;border:none;
+  font-size:1.5rem;line-height:1;color:#8B857A;cursor:pointer;padding:.2rem .35rem;
+  border-radius:var(--radio)}
+.modal-x:hover{color:var(--tinta)}
+.modal-x:focus-visible{outline:2px solid var(--musgo);outline-offset:1px}
+
+.q-cab{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--musgo);font-weight:600}
+.q-tit{font-family:'Fraunces',serif;font-weight:600;font-size:1.3rem;line-height:1.15;
+  margin:.15rem 0 .1rem;padding-right:1.4rem}
+.q-por{font-size:.7rem;color:#7C776B;line-height:1.35}
+.q-reloj{background:var(--tinta);color:var(--hueso);border-radius:var(--radio);
+  padding:.75rem .85rem;margin:.8rem 0 .1rem;text-align:center}
+.q-reloj b{display:block;font-family:'JetBrains Mono',monospace;font-size:1.65rem;
+  font-weight:600;color:var(--concha);line-height:1.1;letter-spacing:-.01em}
+.q-reloj.pasado b{color:#7FBF7F;font-size:1.25rem}
+.q-reloj span{display:block;font-size:.63rem;color:var(--piedra);margin-top:.3rem;
+  line-height:1.4}
+.q-datos{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-top:.7rem}
+.q-dato{background:#fff;border:1px solid #E2DCCC;border-radius:var(--radio);
+  padding:.5rem .6rem}
+.q-dato b{display:block;font-family:'JetBrains Mono',monospace;font-size:1.02rem;
+  font-weight:600;line-height:1.15}
+.q-dato span{display:block;font-size:.56rem;letter-spacing:.08em;text-transform:uppercase;
+  color:#7C776B;margin-top:.15rem}
+.q-dato.ancho{grid-column:1 / -1}
+.q-barra{height:6px;background:#E2DCCC;border-radius:3px;overflow:hidden;margin-top:.7rem}
+.q-barra i{display:block;height:100%;background:var(--musgo);border-radius:3px}
+.q-ojo{background:#FCF3F0;border-left:3px solid var(--alerta);border-radius:var(--radio);
+  padding:.5rem .6rem;margin-top:.5rem;font-size:.72rem;line-height:1.4}
+.q-acciones{display:flex;gap:.4rem;margin-top:.9rem;flex-wrap:wrap}
+.q-acciones button{flex:1;min-width:135px}
+@media(max-width:860px){
+  .modal-caja{width:100%;max-height:90vh}
+  .q-dato b{font-size:1.1rem}
+}
+
 #btnComp{background:none;border:1px solid rgba(237,232,220,.3);color:var(--piedra);
   font-family:'JetBrains Mono',monospace;font-size:.63rem;font-weight:600;letter-spacing:.07em;
   text-transform:uppercase;padding:.42rem .7rem;border-radius:var(--radio);cursor:pointer;
@@ -525,6 +579,7 @@ body.offline #sinRed{display:block}
       title="Ir a la portada" style="cursor:pointer"><b>Las Lolitas al Camino</b><span>Sarria → Santiago · agosto 2026</span></div>
     <button id="btnHoy">Hoy</button>
     <button id="btnGeo" onclick="Geo.iniciar()">Dónde estoy</button>
+    <button id="btnQueda" onclick="Queda.abrir()">¿Cuánto queda?</button>
     <button id="btnComp" onclick="compartir(vistaEtapa)">Compartir</button>
     <div class="cuenta" id="cuenta"></div>
   </header>
@@ -554,6 +609,16 @@ body.offline #sinRed{display:block}
   </main>
 </div>
 <button id="verMapa">Ver mapa</button>
+
+<!-- Ventana de "¿Cuánto queda?". Vacía hasta que se abre: la pinta Queda. -->
+<div id="queda" class="modal" hidden>
+  <div class="modal-fondo" onclick="Queda.cerrar()"></div>
+  <div class="modal-caja" role="dialog" aria-modal="true" aria-labelledby="quedaT">
+    <button class="modal-x" id="quedaX" type="button" onclick="Queda.cerrar()"
+      aria-label="Cerrar">&times;</button>
+    <div id="quedaCuerpo"></div>
+  </div>
+</div>
 <script>
 /* Trazas GPX simplificadas. Cada punto: [lon, lat, altitud_m, km_acumulado]
    Origen: seis trazas de Wikiloc.
@@ -1451,7 +1516,12 @@ const Marcha = {
             horas, maxEle, minEle, km:con[con.length-1].km};
   },
   horarios(etapa){
-    const p = this.perfil(etapa.puntos);
+    /* Mismos hitos saneados que la ficha y que "¿Cuánto queda?": si el
+       horario se calculara con los puntos en crudo, la etapa 2 saldría con
+       dos horas y media de más (ver hitosLimpios). */
+    const base = (typeof hitosLimpios === 'function' && etapa.num)
+      ? (hitosLimpios(etapa.num) || etapa.puntos) : etapa.puntos;
+    const p = this.perfil(base);
     if(!p || !etapa.salida) return null;
     const [hh,mm] = etapa.salida.split(':').map(Number);
     let min = hh*60+mm;
@@ -2407,10 +2477,51 @@ function seccionDia(et, color, perfil){
 
 /* Perfil de una etapa: prefiere la traza GPX, con el tiempo calculado
    sobre los hitos (que es donde el modelo Naismith tiene sentido). */
+/* ------------------------------------------------------------
+   Los hitos de una etapa listos para calcular tiempos.
+   NO son `et.puntos` tal cual, y tiene motivo: en los datos hay dos
+   estropicios que hacen mentir a cualquier estimación de marcha.
+
+   1. El punto de destino (`tipo:'fin'`) de CINCO etapas lleva el km de la
+      traza de la etapa SIGUIENTE, donde ese pueblo está casi en el km 0:
+      Portomarín 0, Palas de Rei 0,25, Melide 0,89, Arzúa 0, O Pedrouzo 0.
+      Como `Marcha.tramo` devuelve 0 si la distancia es negativa, el último
+      trozo de la etapa no se contaba: 1,8 km en la 3 y 1,5 en la 4.
+   2. En la etapa 2, «A Brea» tiene km 13,98 cuando por la guía va en el
+      22,2: está mal proyectado sobre la traza. Eso metía un ida y vuelta de
+      nueve kilómetros y daba 10 h de marcha para una etapa de 27,6 km.
+
+   Se descarta todo punto que retroceda (un hito con el km mal puesto no se
+   puede colocar bien adivinando: se quita) y se añade un punto final en el
+   km donde acaba la traza de verdad. Los datos de `datos.js` siguen con el
+   km equivocado; esto los sanea al vuelo, y por eso lo usan tanto la ficha
+   de la etapa como la ventana de «¿Cuánto queda?»: si cada una lo hiciera a
+   su manera, enseñarían tiempos distintos para lo mismo.
+   ------------------------------------------------------------ */
+const _cacheHitos = {};
+function hitosLimpios(n){
+  if(_cacheHitos[n]) return _cacheHitos[n];
+  const et = ETAPAS[n-1];
+  const tz = (typeof TRAZAS !== 'undefined') ? TRAZAS[n] : null;
+  if(!et || !tz) return null;
+  const out = [];
+  et.puntos.forEach(function(p){
+    if(typeof p.ele !== 'number' || typeof p.km !== 'number') return;
+    if(out.length && p.km <= out[out.length-1].km) return;   // retrocede: fuera
+    out.push(p);
+  });
+  if(!out.length) return null;
+  const ult = tz.linea[tz.linea.length-1];
+  if(out[out.length-1].km < tz.km - 0.02)
+    out.push({km:tz.km, ele:ult[2], nombre:et.destino, tipo:'fin'});
+  _cacheHitos[n] = out;
+  return out;
+}
+
 function perfilEtapa(n){
   const et = ETAPAS[n-1];
   const gpx = Marcha.perfilTraza(n);
-  const guia = Marcha.perfil(et.puntos);
+  const guia = Marcha.perfil(hitosLimpios(n) || et.puntos);
   if(!gpx) return guia;
   return {puntos: gpx.puntos, tramos: guia ? guia.tramos : null,
           dPos: gpx.dPos, dNeg: gpx.dNeg,
@@ -2867,6 +2978,272 @@ function siguienteHito(n, km){
   }
   return null;
 }
+
+/* ============================================================
+   ¿CUÁNTO QUEDA?
+   Ventana con lo que falta hasta el final de la etapa: distancia,
+   tiempo de marcha y cuenta atrás hasta la hora de llegada que
+   marca la guía. Elige la etapa sola, por este orden: dónde estás,
+   qué día es, qué tienes abierto y, si nada de eso vale, la 1.
+   ============================================================ */
+
+/* La última hora que aparece en una casilla del timing: '13:30-15:30' da
+   15:30 y '13:30 / 14:30' da 14:30. Interesa el final, no el principio. */
+function ultimaHoraDe(txt){
+  const m = String(txt == null ? '' : txt).match(/\d{1,2}:\d{2}/g);
+  return (m && m.length) ? m[m.length-1] : null;
+}
+
+/* Hora de llegada prevista de una etapa, sacada de su timing en vez de
+   escrita a mano, para que siga a los datos si cambian. Se busca la línea
+   «Llegada a <destino>»; cinco de las seis etapas la tienen. La 2 no, así
+   que cae a la última hora del timing (13:30-15:30 → 15:30), que es su
+   tramo final «Ligonde-Palas de Rei». Ojo: NO vale coger la última línea
+   que diga «Llegada a», porque en la etapa 2 esa es «Llegada a Gonzar» a
+   las 9:30, a mitad de camino. */
+function horaLlegadaEtapa(n){
+  const e = ETAPAS[n-1];
+  if(!e) return null;
+  const t = e.timing || [];
+  const corto = String(e.destino).split(' de ')[0];
+  let hora = null;
+  t.forEach(function(x){
+    const s = x.texto || '';
+    if(/llegada a/i.test(s) && (s.indexOf(e.destino) >= 0 || s.indexOf(corto) >= 0))
+      hora = x.hora;
+  });
+  if(hora === null && t.length) hora = t[t.length-1].hora;
+  return hora === null ? (e.salida || null) : ultimaHoraDe(hora);
+}
+
+/* El instante exacto en que la guía espera que lleguéis al final de la etapa. */
+function metaEtapa(n){
+  const e = ETAPAS[n-1];
+  if(!e) return null;
+  const f = e.fecha.split('-').map(Number);
+  const hm = String(horaLlegadaEtapa(n) || '00:00').split(':').map(Number);
+  return new Date(f[0], f[1]-1, f[2], hm[0] || 0, hm[1] || 0, 0, 0);
+}
+
+const Queda = {
+  _tim: null,
+  _foco: null,
+
+  abierto: function(){
+    const el = document.getElementById('queda');
+    return !!(el && !el.hidden);
+  },
+
+  hitos: function(n){ return hitosLimpios(n); },
+
+  /* ---- Desnivel que queda ----
+     El desnivel NO se saca de los hitos, aunque el tiempo sí. Motivo: la
+     ficha de la etapa enseña el de la traza GPX (+403 / −535 en la 1) y los
+     hitos, que son veinte puntos sueltos, dan +259 / −365. Dos números
+     distintos para lo mismo en dos pantallas seguidas confunden.
+
+     Se cuenta sobre la traza con umbral de 10 m (el ruido del GPS mete
+     subidas y bajadas que no existen) y luego se ANCLA al total publicado en
+     TRAZAS por proporción. Así, en el km 0 sale exactamente lo que dice la
+     ficha, y a mitad de etapa sale la parte proporcional. Hace falta anclar
+     porque los totales de `trazas.js` se calcularon sobre la traza original
+     de 3470 puntos y aquí solo queda la simplificada a 12 m: reproducirlos
+     tal cual no sale (la 1 da −530 en vez de −535). */
+  _desnivelCrudo: function(n, km){
+    const L = TRAZAS[n].linea;
+    let dP = 0, dN = 0, ref = null;
+    for(let i=0;i<L.length;i++){
+      if(L[i][3] < km) continue;
+      if(ref === null){ ref = L[i][2]; continue; }
+      const e = L[i][2];
+      if(e - ref >= 10){ dP += e - ref; ref = e; }
+      else if(ref - e >= 10){ dN += ref - e; ref = e; }
+    }
+    return {dP:dP, dN:dN};
+  },
+  desnivel: function(n, km){
+    const tz = TRAZAS[n];
+    const base = this._desnivelCrudo(n, 0);
+    const resto = km > 0 ? this._desnivelCrudo(n, km) : base;
+    return {
+      dPos: Math.round(tz.dPos * (base.dP > 0 ? resto.dP / base.dP : 0)),
+      dNeg: Math.round(tz.dNeg * (base.dN > 0 ? resto.dN / base.dN : 0))
+    };
+  },
+
+  /* Qué etapa mirar y por qué. El orden importa: dónde estás manda sobre la
+     fecha, y la fecha sobre lo que tengas abierto. */
+  objetivo: function(){
+    const u = (typeof Geo !== 'undefined') ? Geo.ultima : null;
+    if(u && u.etapa >= 1 && u.etapa <= 6 && u.desvio <= 2)
+      return {n:u.etapa, motivo:'Contando desde donde estás ahora mismo.'};
+    const iso = isoHoy();
+    for(let i=0;i<ETAPAS.length;i++)
+      if(ETAPAS[i].fecha === iso)
+        return {n:ETAPAS[i].num, motivo:'La etapa de hoy.'};
+    if(vistaEtapa >= 1 && vistaEtapa <= 6)
+      return {n:vistaEtapa, motivo:'La etapa que tienes abierta.'};
+    return {n:1, motivo:'El Camino no ha empezado todavía, así que te enseño la primera etapa.'};
+  },
+
+  /* Todo lo que hay que saber de una etapa desde el km en el que estés.
+     Sin ubicación se calcula la etapa entera (km 0). */
+  calcular: function(n){
+    const et = ETAPAS[n-1], tz = TRAZAS[n], pts = this.hitos(n);
+    if(!et || !tz || !pts) return null;
+
+    const u = (typeof Geo !== 'undefined') ? Geo.ultima : null;
+    const situado = !!(u && u.etapa === n);
+    const km = situado ? Math.min(Math.max(u.km, 0), tz.km) : 0;
+
+    /* El tiempo sí sale de los hitos: es el mismo modelo (Naismith-Langmuir
+       sobre los puntos de la guía) que usa el resto de la web para decir
+       cuánto se tarda, y conviene que no discrepen. */
+    let horas = 0;
+    for(let i=1;i<pts.length;i++){
+      const a = pts[i-1], b = pts[i];
+      if(b.km <= km) continue;
+      const largo = b.km - a.km;
+      const desde = Math.max(a.km, km);
+      const d = b.km - desde;
+      const dh = largo > 0 ? (b.ele - a.ele) * (d / largo) : 0;
+      horas += Marcha.tramo(d, dh);
+    }
+    const dn = this.desnivel(n, km);
+
+    let sig = null;
+    for(let i=0;i<pts.length;i++){
+      if(pts[i].km > km + 0.05 && pts[i].tipo !== 'paso' && pts[i].nombre){ sig = pts[i]; break; }
+    }
+
+    return {
+      n:n, et:et, situado:situado, desvio: situado ? u.desvio : null,
+      km:km, kmTotal:tz.km, kmQuedan:Math.max(0, tz.km - km),
+      pct: tz.km > 0 ? Math.min(100, Math.round(km * 100 / tz.km)) : 0,
+      horas:horas, dPos:dn.dPos, dNeg:dn.dNeg,
+      sig:sig, meta:metaEtapa(n), horaGuia:horaLlegadaEtapa(n)
+    };
+  },
+
+  abrir: function(){
+    const el = document.getElementById('queda');
+    if(!el) return;
+    this._foco = document.activeElement;
+    el.hidden = false;
+    this.pintar();
+    const x = document.getElementById('quedaX');
+    if(x) try{ x.focus(); }catch(e){}
+    /* Cada segundo: la cuenta atrás baja de minuto y, si estás caminando, la
+       hora de llegada estimada se mueve contigo. */
+    clearInterval(this._tim);
+    this._tim = setInterval(this.pintar.bind(this), 1000);
+  },
+
+  cerrar: function(){
+    const el = document.getElementById('queda');
+    if(!el) return;
+    el.hidden = true;
+    clearInterval(this._tim);
+    this._tim = null;
+    if(this._foco) try{ this._foco.focus(); }catch(e){}
+    this._foco = null;
+  },
+
+  /* La cuenta atrás en palabras. Con más de un día se enseñan días; con menos
+     de una hora, también los segundos, que es cuando entretiene mirarlo. */
+  cuentaAtras: function(ms){
+    const s = Math.floor(ms / 1000);
+    const d = Math.floor(s / 86400);
+    const h = Math.floor((s % 86400) / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const seg = s % 60;
+    if(d > 0) return d + (d === 1 ? ' día ' : ' días ') + h + ' h ' + String(m).padStart(2,'0') + ' min';
+    if(h > 0) return h + ' h ' + String(m).padStart(2,'0') + ' min';
+    return m + ' min ' + String(seg).padStart(2,'0') + ' s';
+  },
+
+  pintar: function(){
+    const cuerpo = document.getElementById('quedaCuerpo');
+    if(!cuerpo) return;
+    const obj = this.objetivo();
+    const c = this.calcular(obj.n);
+    if(!c){
+      cuerpo.innerHTML = '<p class="q-tit" id="quedaT">No hay datos de esa etapa</p>';
+      return;
+    }
+    const et = c.et;
+    const ahora = new Date();
+
+    let html = '<div class="q-cab">Etapa ' + c.n + ' · ' + esc(et.diaSemana) + ' '
+      + et.fecha.slice(8) + ' de agosto</div>'
+      + '<p class="q-tit" id="quedaT">Hasta <em>' + esc(et.destino) + '</em></p>'
+      + '<p class="q-por">' + esc(obj.motivo) + '</p>';
+
+    /* --- El temporizador --- */
+    const ms = c.meta ? (c.meta - ahora) : null;
+    if(ms === null){
+      html += '<div class="q-reloj"><b>—</b><span>Sin hora de llegada en la guía</span></div>';
+    } else if(ms > 0){
+      html += '<div class="q-reloj"><b>' + this.cuentaAtras(ms) + '</b>'
+        + '<span>para la llegada prevista a ' + esc(et.destino) + ', '
+        + 'las ' + esc(c.horaGuia) + ' del ' + esc(et.diaSemana) + ' '
+        + et.fecha.slice(8) + '</span></div>';
+    } else {
+      html += '<div class="q-reloj pasado"><b>La hora prevista ya ha pasado</b>'
+        + '<span>La guía daba las ' + esc(c.horaGuia) + ' para llegar a '
+        + esc(et.destino) + '</span></div>';
+    }
+
+    /* --- Lo que falta --- */
+    html += '<div class="q-datos">'
+      + '<div class="q-dato"><b>' + c.kmQuedan.toFixed(1) + ' km</b><span>'
+      + (c.situado ? 'te quedan' : 'tiene la etapa') + '</span></div>'
+      + '<div class="q-dato"><b>' + Marcha.formato(c.horas) + '</b><span>'
+      + (c.situado ? 'de marcha por delante' : 'de marcha en total') + '</span></div>'
+      + '<div class="q-dato"><b>+' + c.dPos + ' m</b><span>subida que queda</span></div>'
+      + '<div class="q-dato"><b>−' + c.dNeg + ' m</b><span>bajada que queda</span></div>';
+
+    if(c.situado){
+      const llegada = new Date(ahora.getTime() + c.horas * 3600000);
+      const hh = String(llegada.getHours()).padStart(2,'0') + ':'
+               + String(llegada.getMinutes()).padStart(2,'0');
+      html += '<div class="q-dato ancho"><b>' + hh + '</b>'
+        + '<span>llegarías a esa hora si sales ya y mantienes el ritmo</span></div>';
+    }
+    html += '</div>';
+
+    if(c.situado){
+      html += '<div class="q-barra"><i style="width:' + c.pct + '%"></i></div>'
+        + '<p class="q-por" style="margin-top:.35rem">Llevas ' + c.km.toFixed(1)
+        + ' de ' + c.kmTotal.toFixed(1) + ' km (' + c.pct + ' %).'
+        + (c.sig ? ' Siguiente: <b>' + esc(c.sig.nombre) + '</b>, a '
+            + (c.sig.km - c.km).toFixed(1) + ' km.' : '')
+        + '</p>';
+      /* Aquí NO vale la clase `nota roja`: su ::before mete un "Sin verificar ·"
+         que no pinta nada en este aviso. */
+      if(c.desvio > 0.25)
+        html += '<div class="q-ojo">Estás a ' + Math.round(c.desvio*1000)
+          + ' m de la traza, así que esto es orientativo. ¿Te has salido del camino?</div>';
+    } else {
+      html += '<div class="nota" style="margin-top:.7rem">Estos son los números de la '
+        + 'etapa entera, de ' + esc(et.origen) + ' a ' + esc(et.destino) + '. Para que '
+        + 'cuente desde donde estés, pulsa <b>Dónde estoy</b> y vuelve a abrir esto.</div>';
+    }
+
+    html += '<div class="nota" style="margin-top:.5rem">El tiempo de marcha es una '
+      + 'estimación (Naismith con corrección Langmuir) y <b>no cuenta las paradas</b>. '
+      + 'La hora de llegada es la que puso la tita Lucila en su guía.</div>';
+
+    html += '<div class="q-acciones">';
+    if(!c.situado)
+      html += '<button class="btn-recargar" onclick="Geo.iniciar()">Dónde estoy</button>';
+    html += '<button class="btn-recargar" onclick="Queda.cerrar();irA(' + c.n + ')">'
+      + 'Ver la etapa ' + c.n + '</button>'
+      + '<button class="btn-recargar" onclick="Queda.cerrar()">Cerrar</button></div>';
+
+    cuerpo.innerHTML = html;
+  }
+};
 
 /* ============================================================
    SELLOS
@@ -3936,13 +4313,12 @@ function pintarCuenta(){
 /* Hora de llegada a Santiago segun el horario de la tita Lucila. Se busca en
    el timing de la ultima etapa en vez de escribirla a mano, para que siga a
    los datos si cambian. */
+/* Es la llegada de la última etapa, ni más ni menos. Se delega en
+   `horaLlegadaEtapa` para no tener dos maneras de calcular lo mismo, que es
+   como acaban discrepando. Da 13:30, igual que la versión que había antes;
+   hay una prueba que lo fija. */
 function horaLlegadaSantiago(){
-  const e = ETAPAS[ETAPAS.length-1];
-  let hora = e.salida || '00:00';
-  (e.timing || []).forEach(function(t){
-    if(/Llegada a Santiago/i.test(t.texto || '')) hora = t.hora;
-  });
-  return String(hora).split('-')[0].trim();
+  return horaLlegadaEtapa(ETAPAS.length) || ETAPAS[ETAPAS.length-1].salida || '00:00';
 }
 
 /* Instante exacto al que apunta la cuenta atras. */
@@ -3956,6 +4332,12 @@ function metaSantiago(){
 /* Flechas del teclado para cambiar de etapa */
 document.addEventListener('keydown', function(e){
   if(e.target && e.target.tagName === 'INPUT') return;
+  /* Con la ventana de "¿Cuánto queda?" abierta, Esc la cierra y las flechas
+     NO cambian de etapa: se estaría navegando por detrás de un diálogo. */
+  if(typeof Queda !== 'undefined' && Queda.abierto()){
+    if(e.key === 'Escape') Queda.cerrar();
+    return;
+  }
   if(e.key === 'ArrowRight' && vistaEtapa < 8) irA(vistaEtapa+1);
   else if(e.key === 'ArrowLeft' && vistaEtapa > 0) irA(vistaEtapa-1);
 });

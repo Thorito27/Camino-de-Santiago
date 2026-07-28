@@ -85,6 +85,14 @@ sol y tarjeta bancaria): va aparte y marcado, para no atribuirle nada que no
 escribiera. Se marca en el móvil de cada una y no se comparte con nadie, igual
 que los sellos. Se llega también con `?equipaje=1`.
 
+**¿Cuánto queda?** Botón de la cabecera que abre una ventana con lo que falta
+hasta el final de la etapa: kilómetros, subida y bajada pendientes, tiempo de
+marcha estimado y una cuenta atrás hasta la hora de llegada que marca la guía.
+Elige la etapa sola por este orden: **dónde estás** (si la ubicación está
+activa y sobre la traza) → **la etapa de hoy** → **la que tengas abierta** →
+**la primera**. Con ubicación cuenta desde tu kilómetro y añade a qué hora
+llegarías al ritmo estimado; sin ella enseña la etapa entera y ofrece activarla.
+
 **En el mapa y la cabecera.** Botón «Hoy» que salta a la etapa del día,
 «Dónde estoy» que sitúa al peregrino sobre la traza, cuenta atrás en horas y
 minutos hasta la llegada a Santiago, botón 3D y compartir.
@@ -115,6 +123,16 @@ No hace falta reevaluarlas:
   pierden no se pierde nada del viaje. Todo lo demás vive en memoria o en el
   propio HTML. **No hay servidor ni sincronización**: el ranking de los retos
   se lleva a mano, pegando mensajes en el chat de WhatsApp.
+- **Los tiempos de marcha se calculan con `hitosLimpios(n)`, no con
+  `et.puntos`.** Hay dos kilómetros mal puestos en los datos: el punto de
+  destino de cinco etapas lleva el km de la traza de la etapa siguiente
+  (Portomarín 0, Palas de Rei 0,25, Melide 0,89, Arzúa 0, O Pedrouzo 0), y en
+  la etapa 2 «A Brea» está en el km 13,98 cuando va en el 22,2. El primero
+  dejaba sin contar hasta 1,8 km de etapa; el segundo inflaba la etapa 2 a
+  **10 h** de marcha. `hitosLimpios` descarta los puntos que retroceden y
+  añade un punto final en el km real de la traza. Lo usan `perfilEtapa`,
+  `Marcha.horarios` y `Queda`, para que todos digan lo mismo. **Los datos
+  siguen con el km equivocado**: arreglarlos de raíz está pendiente.
 - **`history.replaceState` va dentro de try/catch.** Con protocolo `file://`
   algunos navegadores lo rechazan y sin la protección se rompe la navegación
   entera.
@@ -293,6 +311,12 @@ Ideas que quedaron sobre la mesa:
 - Selector de tamaño de letra, más allá del aumento que ya hay en móvil.
 
 Ya hechas:
+
+- **«¿Cuánto queda?»** (`Queda`, botón `#btnQueda`): distancia, desnivel y
+  tiempo hasta el final de la etapa, con cuenta atrás hasta la hora de llegada
+  de la guía. Al construirlo salieron **dos km mal puestos en `datos.js`** que
+  hacían mentir a las estimaciones de marcha; se sanean al vuelo con
+  `hitosLimpios(n)` (ver abajo).
 
 - **Equipaje** (`vistaEtapa = 8`, `panelEquipaje`): checklist de la maleta a
   partir del PDF «Checklist maleta» de la tita Lucila, en la constante

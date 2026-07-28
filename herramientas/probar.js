@@ -261,6 +261,136 @@ console.log('5 bis. Equipaje');
   s.dom.window.close();
 }
 
+/* ---------- 5 ter. ¿Cuánto queda? ---------- */
+console.log('5 ter. ¿Cuánto queda?');
+{
+  const s = abrir();
+  const cuerpo = () => s.d.getElementById('quedaCuerpo').innerHTML;
+
+  comprobar('el botón está en la cabecera', !!s.d.getElementById('btnQueda'));
+  comprobar('la ventana empieza cerrada', s.d.getElementById('queda').hidden === true);
+  comprobar('cerrada, no hay temporizador vivo', s.w.eval('Queda._tim') === null);
+
+  /* --- Hora de llegada de cada etapa, sacada del timing --- */
+  const esperadas = {1:'15:00', 2:'15:30', 3:'14:30', 4:'14:00', 5:'14:45', 6:'13:30'};
+  for(let n=1;n<=6;n++){
+    comprobar(`etapa ${n}: llegada prevista ${esperadas[n]}`,
+      s.w.eval(`horaLlegadaEtapa(${n})`) === esperadas[n]);
+  }
+  /* La cuenta atrás de la cabecera no puede cambiar al refactorizarla */
+  comprobar('la llegada a Santiago sigue siendo 13:30',
+    s.w.eval('horaLlegadaSantiago()') === '13:30');
+  comprobar('la etapa 2 NO coge «Llegada a Gonzar» (9:30)',
+    s.w.eval('horaLlegadaEtapa(2)') !== '9:30');
+
+  /* --- Los hitos saneados: ni retrocesos ni final corto --- */
+  for(let n=1;n<=6;n++){
+    const pts = s.w.eval(`Queda.hitos(${n})`);
+    const kmTraza = s.w.eval(`TRAZAS[${n}].km`);
+    let sube = true;
+    for(let i=1;i<pts.length;i++) if(pts[i].km <= pts[i-1].km) sube = false;
+    comprobar(`etapa ${n}: los hitos van siempre hacia delante`, sube);
+    comprobar(`etapa ${n}: el último hito llega al final de la traza`,
+      Math.abs(pts[pts.length-1].km - kmTraza) < 0.03);
+  }
+  /* Los dos estropicios concretos que motivan el saneado */
+  comprobar('la etapa 2 descarta «A Brea» (km 13,98 cuando va en el 22)',
+    s.w.eval("Queda.hitos(2).every(p=>p.nombre!=='A Brea')"));
+  comprobar('el destino con km 0 no se cuela al principio',
+    s.w.eval('Queda.hitos(1)[0].nombre') === 'Sarria');
+
+  /* --- Sin ubicación: la etapa entera --- */
+  s.w.irA(0);
+  const c1 = s.w.eval('Queda.calcular(1)');
+  comprobar('sin ubicación calcula desde el km 0', c1.km === 0 && c1.situado === false);
+  comprobar('km que quedan = etapa entera',
+    Math.abs(c1.kmQuedan - s.w.eval('TRAZAS[1].km')) < 0.01);
+  comprobar('el tiempo de marcha sale positivo y razonable', c1.horas > 3 && c1.horas < 9);
+  comprobar('hay desnivel de subida y de bajada', c1.dPos > 0 && c1.dNeg > 0);
+  /* En el km 0 el desnivel tiene que ser EXACTAMENTE el de la ficha de la
+     etapa; si no, la web se contradice de una pantalla a la siguiente. */
+  for(let n=1;n<=6;n++){
+    const c = s.w.eval(`Queda.calcular(${n})`);
+    comprobar(`etapa ${n}: el desnivel entero coincide con el de la ficha`,
+      c.dPos === s.w.eval(`TRAZAS[${n}].dPos`) && c.dNeg === s.w.eval(`TRAZAS[${n}].dNeg`));
+  }
+  comprobar('la etapa 2 ya no da las 10 h del dato roto',
+    s.w.eval('Queda.calcular(2).horas') < 9);
+
+  /* La ficha de la etapa y esta ventana tienen que decir EXACTAMENTE el mismo
+     tiempo de marcha. Se vieron 3 h 31 min en la ficha y 4 h 03 min en la
+     ventana, en la misma pantalla, por los hitos con el km mal puesto. */
+  for(let n=1;n<=6;n++){
+    const dif = Math.abs(s.w.eval(`perfilEtapa(${n}).horas`) - s.w.eval(`Queda.calcular(${n}).horas`));
+    comprobar(`etapa ${n}: la ficha y la ventana dan la misma marcha`, dif < 1/60);
+  }
+  comprobar('la etapa 2 ya no da 10 h en la ficha', s.w.eval('perfilEtapa(2).horas') < 9);
+
+  /* --- Qué etapa elige --- */
+  comprobar('fuera del viaje y sin etapa abierta, elige la 1',
+    s.w.eval('Queda.objetivo().n') === 1);
+  s.w.irA(4);
+  comprobar('con una etapa abierta, elige esa', s.w.eval('Queda.objetivo().n') === 4);
+  s.w.irA(8);
+  comprobar('en el equipaje vuelve a la etapa 1', s.w.eval('Queda.objetivo().n') === 1);
+
+  /* La ubicación manda sobre todo lo demás */
+  s.w.eval("Geo.ultima={lat:42.79,lon:-7.5,precision:10,km:10,desvio:0.02,ele:500,etapa:1}");
+  comprobar('con ubicación, manda la etapa donde estás', s.w.eval('Queda.objetivo().n') === 1);
+  const c2 = s.w.eval('Queda.calcular(1)');
+  comprobar('situado, cuenta desde tu km', c2.situado === true && c2.km === 10);
+  comprobar('quedan menos km que la etapa entera', c2.kmQuedan < c1.kmQuedan);
+  comprobar('y menos tiempo de marcha', c2.horas < c1.horas);
+  comprobar('el porcentaje cuadra', c2.pct === Math.round(10*100/c2.kmTotal));
+  comprobar('propone un siguiente hito por delante', !!c2.sig && c2.sig.km > 10);
+  comprobar('a mitad de etapa queda menos desnivel que entera',
+    c2.dPos < c1.dPos && c2.dNeg < c1.dNeg);
+
+  /* --- Abrir y cerrar --- */
+  s.w.eval('Queda.abrir()');
+  comprobar('al abrir se muestra', s.d.getElementById('queda').hidden === false);
+  comprobar('pinta contenido', cuerpo().length > 500);
+  comprobar('sale el destino de la etapa', cuerpo().indexOf('Portomarín') >= 0);
+  comprobar('sale la hora de llegada de la guía', cuerpo().indexOf('15:00') >= 0);
+  comprobar('sale el temporizador', cuerpo().indexOf('q-reloj') >= 0);
+  comprobar('avisa de que no cuenta las paradas', cuerpo().indexOf('no cuenta las paradas') >= 0);
+  comprobar('abierta, el temporizador está vivo', s.w.eval('Queda._tim') !== null);
+
+  /* Con el diálogo abierto las flechas no deben mover la etapa */
+  const antes = s.w.eval('vistaEtapa');
+  s.d.dispatchEvent(new s.w.KeyboardEvent('keydown', {key:'ArrowRight', bubbles:true}));
+  comprobar('las flechas no navegan por detrás del diálogo',
+    s.w.eval('vistaEtapa') === antes);
+  s.d.dispatchEvent(new s.w.KeyboardEvent('keydown', {key:'Escape', bubbles:true}));
+  comprobar('Esc cierra', s.d.getElementById('queda').hidden === true);
+  comprobar('al cerrar se para el temporizador', s.w.eval('Queda._tim') === null);
+
+  /* --- La cuenta atrás en palabras --- */
+  comprobar('más de un día enseña días',
+    /^2 días 3 h 04 min$/.test(s.w.eval('Queda.cuentaAtras(2*86400000+3*3600000+4*60000)')));
+  comprobar('un solo día va en singular',
+    s.w.eval('Queda.cuentaAtras(86400000+60000)').indexOf('1 día ') === 0);
+  comprobar('menos de un día, sin días',
+    s.w.eval('Queda.cuentaAtras(5*3600000+9*60000)') === '5 h 09 min');
+  comprobar('menos de una hora enseña segundos',
+    s.w.eval('Queda.cuentaAtras(9*60000+7000)') === '9 min 07 s');
+
+  /* --- La hora prevista ya pasada --- */
+  const p = abrir();
+  p.w.eval("Queda.calcular=function(){return {n:1,et:ETAPAS[0],situado:false,desvio:null,"
+    + "km:0,kmTotal:23.51,kmQuedan:23.51,pct:0,horas:5,dPos:400,dNeg:530,sig:null,"
+    + "meta:new Date(2020,0,1),horaGuia:'15:00'}}");
+  p.w.eval('Queda.abrir()');
+  comprobar('si la hora ya pasó, lo dice',
+    p.d.getElementById('quedaCuerpo').innerHTML.indexOf('ya ha pasado') >= 0);
+  p.w.eval('Queda.cerrar()');
+  p.dom.window.close();
+
+  comprobar('¿cuánto queda? sin errores', s.errores.length === 0);
+  if(s.errores.length) s.errores.slice(0,3).forEach(e => console.error('   ' + e));
+  s.dom.window.close();
+}
+
 /* ---------- 6. Flechas del teclado ---------- */
 console.log('6. Flechas del teclado');
 {

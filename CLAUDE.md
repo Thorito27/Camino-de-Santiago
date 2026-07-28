@@ -101,10 +101,10 @@ funciona publicado en Pages, no abriendo el archivo local.
 
 **Hay DOS versiones que subir, y no son lo mismo.**
 
-- **`VERSION` en `sw.js`** (ahora `camino-v14`): súbela **siempre que cambies
+- **`VERSION` en `sw.js`** (ahora `camino-v18`): súbela **siempre que cambies
   `index.html`**. Nombra los cachés; si no la subes, los móviles que ya tengan
   la web guardada pueden seguir con la vieja.
-- **`APP_VERSION` en `index.html`** (ahora `map-7`): súbela **al tocar el
+- **`APP_VERSION` en `index.html`** (ahora `map-8`): súbela **al tocar el
   mapa**. No afecta al caché: es la etiqueta que enseña el diagnóstico `?debug`
   para saber, desde el propio móvil y sin Mac, qué versión ha cargado de
   verdad. Sirvió para descubrir que el problema del mapa era caché y no código.
@@ -206,6 +206,16 @@ El orden importa: `TRAZAS` antes que `ETAPAS`, y ambos antes que la lógica.
   El ranking **no es automático**: se comparte por WhatsApp con
   `compartirTexto()`, que usa el mismo mecanismo que `compartir()`.
 
+- **`Queda`** — la ventana de «¿Cuánto queda?» (botón `#btnQueda` de la
+  cabecera). Distancia, desnivel y tiempo hasta el final de la etapa, más una
+  cuenta atrás hasta la hora de llegada de la guía. `objetivo()` elige etapa
+  por este orden: **dónde estás** (si `Geo.ultima` está a menos de 2 km de la
+  traza) → **la etapa de hoy** → **la que tengas abierta** → **la 1**.
+  El tiempo sale de los hitos (mismo Naismith que el resto); el **desnivel sale
+  de la traza y se ancla por proporción a `TRAZAS[n].dPos/dNeg`**, para que en
+  el km 0 diga exactamente lo mismo que la ficha de la etapa. Con el diálogo
+  abierto, las flechas del teclado NO navegan y `Esc` cierra.
+
 - **`Capa`** — controles del mapa. Ya NO alterna capas (hubo una topográfica,
   se retiró): solo guarda si la vista es 3D, en `lolitas2026-3d`. `aplicar3D()`
   pone pitch 0 o 60.
@@ -232,6 +242,22 @@ El orden importa: `TRAZAS` antes que `ETAPAS`, y ambos antes que la lógica.
 | `lolitas2026-persona` | quién juega en este móvil |
 | `lolitas2026-3d` | si el mapa está en vista 3D |
 | `lolitas2026-equipaje` | qué está ya metido en la maleta |
+
+**`hitosLimpios(n)` es obligatorio para calcular tiempos, no `et.puntos`.**
+Hay dos km mal puestos en los datos y los dos hacen mentir a Naismith:
+
+1. El punto `tipo:'fin'` de **cinco** etapas lleva el km de la traza de la
+   etapa SIGUIENTE (Portomarín 0, Palas de Rei 0,25, Melide 0,89, Arzúa 0,
+   O Pedrouzo 0). Como `Marcha.tramo` devuelve 0 con distancia negativa, el
+   último trozo no se contaba: 1,8 km en la 3.
+2. En la etapa 2, **«A Brea» tiene km 13,98 cuando va en el 22,2**. Eso metía
+   un ida y vuelta de nueve kilómetros: la etapa 2 daba **10 h** de marcha.
+
+`hitosLimpios` descarta los puntos que retroceden y añade un punto final en el
+km real de la traza. Lo usan `perfilEtapa`, `Marcha.horarios` y `Queda`.
+**Si calculas tiempos por tu cuenta con `et.puntos`, saldrán mal**, y además
+discreparán de lo que enseña la ficha. Los datos siguen con el km equivocado
+en `datos.js`: arreglarlos de raíz está pendiente.
 - **`Marcha.coordEnKm(puntos, km, n)`** — interpola sobre `TRAZAS[n].linea`,
   NO sobre los hitos. Pásale siempre el número de etapa; sin él cae al respaldo
   por hitos, que corta campo a través.
