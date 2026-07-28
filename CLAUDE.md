@@ -126,13 +126,25 @@ archivo se recorre hacia delante y se va consumiendo, así que cada fila solo
 escribe en la coincidencia que le toca. **Si tocas esa herramienta, no vuelvas
 a buscar por nombre sobre el archivo entero.**
 
+**`respondWith` NUNCA puede resolverse con `undefined`.** Si el service worker
+responde a una navegación con `undefined`, el navegador da `ERR_FAILED` y en el
+móvil eso se ve como una **pantalla en blanco**: parece que la web esté rota
+cuando lo único que pasa es que no hay cobertura. Pasaba en el respaldo sin red
+(`caches.match('./index.html')` devuelve `undefined` si no está guardada), y se
+volvía probable justo al **subir de `VERSION`**, porque al activarse se borran
+las cachés viejas y, si la instalación no logró guardar la página, el caché
+nuevo queda vacío. Ahora hay `paginaSinRed()`, que devuelve una página de
+verdad con un botón de reintentar, y `activate` reintenta guardar los
+`ESENCIALES` tras la purga. Si tocas el `fetch` del service worker, comprueba
+que todas las ramas devuelven una `Response`.
+
 **El service worker no puede ir dentro del HTML.** El navegador exige un
 `.js` servido desde el mismo origen. Por eso `sw.js` va suelto. Y solo
 funciona publicado en Pages, no abriendo el archivo local.
 
 **Hay DOS versiones que subir, y no son lo mismo.**
 
-- **`VERSION` en `sw.js`** (ahora `camino-v19`): súbela **siempre que cambies
+- **`VERSION` en `sw.js`** (ahora `camino-v20`): súbela **siempre que cambies
   `index.html`**. Nombra los cachés; si no la subes, los móviles que ya tengan
   la web guardada pueden seguir con la vieja.
 - **`APP_VERSION` en `index.html`** (ahora `map-9`): súbela **al tocar el
