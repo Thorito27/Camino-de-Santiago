@@ -93,6 +93,204 @@ en modo avión. Es justo la primera fila de la tabla.
 
 ---
 
+## 2026-07-28 — Arreglados los once puntos mal puestos, y la herramienta que los rompió
+
+Continuación de la entrada de abajo. Ahí se saneaban los km al vuelo con
+`hitosLimpios` y quedaba pendiente arreglarlos de raíz. Ya está hecho, y
+apareció **la causa**, que era mejor noticia que el síntoma.
+
+### La causa: nombres repetidos
+
+**Seis puntos se llaman igual en dos etapas**, porque el destino de una es el
+origen de la siguiente: Portomarín (1 y 2), Palas de Rei (2 y 3), Melide (3 y
+4), Arzúa (4 y 5), O Pedrouzo (5 y 6) y **A Brea (2 y 5, que son dos pueblos
+distintos con el mismo nombre)**.
+
+`herramientas/ajustar-puntos.js` localizaba cada punto con
+`src.match('{nombre:"…"')` y escribía con `src.replace(...)`. **Las dos cosas
+van a la primera coincidencia del archivo entero.** Así que, en cada par, la
+fila de la segunda etapa machacaba la de la primera:
+
+- El Portomarín de la etapa 1 se quedó con el vértice km 0 de la traza de la
+  **etapa 2**. Igual con Palas de Rei, Melide, Arzúa y O Pedrouzo.
+- «A Brea» de la etapa 2 se quedó con las coordenadas de la «A Brea» de la
+  **etapa 5**, a 38 km. Su propia herramienta lo cantaba: el aviso de «se
+  movería más de 500 m» decía **36.069 m** para ese punto.
+
+Es decir: el fallo no estaba en los datos, estaba en el script que los
+escribió, y llevaba ahí desde el commit `8e42823`.
+
+### El arreglo, en tres pasos
+
+1. **La herramienta.** Ahora el archivo se recorre **hacia delante y se va
+   consumiendo**: cada fila solo puede escribir en la primera coincidencia que
+   quede por delante. Como `filas` se construye en el mismo orden en que están
+   los puntos en el archivo, cada una cae en su línea. Si una fila no se
+   encuentra, no consume nada y se avisa por pantalla en vez de callar.
+   De paso, `desviacion_m` ahora se actualiza si ya existía; antes solo se
+   añadía cuando faltaba y al reejecutar quedaba el valor viejo.
+2. **Las seis filas machacadas** se restauraron con sus coordenadas de antes
+   del commit que las rompió, sacadas del histórico de git (`git show
+   8e42823^:datos.js`), no inventadas ni deducidas.
+3. **Reproyección** con `node herramientas/ajustar-puntos.js --aplicar`. Ya no
+   salta ningún aviso: el punto que más se mueve son 240 m (Arzúa), frente a
+   los 36 km de antes.
+
+### Qué ha cambiado en los datos
+
+**Once puntos**, exactamente los de nombre repetido. Ni uno más:
+
+| Etapa | Punto | km antes | km ahora | Se mueve |
+|---|---|---|---|---|
+| 1 | Portomarín | 0 | 23,46 | 98 m |
+| 2 | Portomarín | 0 | 0 | 109 m |
+| 2 | **A Brea** | **13,98** | **25,15** | **38,2 km** |
+| 2 | Palas de Rei | 0,25 | 27,52 | 14 m |
+| 3 | Palas de Rei | 0,25 | 0,25 | 21 m |
+| 3 | Melide | 0,89 | 15,63 | 682 m |
+| 4 | Melide | 0,89 | 0,89 | 187 m |
+| 4 | Arzúa | 0 | 14,73 | 368 m |
+| 5 | A Brea | 13,98 | 13,98 | 4 m |
+| 5 | O Pedrouzo | 0 | 19,30 | 580 m |
+| 6 | O Pedrouzo | 0 | 0 | 11 m |
+
+Comprobado además: **ningún `kmGuia` se ha tocado** (es el dato de la tita
+Lucila) y **ningún punto `fueraDeRuta` se ha movido**.
+
+Esto no era solo un número: en el mapa, el marcador de Portomarín de la etapa 1
+se dibujaba donde arranca la etapa 2, y el de «A Brea» de la etapa 2 caía en
+mitad de la etapa 5. Y en la pestaña Ruta de la etapa 2, A Brea aparecía en el
+km 13,98 entre medias, con Palas de Rei listado en el 0,25. Ahora la lista va
+en orden: Os Valos 23,51 → **A Brea 25,15** → Avenostre 26,47 → Palas de Rei
+27,52.
+
+### Qué NO ha cambiado
+
+Los tiempos de marcha que se ven en pantalla **son los mismos que ya daba la
+entrada anterior** (31 h 26 min en total), porque `hitosLimpios` ya los estaba
+corrigiendo al vuelo. Lo que cambia es que ahora **los datos son correctos por
+sí solos**: `Marcha.perfil(ETAPAS[1].puntos)` en crudo da 7 h 31 min en vez de
+10 h 01 min.
+
+`hitosLimpios` **se queda**, pero cambia de papel: ya no tapa datos rotos, sino
+que (a) añade el punto final en el km donde acaba la traza —el último hito de
+la guía se queda corto, 0,71 km en la etapa 4, once minutos de marcha— y (b)
+hace de red de seguridad. Hoy solo descarta empates a mismo km (Barbadelo y su
+iglesia, los dos en el 4,36), que suman cero.
+
+### Pruebas
+
+Nuevas, sobre **los datos**, no sobre el saneado: que ningún punto de
+`datos.js` retroceda en km en ninguna etapa, que el punto final esté cerca del
+final de su traza, que los seis nombres repetidos tengan km bien distinto en
+cada etapa, que «A Brea» de la etapa 2 esté pasado el km 24 y la de la 5 antes
+del 15, y que la etapa 2 en crudo ya no dé 10 h. Se cambió la prueba que daba
+por bueno que «A Brea» se descartara: ahora exige lo contrario, que se
+conserve, y que el saneado solo tire empates.
+
+**311 comprobaciones, 0 fallos** (eran 289). `npm run validar`: OK. Comprobado
+en Chromium, sin errores de JavaScript.
+
+`VERSION` de `sw.js` sube a `camino-v19` (cambia `index.html` por los datos
+reincrustados). `APP_VERSION` pasa a `map-9`: **los marcadores del mapa se
+mueven**, y esa etiqueta sirve justo para saber desde el móvil qué versión se
+ha cargado.
+
+---
+
+## 2026-07-28 — «¿Cuánto queda?» y dos kilómetros mal puestos
+
+**Rama:** `claude/luggage-checklist-tab-4zqh2v` (la misma; la PR #24 sigue
+abierta, así que el trabajo nuevo va encima en vez de en una rama aparte).
+
+Botón nuevo en la cabecera, **«¿Cuánto queda?»**, que abre una ventana con lo
+que falta hasta el final de la etapa: kilómetros, subida y bajada pendientes,
+tiempo de marcha estimado y una **cuenta atrás** hasta la hora de llegada que
+marca la guía. Módulo `Queda` en `index.html`.
+
+**Qué etapa enseña, y por qué en ese orden** (`Queda.objetivo()`): dónde estás
+(si `Geo.ultima` cae a menos de 2 km de la traza) → la etapa de hoy → la que
+tengas abierta → la 1. Hoy, a tres semanas de salir, sale la 1: «20 días 22 h
+34 min para la llegada prevista a Portomarín, las 15:00 del martes 18».
+
+Con ubicación cuenta desde tu kilómetro, dibuja el progreso, dice el siguiente
+hito y a qué hora llegarías al ritmo estimado. Sin ubicación enseña la etapa
+entera y ofrece activarla. Es un diálogo de verdad: `Esc` cierra, el foco vuelve
+al botón, y **con la ventana abierta las flechas ya no cambian de etapa por
+detrás** (antes de arreglarlo, se navegaba a ciegas bajo el diálogo).
+
+### Los dos kilómetros mal puestos
+
+Esto salió al construir lo anterior, y es lo más importante de la sesión.
+`datos.js` tiene dos km equivocados que hacían **mentir a las estimaciones de
+marcha de toda la web**, no solo a la ventana nueva:
+
+1. **El punto de destino (`tipo:'fin'`) de cinco etapas lleva el km de la traza
+   de la etapa SIGUIENTE**, donde ese pueblo está casi en el km 0: Portomarín
+   0, Palas de Rei 0,25, Melide 0,89, Arzúa 0, O Pedrouzo 0. Como
+   `Marcha.tramo` devuelve 0 cuando la distancia es negativa, el último trozo
+   de la etapa **no se contaba**: 1,8 km en la 3 y 1,5 en la 4.
+2. **En la etapa 2, «A Brea» tiene km 13,98 cuando por la guía va en el 22,2.**
+   Está mal proyectado sobre la traza. Eso metía un ida y vuelta de nueve
+   kilómetros y daba **10 h 01 min** de marcha para una etapa de 27,6 km.
+
+Se vio porque la ficha de la etapa 3 decía **3 h 31 min** y la ventana nueva
+**4 h 03 min**, en la misma pantalla. Con dos cifras distintas para lo mismo no
+se podía entregar.
+
+**Arreglo:** `hitosLimpios(n)`, que descarta todo punto que retroceda y añade un
+punto final en el km donde acaba la traza de verdad. Lo usan `perfilEtapa`,
+`Marcha.horarios` y `Queda`, así que la ficha, el horario y la ventana dicen ya
+lo mismo. Lo que cambia en pantalla:
+
+| Etapa | Marcha antes | Marcha ahora |
+|---|---|---|
+| 1 | 5 h 42 | 5 h 43 |
+| 2 | **10 h 01** | **7 h 32** |
+| 3 | 3 h 31 | 4 h 03 |
+| 4 | 3 h 21 | 3 h 44 |
+| 5 | 4 h 56 | 5 h 01 |
+| 6 | 5 h 22 | 5 h 24 |
+| **Total del viaje** | **32 h 53** | **31 h 26** |
+
+**Ojo: los datos siguen mal.** `hitosLimpios` los sanea al vuelo, no los
+corrige. Arreglar los km en `datos.js` (proyectando esos puntos sobre su propia
+traza con `herramientas/ajustar-puntos.js`) queda **pendiente**; hasta
+entonces, quien calcule tiempos con `et.puntos` en crudo se equivocará.
+
+### Un detalle de coherencia
+
+El desnivel de la ventana NO se saca de los hitos aunque el tiempo sí: los
+hitos daban +259/−365 para la etapa 1 y la ficha enseña +403/−535. Se cuenta
+sobre la traza con umbral de 10 m y se **ancla por proporción** al total de
+`TRAZAS`, así que en el km 0 sale exactamente lo de la ficha. Hay que anclar
+porque los totales de `trazas.js` se calcularon sobre la traza original de 3470
+puntos y aquí solo queda la simplificada a 12 m: reproducirlos tal cual no sale
+(la 1 da −530 en vez de −535).
+
+`horaLlegadaSantiago()` pasa a delegar en `horaLlegadaEtapa(6)` para no tener
+dos maneras de calcular lo mismo. Sigue dando 13:30 y hay una prueba que lo
+fija. La regla para sacar la hora de llegada del timing tiene truco: **no vale
+coger la última línea que diga «Llegada a»**, porque en la etapa 2 esa es
+«Llegada a Gonzar» a las 9:30, a mitad de camino. Se busca «Llegada a
+&lt;destino&gt;» y, si no está (solo la 2), la última hora del timing: 15:30.
+
+**Pruebas.** Bloque nuevo de 55 comprobaciones: horas de llegada de las seis
+etapas, hitos saneados (que suben siempre y llegan al final de la traza), los
+dos estropicios concretos, elección de etapa en los cuatro casos, cálculo con y
+sin ubicación, desnivel idéntico al de la ficha en las seis, **igualdad entre
+ficha y ventana**, abrir/cerrar, flechas bloqueadas, `Esc`, y el formato de la
+cuenta atrás. **289 comprobaciones, 0 fallos** (eran 220). `npm run validar`: OK.
+
+Comprobado además en Chromium a 414 px y 1280 px, sin errores de JavaScript.
+**Sin probar en un móvil de verdad.**
+
+`VERSION` de `sw.js` sube a `camino-v18`. `APP_VERSION` se queda en `map-8`: no
+se tocó el mapa. De paso se actualizaron en CLAUDE.md las dos versiones, que
+seguían puestas en `camino-v14` y `map-7`.
+
+---
+
 ## 2026-07-27 — Pestaña de Equipaje: la checklist de la maleta
 
 **Rama:** `claude/luggage-checklist-tab-4zqh2v`

@@ -26,7 +26,24 @@ Seis etapas, del 18 al 23 de agosto de 2026, de Sarria a Santiago.
 ## Reglas que no se negocian
 
 **1. Nunca push directo a `main`.** Está protegida. Rama nueva → commit →
-push → Pull Request. Siempre.
+push → Pull Request → **fusionar**. Siempre, y hasta el final: un cambio que
+se queda en una rama no lo ve nadie, porque **la web se publica desde `main`**
+(GitHub Pages, carpeta raíz). No dejes trabajo terminado sin fusionar salvo
+que se pida expresamente.
+
+**Y comprueba si la PR de tu rama ya está fusionada antes de seguir
+trabajando en ella.** Ya pasó: se fusionó la PR #24 y después se siguieron
+subiendo commits a la misma rama, que quedaron fuera de `main` mientras
+parecía que estaban entregados. Una PR fusionada está cerrada y no recoge nada
+nuevo. Si la tuya lo está, rearranca la rama desde `main` conservando el
+nombre, rebasa encima lo que aún no esté fusionado y abre una PR nueva:
+
+```bash
+git fetch origin main
+git log --oneline origin/main..HEAD          # ¿qué falta por fusionar?
+git rebase --onto origin/main <ultimo-fusionado> <rama>
+git push --force-with-lease -u origin <rama>
+```
 
 **2. Validar la sintaxis antes de terminar.** El JavaScript vive dentro del
 HTML, así que `node --check` no sirve directo:
@@ -95,16 +112,30 @@ de cuatro píxeles. Se intentó arreglar tres veces tocando el lienzo
 el problema era el **contenedor**, no el lienzo. Si alguien devuelve el mapa al
 flujo del grid, volverá el fallo.
 
+**`ajustar-puntos.js` y los nombres repetidos.** Seis puntos se llaman igual
+en dos etapas, porque el destino de una es el origen de la siguiente:
+Portomarín (1 y 2), Palas de Rei (2 y 3), Melide (3 y 4), Arzúa (4 y 5),
+O Pedrouzo (5 y 6) y **A Brea (2 y 5, dos pueblos distintos que se llaman
+igual)**. La herramienta buscaba el punto con `src.match(nombre)` y escribía
+con `src.replace`, y **las dos cosas van a la primera coincidencia del archivo
+entero**: la fila de la segunda etapa machacaba la de la primera. Así el
+Portomarín de la etapa 1 acabó con el km 0 de la traza de la etapa 2, y «A
+Brea» de la etapa 2 acabó con las coordenadas de la de la etapa 5. La etapa 2
+enseñó **10 h de marcha** para 27,6 km durante meses. Ya está arreglado: el
+archivo se recorre hacia delante y se va consumiendo, así que cada fila solo
+escribe en la coincidencia que le toca. **Si tocas esa herramienta, no vuelvas
+a buscar por nombre sobre el archivo entero.**
+
 **El service worker no puede ir dentro del HTML.** El navegador exige un
 `.js` servido desde el mismo origen. Por eso `sw.js` va suelto. Y solo
 funciona publicado en Pages, no abriendo el archivo local.
 
 **Hay DOS versiones que subir, y no son lo mismo.**
 
-- **`VERSION` en `sw.js`** (ahora `camino-v14`): súbela **siempre que cambies
+- **`VERSION` en `sw.js`** (ahora `camino-v19`): súbela **siempre que cambies
   `index.html`**. Nombra los cachés; si no la subes, los móviles que ya tengan
   la web guardada pueden seguir con la vieja.
-- **`APP_VERSION` en `index.html`** (ahora `map-7`): súbela **al tocar el
+- **`APP_VERSION` en `index.html`** (ahora `map-9`): súbela **al tocar el
   mapa**. No afecta al caché: es la etiqueta que enseña el diagnóstico `?debug`
   para saber, desde el propio móvil y sin Mac, qué versión ha cargado de
   verdad. Sirvió para descubrir que el problema del mapa era caché y no código.
@@ -206,6 +237,16 @@ El orden importa: `TRAZAS` antes que `ETAPAS`, y ambos antes que la lógica.
   El ranking **no es automático**: se comparte por WhatsApp con
   `compartirTexto()`, que usa el mismo mecanismo que `compartir()`.
 
+- **`Queda`** — la ventana de «¿Cuánto queda?» (botón `#btnQueda` de la
+  cabecera). Distancia, desnivel y tiempo hasta el final de la etapa, más una
+  cuenta atrás hasta la hora de llegada de la guía. `objetivo()` elige etapa
+  por este orden: **dónde estás** (si `Geo.ultima` está a menos de 2 km de la
+  traza) → **la etapa de hoy** → **la que tengas abierta** → **la 1**.
+  El tiempo sale de los hitos (mismo Naismith que el resto); el **desnivel sale
+  de la traza y se ancla por proporción a `TRAZAS[n].dPos/dNeg`**, para que en
+  el km 0 diga exactamente lo mismo que la ficha de la etapa. Con el diálogo
+  abierto, las flechas del teclado NO navegan y `Esc` cierra.
+
 - **`Capa`** — controles del mapa. Ya NO alterna capas (hubo una topográfica,
   se retiró): solo guarda si la vista es 3D, en `lolitas2026-3d`. `aplicar3D()`
   pone pitch 0 o 60.
@@ -232,6 +273,21 @@ El orden importa: `TRAZAS` antes que `ETAPAS`, y ambos antes que la lógica.
 | `lolitas2026-persona` | quién juega en este móvil |
 | `lolitas2026-3d` | si el mapa está en vista 3D |
 | `lolitas2026-equipaje` | qué está ya metido en la maleta |
+
+**`hitosLimpios(n)` es lo que hay que usar para calcular tiempos**, no
+`et.puntos` en crudo. Lo usan `perfilEtapa`, `Marcha.horarios` y `Queda`, y por
+eso los tres dicen lo mismo. Hace dos cosas:
+
+1. **Añade un punto final en el km donde acaba la traza.** El último hito de la
+   guía no siempre coincide con el final del track: en la etapa 4 quedan 0,71
+   km por detrás de Arzúa (11 minutos de marcha). Esto sigue haciendo falta.
+2. **Descarta los puntos que retroceden en km.** Hoy solo caen empates a mismo
+   km (Barbadelo y su iglesia, los dos en el 4,36), que suman cero. Es una red
+   de seguridad, no un parche: los datos ya están bien.
+
+**Los km de `datos.js` se corrigieron el 28 de julio de 2026** (antes cinco
+destinos llevaban el km de la traza siguiente y «A Brea» de la etapa 2 estaba a
+38 km de su sitio). Ver la trampa de los nombres repetidos, más abajo.
 - **`Marcha.coordEnKm(puntos, km, n)`** — interpola sobre `TRAZAS[n].linea`,
   NO sobre los hitos. Pásale siempre el número de etapa; sin él cae al respaldo
   por hitos, que corta campo a través.

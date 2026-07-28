@@ -85,6 +85,14 @@ sol y tarjeta bancaria): va aparte y marcado, para no atribuirle nada que no
 escribiera. Se marca en el móvil de cada una y no se comparte con nadie, igual
 que los sellos. Se llega también con `?equipaje=1`.
 
+**¿Cuánto queda?** Botón de la cabecera que abre una ventana con lo que falta
+hasta el final de la etapa: kilómetros, subida y bajada pendientes, tiempo de
+marcha estimado y una cuenta atrás hasta la hora de llegada que marca la guía.
+Elige la etapa sola por este orden: **dónde estás** (si la ubicación está
+activa y sobre la traza) → **la etapa de hoy** → **la que tengas abierta** →
+**la primera**. Con ubicación cuenta desde tu kilómetro y añade a qué hora
+llegarías al ritmo estimado; sin ella enseña la etapa entera y ofrece activarla.
+
 **En el mapa y la cabecera.** Botón «Hoy» que salta a la etapa del día,
 «Dónde estoy» que sitúa al peregrino sobre la traza, cuenta atrás en horas y
 minutos hasta la llegada a Santiago, botón 3D y compartir.
@@ -115,6 +123,20 @@ No hace falta reevaluarlas:
   pierden no se pierde nada del viaje. Todo lo demás vive en memoria o en el
   propio HTML. **No hay servidor ni sincronización**: el ranking de los retos
   se lleva a mano, pegando mensajes en el chat de WhatsApp.
+- **Los tiempos de marcha se calculan con `hitosLimpios(n)`, no con
+  `et.puntos` en crudo.** Añade un punto final en el km donde acaba la traza
+  (el último hito de la guía se queda corto: 0,71 km en la etapa 4) y descarta
+  los puntos que retrocedan. Lo usan `perfilEtapa`, `Marcha.horarios` y
+  `Queda`, para que los tres digan lo mismo.
+- **Cuidado al tocar `ajustar-puntos.js`: hay seis nombres de punto repetidos
+  en dos etapas** (Portomarín, Palas de Rei, Melide, Arzúa, O Pedrouzo y
+  A Brea, que son dos pueblos distintos con el mismo nombre). La herramienta
+  buscaba por nombre sobre el archivo entero y escribía en la primera
+  coincidencia, así que la fila de la segunda etapa machacaba la de la
+  primera. Eso dejó cinco destinos con el km de la traza siguiente y «A Brea»
+  de la etapa 2 a 38 km de su sitio, y la etapa 2 enseñando **10 h de marcha**
+  para 27,6 km. Corregido el 28 de julio de 2026: el archivo se recorre hacia
+  delante y se va consumiendo.
 - **`history.replaceState` va dentro de try/catch.** Con protocolo `file://`
   algunos navegadores lo rechazan y sin la protección se rompe la navegación
   entera.
@@ -293,6 +315,13 @@ Ideas que quedaron sobre la mesa:
 - Selector de tamaño de letra, más allá del aumento que ya hay en móvil.
 
 Ya hechas:
+
+- **«¿Cuánto queda?»** (`Queda`, botón `#btnQueda`): distancia, desnivel y
+  tiempo hasta el final de la etapa, con cuenta atrás hasta la hora de llegada
+  de la guía. Al construirlo salieron **once puntos mal puestos en `datos.js`**
+  que hacían mentir a las estimaciones de marcha; se corrigieron reproyectando
+  con `ajustar-puntos.js`, tras arreglar el fallo de la herramienta que los
+  había roto.
 
 - **Equipaje** (`vistaEtapa = 8`, `panelEquipaje`): checklist de la maleta a
   partir del PDF «Checklist maleta» de la tita Lucila, en la constante

@@ -126,15 +126,35 @@ if(!APLICAR){
   process.exit(0);
 }
 
-/* ---------- Aplicar sobre datos.js ---------- */
-let src = fs.readFileSync(path.join(raiz, 'datos.js'), 'utf8');
-let cambiados = 0, marcados = 0;
+/* ---------- Aplicar sobre datos.js ----------
+   OJO CON LOS NOMBRES REPETIDOS. Seis puntos se llaman igual en dos etapas,
+   porque el destino de una es el origen de la siguiente: Portomarín (1 y 2),
+   Palas de Rei (2 y 3), Melide (3 y 4), Arzúa (4 y 5), O Pedrouzo (5 y 6) y
+   A Brea (2 y 5, dos pueblos distintos con el mismo nombre).
+
+   La versión anterior de esto buscaba el nombre con `src.match` y escribía con
+   `src.replace`, y las dos cosas van a la PRIMERA coincidencia del archivo
+   entero. Resultado: la fila de la segunda etapa machacaba la de la primera.
+   Así fue como el Portomarín de la etapa 1 acabó con el km 0 de la traza de
+   la etapa 2, y como «A Brea» de la etapa 2 acabó con las coordenadas de la
+   «A Brea» de la etapa 5, a 36 km de su sitio. Eso dejó a la etapa 2 con
+   10 h de marcha estimada durante meses.
+
+   Ahora el archivo se recorre HACIA DELANTE y se va consumiendo: cada fila
+   solo puede escribir en la primera coincidencia que quede por delante. Como
+   `filas` se construye en el mismo orden en que están en el archivo (etapas
+   en orden, puntos en orden), cada fila cae en su propia línea. Si una fila
+   no se encuentra, no se consume nada y las siguientes siguen buscando desde
+   el mismo sitio. */
+const src = fs.readFileSync(path.join(raiz, 'datos.js'), 'utf8');
+let hecho = '', resto = src;
+let cambiados = 0, marcados = 0, perdidos = [];
 
 filas.forEach(function(f){
-  /* Localizar la línea del punto por su nombre dentro del bloque de su etapa */
-  const re = new RegExp('(\\{nombre:"' + f.nombre.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '",)([^\\n]*?)(\\}[,\\n])');
-  const m = src.match(re);
-  if(!m) return;
+  const re = new RegExp('(\\{nombre:"' + f.nombre.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    + '",)([^\\n]*?)(\\}[,\\n])');
+  const m = resto.match(re);
+  if(!m){ perdidos.push('etapa ' + f.etapa + ' · ' + f.nombre); return; }
   let cuerpo = m[2];
 
   if(f.excluir){
@@ -148,13 +168,23 @@ filas.forEach(function(f){
       .replace(/lon:\s*-?[\d.]+/, 'lon:' + f.nuevo.lon.toFixed(6))
       .replace(/\bkm:\s*-?[\d.]+/, 'km:' + f.nuevo.km.toFixed(2))
       .replace(/\bele:\s*-?[\d.]+/, 'ele:' + Math.round(f.nuevo.ele));
-    if(!/desviacion_m:/.test(cuerpo)) cuerpo += ', desviacion_m:' + Math.round(f.dist);
+    /* Si ya llevaba `desviacion_m` se actualiza; si no, se añade. Antes solo
+       se añadía cuando faltaba, y al reejecutar quedaba el valor viejo. */
+    if(/desviacion_m:\s*-?[\d.]+/.test(cuerpo))
+      cuerpo = cuerpo.replace(/desviacion_m:\s*-?[\d.]+/, 'desviacion_m:' + Math.round(f.dist));
+    else
+      cuerpo += ', desviacion_m:' + Math.round(f.dist);
     cambiados++;
   }
-  src = src.replace(re, m[1] + cuerpo + m[3]);
+  hecho += resto.slice(0, m.index) + m[1] + cuerpo + m[3];
+  resto = resto.slice(m.index + m[0].length);
 });
 
-fs.writeFileSync(path.join(raiz, 'datos.js'), src);
+fs.writeFileSync(path.join(raiz, 'datos.js'), hecho + resto);
 console.log('\n  datos.js actualizado: ' + cambiados + ' puntos llevados a la traza, '
   + marcados + ' marcados como fuera de ruta.');
+if(perdidos.length){
+  console.log('  *** ' + perdidos.length + ' punto(s) NO se encontraron en el archivo:');
+  perdidos.forEach(p => console.log('    - ' + p));
+}
 console.log('  Recuerda reincrustar datos.js en index.html (ver README).\n');
