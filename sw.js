@@ -23,7 +23,7 @@
    el resto del margen es para lo que se navegue.
    ============================================================ */
 
-const VERSION      = 'camino-v19';
+const VERSION      = 'camino-v20';
 const CACHE_APP    = VERSION + '-app';
 const CACHE_TILES  = VERSION + '-tiles';
 const CACHE_METEO  = VERSION + '-meteo';
@@ -55,9 +55,44 @@ self.addEventListener('activate', function(e){
       return Promise.all(nombres.map(function(n){
         if(n.indexOf(VERSION) !== 0) return caches.delete(n);
       }));
+    }).then(function(){
+      /* Al subir de VERSION se acaban de borrar las cachés viejas. Si la
+         instalación no consiguió guardar la página (móvil con mala cobertura
+         justo al actualizar), el caché nuevo se queda VACÍO y la primera vez
+         que falle la red no hay respaldo. Se reintenta aquí. */
+      return caches.open(CACHE_APP).then(function(c){
+        return Promise.all(ESENCIALES.map(function(url){
+          return c.match(url).then(function(hit){
+            return hit ? null : c.add(url).catch(function(){});
+          });
+        }));
+      });
     }).then(function(){ return self.clients.claim(); })
   );
 });
+
+/* Última red de seguridad para una navegación sin red y sin copia guardada.
+   NUNCA hay que dejar que `respondWith` se resuelva con `undefined`: el
+   navegador responde con ERR_FAILED y en el móvil eso se ve como una PANTALLA
+   EN BLANCO, que parece que la web esté rota cuando solo falta cobertura. */
+function paginaSinRed(){
+  return new Response(
+    '<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">'
+    + '<meta name="viewport" content="width=device-width,initial-scale=1">'
+    + '<title>Sin conexión — Las Lolitas al Camino</title>'
+    + '<style>html,body{height:100%}body{margin:0;display:flex;align-items:center;'
+    + 'justify-content:center;font-family:system-ui,-apple-system,sans-serif;'
+    + 'background:#1B2A23;color:#EDE8DC;text-align:center;padding:2rem;line-height:1.6}'
+    + 'b{color:#D8A33C;display:block;font-size:1.1rem;margin-bottom:.5rem}'
+    + 'button{margin-top:1.2rem;background:#D8A33C;color:#1B2A23;border:none;padding:.7rem 1.4rem;'
+    + 'border-radius:3px;font:inherit;font-weight:600;cursor:pointer}</style></head><body><div>'
+    + '<b>Sin conexión</b>No hay cobertura y todavía no había una copia guardada '
+    + 'en este móvil.<br>Vuelve a intentarlo cuando tengas señal o wifi.'
+    + '<button onclick="location.reload()">Reintentar</button>'
+    + '</div></body></html>',
+    {status:200, headers:{'Content-Type':'text/html; charset=utf-8'}}
+  );
+}
 
 /* Recorta el caché de tiles cuando crece demasiado (FIFO) */
 function podar(nombre, max){
@@ -141,6 +176,8 @@ self.addEventListener('fetch', function(e){
       }).catch(function(){
         return caches.match('./index.html').then(function(hit){
           return hit || caches.match('./');
+        }).then(function(hit){
+          return hit || caches.match(req).then(function(h){ return h || paginaSinRed(); });
         });
       })
     );
@@ -160,8 +197,10 @@ self.addEventListener('fetch', function(e){
         }
         return res;
       }).catch(function(){
-        /* Si es una navegación, servir la página cacheada */
-        if(req.mode === 'navigate') return caches.match('./index.html');
+        /* Si es una navegación, servir la página cacheada. Y si tampoco está,
+           la página de "sin conexión": aquí tampoco vale devolver undefined. */
+        if(req.mode === 'navigate')
+          return caches.match('./index.html').then(function(h){ return h || paginaSinRed(); });
         return new Response('', {status: 504});
       });
     })
