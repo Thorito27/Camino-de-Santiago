@@ -93,6 +93,73 @@ en modo avión. Es justo la primera fila de la tabla.
 
 ---
 
+## 2026-07-28 — La pantalla en blanco: el service worker devolvía `undefined`
+
+Aviso de que **la web no cargaba, pantalla en blanco**. Lo primero fue
+descartar lo publicado, y estaba todo bien: `main` íntegro (el HTML cierra, los
+cuatro bloques de script completos, cada constante una sola vez), las **311
+comprobaciones** de `npm test` pasando **ejecutadas contra el contenido exacto
+de `main`** —no contra la copia local—, `npm run validar` OK y el despliegue de
+Pages en éxito para el commit de la fusión (16:55 UTC).
+
+Faltaba un hueco en las pruebas y se tapó: **en este entorno `unpkg.com` está
+bloqueado**, así que MapLibre no había cargado nunca en un navegador de verdad
+y ese camino solo lo cubrían los tests con jsdom, que lo simulan. Se bajó
+MapLibre **de npm** (que sí está permitido), se sirvió la página apuntando a la
+copia local y cargó perfectamente: panel y navegación pintados, cero errores.
+Conviene recordar el truco la próxima vez que haya que probar «con mapa».
+
+### El fallo de verdad
+
+Está en `sw.js`. El respaldo de navegación sin red hacía
+`caches.match('./index.html')`, que devuelve **`undefined`** si esa copia no
+está guardada, y con eso se resolvía `respondWith`. El navegador contesta
+entonces `ERR_FAILED`, y en el móvil eso **se ve como una pantalla en blanco**:
+parece la web rota cuando lo único que falta es cobertura.
+
+Y se vuelve probable **justo al subir de `VERSION`**: al activarse se borran las
+cachés viejas, y si la instalación no consiguió guardar la página —móvil con
+mala cobertura en ese momento, que en el Camino es lo normal— el caché nuevo
+queda vacío. A partir de ahí, cualquier fallo de red da pantalla en blanco en
+vez de la copia guardada. Se acababa de subir a `camino-v19`.
+
+Reproducido en Chromium con service worker real, caché vaciada y red cortada:
+`net::ERR_FAILED` y el navegador con su página de error.
+
+### El arreglo
+
+- **`paginaSinRed()`**: una página de verdad, con el aviso de sin conexión y un
+  botón de reintentar. **Ninguna rama del `fetch` puede devolver ya
+  `undefined`.**
+- El respaldo de navegación encadena `./index.html` → la raíz → la propia
+  petición → `paginaSinRed()`.
+- **`activate` reintenta guardar los `ESENCIALES`** tras purgar las cachés
+  viejas, para no quedarse con un caché vacío después de actualizar.
+
+| Escenario | Antes | Ahora |
+|---|---|---|
+| Caché vacía y sin red | `ERR_FAILED`, pantalla en blanco | Aviso «Sin conexión» con botón |
+| Sin red con copia guardada | La web entera | La web entera (16.004 caracteres de panel) |
+| Con red | Normal | Normal |
+
+`VERSION` a `camino-v20`. `APP_VERSION` sin tocar: no se cambió `index.html`.
+
+**Lo que NO se ha podido comprobar:** abrir la web publicada desde aquí, porque
+el proxy del entorno bloquea `github.io`. Es un fallo real, reproducible y que
+da ese síntoma exacto, pero **no está confirmado que fuera el que se estaba
+viendo en el móvil**.
+
+### Y una lección de proceso
+
+Se descubrió de paso que **la PR #24 llevaba fusionada desde el día 27** y se
+habían seguido subiendo commits a esa misma rama, que quedaron fuera de `main`
+mientras parecía que estaban entregados. Se rearrancó la rama desde `main`, se
+rebasaron encima y se abrió la PR #25. Queda como regla que no se negocia en
+CLAUDE.md: llegar hasta fusionar, y comprobar antes si la PR de la rama ya lo
+está.
+
+---
+
 ## 2026-07-28 — Arreglados los once puntos mal puestos, y la herramienta que los rompió
 
 Continuación de la entrada de abajo. Ahí se saneaban los km al vuelo con
