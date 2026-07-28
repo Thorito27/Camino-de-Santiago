@@ -26,7 +26,24 @@ Seis etapas, del 18 al 23 de agosto de 2026, de Sarria a Santiago.
 ## Reglas que no se negocian
 
 **1. Nunca push directo a `main`.** Está protegida. Rama nueva → commit →
-push → Pull Request. Siempre.
+push → Pull Request → **fusionar**. Siempre, y hasta el final: un cambio que
+se queda en una rama no lo ve nadie, porque **la web se publica desde `main`**
+(GitHub Pages, carpeta raíz). No dejes trabajo terminado sin fusionar salvo
+que se pida expresamente.
+
+**Y comprueba si la PR de tu rama ya está fusionada antes de seguir
+trabajando en ella.** Ya pasó: se fusionó la PR #24 y después se siguieron
+subiendo commits a la misma rama, que quedaron fuera de `main` mientras
+parecía que estaban entregados. Una PR fusionada está cerrada y no recoge nada
+nuevo. Si la tuya lo está, rearranca la rama desde `main` conservando el
+nombre, rebasa encima lo que aún no esté fusionado y abre una PR nueva:
+
+```bash
+git fetch origin main
+git log --oneline origin/main..HEAD          # ¿qué falta por fusionar?
+git rebase --onto origin/main <ultimo-fusionado> <rama>
+git push --force-with-lease -u origin <rama>
+```
 
 **2. Validar la sintaxis antes de terminar.** El JavaScript vive dentro del
 HTML, así que `node --check` no sirve directo:
