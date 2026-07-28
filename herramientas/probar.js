@@ -283,6 +283,35 @@ console.log('5 ter. ¿Cuánto queda?');
   comprobar('la etapa 2 NO coge «Llegada a Gonzar» (9:30)',
     s.w.eval('horaLlegadaEtapa(2)') !== '9:30');
 
+  /* --- Los DATOS, no el saneado: los km de datos.js tienen que estar bien ---
+     Seis puntos se llaman igual en dos etapas (el destino de una es el origen
+     de la siguiente) y `ajustar-puntos.js` escribía en la primera coincidencia
+     del archivo, así que la fila de la segunda etapa machacaba la de la
+     primera. Si alguien vuelve a romper eso, esto salta. */
+  for(let n=1;n<=6;n++){
+    const pts = s.w.eval(`ETAPAS[${n-1}].puntos`);
+    let atras = [];
+    for(let i=1;i<pts.length;i++) if(pts[i].km < pts[i-1].km) atras.push(pts[i].nombre);
+    comprobar(`etapa ${n}: ningún punto de datos.js retrocede en km`, atras.length === 0);
+    const ult = pts[pts.length-1];
+    const kmTraza = s.w.eval(`TRAZAS[${n}].km`);
+    comprobar(`etapa ${n}: el punto final está cerca del final de la traza`,
+      ult.km > kmTraza - 1.2);
+  }
+  /* Los dos casos concretos que estuvieron rotos */
+  comprobar('«A Brea» de la etapa 2 está en su sitio (km ~25), no en el 13,98',
+    s.w.eval("ETAPAS[1].puntos.find(p=>p.nombre==='A Brea').km") > 24);
+  comprobar('«A Brea» de la etapa 5 sigue en el suyo (km ~14)',
+    s.w.eval("ETAPAS[4].puntos.find(p=>p.nombre==='A Brea').km") < 15);
+  comprobar('los seis nombres repetidos tienen km distinto en cada etapa',
+    ['Portomarín','Palas de Rei','Melide','Arzúa','O Pedrouzo'].every(function(nom){
+      const kms = s.w.eval(`ETAPAS.map(e=>{const p=e.puntos.find(p=>p.nombre===${JSON.stringify(nom)});return p?p.km:null}).filter(k=>k!==null)`);
+      return kms.length === 2 && Math.abs(kms[0] - kms[1]) > 5;
+    }));
+  /* Y que sin sanear ya casi no se pierde nada: la etapa 2 daba 10 h */
+  comprobar('la etapa 2 en crudo ya no da 10 h',
+    s.w.eval('Marcha.perfil(ETAPAS[1].puntos).horas') < 8);
+
   /* --- Los hitos saneados: ni retrocesos ni final corto --- */
   for(let n=1;n<=6;n++){
     const pts = s.w.eval(`Queda.hitos(${n})`);
@@ -293,11 +322,20 @@ console.log('5 ter. ¿Cuánto queda?');
     comprobar(`etapa ${n}: el último hito llega al final de la traza`,
       Math.abs(pts[pts.length-1].km - kmTraza) < 0.03);
   }
-  /* Los dos estropicios concretos que motivan el saneado */
-  comprobar('la etapa 2 descarta «A Brea» (km 13,98 cuando va en el 22)',
-    s.w.eval("Queda.hitos(2).every(p=>p.nombre!=='A Brea')"));
-  comprobar('el destino con km 0 no se cuela al principio',
+  /* Con los datos ya corregidos, el saneado no debe tirar nada útil: «A Brea»
+     se queda (antes había que descartarla) y solo caen empates a mismo km,
+     que suman cero kilómetros. */
+  comprobar('la etapa 2 ya conserva «A Brea»',
+    s.w.eval("Queda.hitos(2).some(p=>p.nombre==='A Brea')"));
+  comprobar('el primer hito sigue siendo la salida',
     s.w.eval('Queda.hitos(1)[0].nombre') === 'Sarria');
+  for(let n=1;n<=6;n++){
+    const conEle = s.w.eval(`ETAPAS[${n-1}].puntos.filter(p=>typeof p.ele==='number'&&typeof p.km==='number')`);
+    const limpio = s.w.eval(`Queda.hitos(${n})`);
+    const fuera = conEle.filter(p => !limpio.some(q => q.nombre === p.nombre));
+    const soloEmpates = fuera.every(p => conEle.some(q => q.nombre !== p.nombre && q.km === p.km));
+    comprobar(`etapa ${n}: el saneado solo descarta empates a mismo km`, soloEmpates);
+  }
 
   /* --- Sin ubicación: la etapa entera --- */
   s.w.irA(0);

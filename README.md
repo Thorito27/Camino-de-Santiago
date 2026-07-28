@@ -124,15 +124,19 @@ No hace falta reevaluarlas:
   propio HTML. **No hay servidor ni sincronización**: el ranking de los retos
   se lleva a mano, pegando mensajes en el chat de WhatsApp.
 - **Los tiempos de marcha se calculan con `hitosLimpios(n)`, no con
-  `et.puntos`.** Hay dos kilómetros mal puestos en los datos: el punto de
-  destino de cinco etapas lleva el km de la traza de la etapa siguiente
-  (Portomarín 0, Palas de Rei 0,25, Melide 0,89, Arzúa 0, O Pedrouzo 0), y en
-  la etapa 2 «A Brea» está en el km 13,98 cuando va en el 22,2. El primero
-  dejaba sin contar hasta 1,8 km de etapa; el segundo inflaba la etapa 2 a
-  **10 h** de marcha. `hitosLimpios` descarta los puntos que retroceden y
-  añade un punto final en el km real de la traza. Lo usan `perfilEtapa`,
-  `Marcha.horarios` y `Queda`, para que todos digan lo mismo. **Los datos
-  siguen con el km equivocado**: arreglarlos de raíz está pendiente.
+  `et.puntos` en crudo.** Añade un punto final en el km donde acaba la traza
+  (el último hito de la guía se queda corto: 0,71 km en la etapa 4) y descarta
+  los puntos que retrocedan. Lo usan `perfilEtapa`, `Marcha.horarios` y
+  `Queda`, para que los tres digan lo mismo.
+- **Cuidado al tocar `ajustar-puntos.js`: hay seis nombres de punto repetidos
+  en dos etapas** (Portomarín, Palas de Rei, Melide, Arzúa, O Pedrouzo y
+  A Brea, que son dos pueblos distintos con el mismo nombre). La herramienta
+  buscaba por nombre sobre el archivo entero y escribía en la primera
+  coincidencia, así que la fila de la segunda etapa machacaba la de la
+  primera. Eso dejó cinco destinos con el km de la traza siguiente y «A Brea»
+  de la etapa 2 a 38 km de su sitio, y la etapa 2 enseñando **10 h de marcha**
+  para 27,6 km. Corregido el 28 de julio de 2026: el archivo se recorre hacia
+  delante y se va consumiendo.
 - **`history.replaceState` va dentro de try/catch.** Con protocolo `file://`
   algunos navegadores lo rechazan y sin la protección se rompe la navegación
   entera.
@@ -314,9 +318,10 @@ Ya hechas:
 
 - **«¿Cuánto queda?»** (`Queda`, botón `#btnQueda`): distancia, desnivel y
   tiempo hasta el final de la etapa, con cuenta atrás hasta la hora de llegada
-  de la guía. Al construirlo salieron **dos km mal puestos en `datos.js`** que
-  hacían mentir a las estimaciones de marcha; se sanean al vuelo con
-  `hitosLimpios(n)` (ver abajo).
+  de la guía. Al construirlo salieron **once puntos mal puestos en `datos.js`**
+  que hacían mentir a las estimaciones de marcha; se corrigieron reproyectando
+  con `ajustar-puntos.js`, tras arreglar el fallo de la herramienta que los
+  había roto.
 
 - **Equipaje** (`vistaEtapa = 8`, `panelEquipaje`): checklist de la maleta a
   partir del PDF «Checklist maleta» de la tita Lucila, en la constante

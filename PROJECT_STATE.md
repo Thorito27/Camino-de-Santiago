@@ -93,6 +93,111 @@ en modo avión. Es justo la primera fila de la tabla.
 
 ---
 
+## 2026-07-28 — Arreglados los once puntos mal puestos, y la herramienta que los rompió
+
+Continuación de la entrada de abajo. Ahí se saneaban los km al vuelo con
+`hitosLimpios` y quedaba pendiente arreglarlos de raíz. Ya está hecho, y
+apareció **la causa**, que era mejor noticia que el síntoma.
+
+### La causa: nombres repetidos
+
+**Seis puntos se llaman igual en dos etapas**, porque el destino de una es el
+origen de la siguiente: Portomarín (1 y 2), Palas de Rei (2 y 3), Melide (3 y
+4), Arzúa (4 y 5), O Pedrouzo (5 y 6) y **A Brea (2 y 5, que son dos pueblos
+distintos con el mismo nombre)**.
+
+`herramientas/ajustar-puntos.js` localizaba cada punto con
+`src.match('{nombre:"…"')` y escribía con `src.replace(...)`. **Las dos cosas
+van a la primera coincidencia del archivo entero.** Así que, en cada par, la
+fila de la segunda etapa machacaba la de la primera:
+
+- El Portomarín de la etapa 1 se quedó con el vértice km 0 de la traza de la
+  **etapa 2**. Igual con Palas de Rei, Melide, Arzúa y O Pedrouzo.
+- «A Brea» de la etapa 2 se quedó con las coordenadas de la «A Brea» de la
+  **etapa 5**, a 38 km. Su propia herramienta lo cantaba: el aviso de «se
+  movería más de 500 m» decía **36.069 m** para ese punto.
+
+Es decir: el fallo no estaba en los datos, estaba en el script que los
+escribió, y llevaba ahí desde el commit `8e42823`.
+
+### El arreglo, en tres pasos
+
+1. **La herramienta.** Ahora el archivo se recorre **hacia delante y se va
+   consumiendo**: cada fila solo puede escribir en la primera coincidencia que
+   quede por delante. Como `filas` se construye en el mismo orden en que están
+   los puntos en el archivo, cada una cae en su línea. Si una fila no se
+   encuentra, no consume nada y se avisa por pantalla en vez de callar.
+   De paso, `desviacion_m` ahora se actualiza si ya existía; antes solo se
+   añadía cuando faltaba y al reejecutar quedaba el valor viejo.
+2. **Las seis filas machacadas** se restauraron con sus coordenadas de antes
+   del commit que las rompió, sacadas del histórico de git (`git show
+   8e42823^:datos.js`), no inventadas ni deducidas.
+3. **Reproyección** con `node herramientas/ajustar-puntos.js --aplicar`. Ya no
+   salta ningún aviso: el punto que más se mueve son 240 m (Arzúa), frente a
+   los 36 km de antes.
+
+### Qué ha cambiado en los datos
+
+**Once puntos**, exactamente los de nombre repetido. Ni uno más:
+
+| Etapa | Punto | km antes | km ahora | Se mueve |
+|---|---|---|---|---|
+| 1 | Portomarín | 0 | 23,46 | 98 m |
+| 2 | Portomarín | 0 | 0 | 109 m |
+| 2 | **A Brea** | **13,98** | **25,15** | **38,2 km** |
+| 2 | Palas de Rei | 0,25 | 27,52 | 14 m |
+| 3 | Palas de Rei | 0,25 | 0,25 | 21 m |
+| 3 | Melide | 0,89 | 15,63 | 682 m |
+| 4 | Melide | 0,89 | 0,89 | 187 m |
+| 4 | Arzúa | 0 | 14,73 | 368 m |
+| 5 | A Brea | 13,98 | 13,98 | 4 m |
+| 5 | O Pedrouzo | 0 | 19,30 | 580 m |
+| 6 | O Pedrouzo | 0 | 0 | 11 m |
+
+Comprobado además: **ningún `kmGuia` se ha tocado** (es el dato de la tita
+Lucila) y **ningún punto `fueraDeRuta` se ha movido**.
+
+Esto no era solo un número: en el mapa, el marcador de Portomarín de la etapa 1
+se dibujaba donde arranca la etapa 2, y el de «A Brea» de la etapa 2 caía en
+mitad de la etapa 5. Y en la pestaña Ruta de la etapa 2, A Brea aparecía en el
+km 13,98 entre medias, con Palas de Rei listado en el 0,25. Ahora la lista va
+en orden: Os Valos 23,51 → **A Brea 25,15** → Avenostre 26,47 → Palas de Rei
+27,52.
+
+### Qué NO ha cambiado
+
+Los tiempos de marcha que se ven en pantalla **son los mismos que ya daba la
+entrada anterior** (31 h 26 min en total), porque `hitosLimpios` ya los estaba
+corrigiendo al vuelo. Lo que cambia es que ahora **los datos son correctos por
+sí solos**: `Marcha.perfil(ETAPAS[1].puntos)` en crudo da 7 h 31 min en vez de
+10 h 01 min.
+
+`hitosLimpios` **se queda**, pero cambia de papel: ya no tapa datos rotos, sino
+que (a) añade el punto final en el km donde acaba la traza —el último hito de
+la guía se queda corto, 0,71 km en la etapa 4, once minutos de marcha— y (b)
+hace de red de seguridad. Hoy solo descarta empates a mismo km (Barbadelo y su
+iglesia, los dos en el 4,36), que suman cero.
+
+### Pruebas
+
+Nuevas, sobre **los datos**, no sobre el saneado: que ningún punto de
+`datos.js` retroceda en km en ninguna etapa, que el punto final esté cerca del
+final de su traza, que los seis nombres repetidos tengan km bien distinto en
+cada etapa, que «A Brea» de la etapa 2 esté pasado el km 24 y la de la 5 antes
+del 15, y que la etapa 2 en crudo ya no dé 10 h. Se cambió la prueba que daba
+por bueno que «A Brea» se descartara: ahora exige lo contrario, que se
+conserve, y que el saneado solo tire empates.
+
+**311 comprobaciones, 0 fallos** (eran 289). `npm run validar`: OK. Comprobado
+en Chromium, sin errores de JavaScript.
+
+`VERSION` de `sw.js` sube a `camino-v19` (cambia `index.html` por los datos
+reincrustados). `APP_VERSION` pasa a `map-9`: **los marcadores del mapa se
+mueven**, y esa etiqueta sirve justo para saber desde el móvil qué versión se
+ha cargado.
+
+---
+
 ## 2026-07-28 — «¿Cuánto queda?» y dos kilómetros mal puestos
 
 **Rama:** `claude/luggage-checklist-tab-4zqh2v` (la misma; la PR #24 sigue

@@ -95,16 +95,30 @@ de cuatro píxeles. Se intentó arreglar tres veces tocando el lienzo
 el problema era el **contenedor**, no el lienzo. Si alguien devuelve el mapa al
 flujo del grid, volverá el fallo.
 
+**`ajustar-puntos.js` y los nombres repetidos.** Seis puntos se llaman igual
+en dos etapas, porque el destino de una es el origen de la siguiente:
+Portomarín (1 y 2), Palas de Rei (2 y 3), Melide (3 y 4), Arzúa (4 y 5),
+O Pedrouzo (5 y 6) y **A Brea (2 y 5, dos pueblos distintos que se llaman
+igual)**. La herramienta buscaba el punto con `src.match(nombre)` y escribía
+con `src.replace`, y **las dos cosas van a la primera coincidencia del archivo
+entero**: la fila de la segunda etapa machacaba la de la primera. Así el
+Portomarín de la etapa 1 acabó con el km 0 de la traza de la etapa 2, y «A
+Brea» de la etapa 2 acabó con las coordenadas de la de la etapa 5. La etapa 2
+enseñó **10 h de marcha** para 27,6 km durante meses. Ya está arreglado: el
+archivo se recorre hacia delante y se va consumiendo, así que cada fila solo
+escribe en la coincidencia que le toca. **Si tocas esa herramienta, no vuelvas
+a buscar por nombre sobre el archivo entero.**
+
 **El service worker no puede ir dentro del HTML.** El navegador exige un
 `.js` servido desde el mismo origen. Por eso `sw.js` va suelto. Y solo
 funciona publicado en Pages, no abriendo el archivo local.
 
 **Hay DOS versiones que subir, y no son lo mismo.**
 
-- **`VERSION` en `sw.js`** (ahora `camino-v18`): súbela **siempre que cambies
+- **`VERSION` en `sw.js`** (ahora `camino-v19`): súbela **siempre que cambies
   `index.html`**. Nombra los cachés; si no la subes, los móviles que ya tengan
   la web guardada pueden seguir con la vieja.
-- **`APP_VERSION` en `index.html`** (ahora `map-8`): súbela **al tocar el
+- **`APP_VERSION` en `index.html`** (ahora `map-9`): súbela **al tocar el
   mapa**. No afecta al caché: es la etiqueta que enseña el diagnóstico `?debug`
   para saber, desde el propio móvil y sin Mac, qué versión ha cargado de
   verdad. Sirvió para descubrir que el problema del mapa era caché y no código.
@@ -243,21 +257,20 @@ El orden importa: `TRAZAS` antes que `ETAPAS`, y ambos antes que la lógica.
 | `lolitas2026-3d` | si el mapa está en vista 3D |
 | `lolitas2026-equipaje` | qué está ya metido en la maleta |
 
-**`hitosLimpios(n)` es obligatorio para calcular tiempos, no `et.puntos`.**
-Hay dos km mal puestos en los datos y los dos hacen mentir a Naismith:
+**`hitosLimpios(n)` es lo que hay que usar para calcular tiempos**, no
+`et.puntos` en crudo. Lo usan `perfilEtapa`, `Marcha.horarios` y `Queda`, y por
+eso los tres dicen lo mismo. Hace dos cosas:
 
-1. El punto `tipo:'fin'` de **cinco** etapas lleva el km de la traza de la
-   etapa SIGUIENTE (Portomarín 0, Palas de Rei 0,25, Melide 0,89, Arzúa 0,
-   O Pedrouzo 0). Como `Marcha.tramo` devuelve 0 con distancia negativa, el
-   último trozo no se contaba: 1,8 km en la 3.
-2. En la etapa 2, **«A Brea» tiene km 13,98 cuando va en el 22,2**. Eso metía
-   un ida y vuelta de nueve kilómetros: la etapa 2 daba **10 h** de marcha.
+1. **Añade un punto final en el km donde acaba la traza.** El último hito de la
+   guía no siempre coincide con el final del track: en la etapa 4 quedan 0,71
+   km por detrás de Arzúa (11 minutos de marcha). Esto sigue haciendo falta.
+2. **Descarta los puntos que retroceden en km.** Hoy solo caen empates a mismo
+   km (Barbadelo y su iglesia, los dos en el 4,36), que suman cero. Es una red
+   de seguridad, no un parche: los datos ya están bien.
 
-`hitosLimpios` descarta los puntos que retroceden y añade un punto final en el
-km real de la traza. Lo usan `perfilEtapa`, `Marcha.horarios` y `Queda`.
-**Si calculas tiempos por tu cuenta con `et.puntos`, saldrán mal**, y además
-discreparán de lo que enseña la ficha. Los datos siguen con el km equivocado
-en `datos.js`: arreglarlos de raíz está pendiente.
+**Los km de `datos.js` se corrigieron el 28 de julio de 2026** (antes cinco
+destinos llevaban el km de la traza siguiente y «A Brea» de la etapa 2 estaba a
+38 km de su sitio). Ver la trampa de los nombres repetidos, más abajo.
 - **`Marcha.coordEnKm(puntos, km, n)`** — interpola sobre `TRAZAS[n].linea`,
   NO sobre los hitos. Pásale siempre el número de etapa; sin él cae al respaldo
   por hitos, que corta campo a través.
