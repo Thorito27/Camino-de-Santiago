@@ -93,6 +93,72 @@ en modo avión. Es justo la primera fila de la tabla.
 
 ---
 
+## 2026-08-06 — Portada: los que no vienen, la autoría y el baile de los coches
+
+Tres correcciones pedidas sobre la portada.
+
+### Daniel, Pepe y Fidel
+
+Se añade, al final de «Quiénes van»: «Y en el camino habrá un recuerdo para
+Daniel, Pepe y Fidel, que esta vez no vienen».
+
+**Está escrito en tono neutro a propósito.** El encargo decía «nos acordaremos
+de Daniel, Pepe y Fidel que no vienen», y esa frase admite dos lecturas —que
+no han podido venir a este viaje, o algo más definitivo—. No se preguntó
+porque una redacción sosegada vale para las dos y no afirma nada que no se
+sepa; queda dicho aquí para que, si hace falta otro tono, se cambie a
+conciencia y no por descuido.
+
+### La autoría de los datos
+
+«Los preparó la tita Lucila en su guía» pasa a «salen de la guía de la tita
+Lucila, **con aportes de Juan Martínez**». Es una atribución, no un adorno.
+
+### Cómo se mueven los coches
+
+Apartado nuevo. Sois doce y hay tres coches; el movimiento de cada día, en
+cuatro pasos numerados (numerados porque es un orden: hecho de otra forma, no
+sale):
+
+1. A primera hora los tres coches van al **destino** de la etapa. Tres
+   conductores.
+2. Se **dejan dos** y todos vuelven en el tercero al **punto de partida**.
+3. Se camina la etapa.
+4. Al llegar andando esperan esos dos coches. Se coge uno para volver al origen
+   a por el que quedó allí: **van dos personas y vuelven con los dos coches**.
+
+Los conductores que hacen falta en cada paso (tres por la mañana, dos por la
+tarde) no venían en el encargo: se deducen del propio movimiento y se dicen
+porque es lo que se calcula mal.
+
+El apartado cierra con que al final del día los tres coches quedan en el
+destino, que es el punto de partida del día siguiente. **Se comprobó antes de
+afirmarlo**: las seis etapas encadenan (Portomarín, Palas de Rei, Melide,
+Arzúa, O Pedrouzo), y se dice explícitamente que el último día no hace falta
+porque en Santiago se acaba. Hay una prueba que vigila ese encadenamiento.
+
+Y un aviso al pie: **en un taxi normal caben cuatro personas**, así que para
+los doce harían falta tres. Enlaza a los puntos de escape, que llevan los
+teléfonos.
+
+### Comprobado
+
+`npm test`: **383 comprobaciones, 0 fallos** (eran 374). `npm run validar` y
+`node --check` OK.
+
+El texto de la portada está a mano y no sale de ningún dato, así que se le
+pusieron pruebas: los tres nombres, la atribución y los cuatro pasos. Probadas
+**en negativo**: quitando a Fidel, la mención a Juan Martínez y un paso de la
+lista, saltan cuatro fallos.
+
+`VERSION` a `camino-v23`. `APP_VERSION` sigue en `map-9`.
+
+**Sin comprobar en navegador real.** Se leyó el texto plano de la portada
+entera y se lee bien, pero el estilo de la lista numerada (el `::marker` en
+dorado) no lo ha visto nadie.
+
+---
+
 ## 2026-08-06 — Repaso de los apartados de etapa: se repetían y mentían
 
 Encargo: revisar los apartados dentro de cada etapa, que no sean repetitivos y

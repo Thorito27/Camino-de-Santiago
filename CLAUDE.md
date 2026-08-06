@@ -387,6 +387,15 @@ ve al entrar sin `?etapa=N`; con `?etapa=N` se salta directo a esa etapa. El
 trazado de la portada es un SVG propio generado de `TRAZAS` (`svgPortadaMapa`),
 sin imágenes externas.
 
+**El texto de la portada está escrito a mano y no sale de ningún dato**, así
+que una reescritura se lo lleva por delante sin que salte nada. Por eso hay
+pruebas que lo fijan: que están **Daniel, Pepe y Fidel** (los tres que no
+vienen, y el recuerdo es intencionado), que la guía se atribuye a **la tita
+Lucila con aportes de Juan Martínez**, y que el apartado «Cómo se mueven los
+coches» tiene sus **cuatro pasos en orden**. Ese apartado se apoya en que el
+destino de cada etapa es la salida de la siguiente: hay una prueba que lo
+comprueba, porque si algún día deja de encadenar, la explicación deja de valer.
+
 **Cada cosa en una sola pestaña.** Itinerario es el día (horario, cama y
 comida reservada); Paradas es lo que hay por el camino (escapes, bares y qué
 ver); Ruta son todos los puntos. La lista `cultura` llegó a pintarse **entera

@@ -147,6 +147,12 @@ h2::after{content:'';flex:1;height:1px;background:#DED8C9}
 .portada strong{font-weight:600;color:var(--tinta)}
 .portada a{color:var(--musgo);font-weight:600}
 .portada .nota strong{color:var(--tinta)}
+/* El baile de los tres coches. Numerada porque es un orden, no una lista
+   de cosas sueltas: si se hace en otro orden, no sale. */
+.portada ol.coches{margin:.55rem 0 .2rem;padding-left:1.35rem}
+.portada ol.coches li{font-size:.82rem;line-height:1.62;margin-top:.35rem;padding-left:.15rem}
+.portada ol.coches li::marker{font-family:'JetBrains Mono',monospace;font-size:.72rem;
+  color:var(--concha);font-weight:600}
 .portada-cta{display:block;width:100%;margin:1.2rem 0 .3rem;padding:.9rem 1rem;
   font-family:'Fraunces',serif;font-weight:600;font-size:1.08rem;text-align:center;
   color:var(--tinta);background:var(--concha);border:none;border-radius:var(--radio);cursor:pointer}
@@ -2200,6 +2206,8 @@ function panelPortada(){
     + '<strong>Juan Luque</strong> y sus hijas <strong>Lucilita</strong> y <strong>Sofía</strong>. '
     + 'Y <strong>Rocío</strong> con su hijo <strong>Pablo</strong>. De la abuela a los nietos, '
     + 'todos hasta la catedral.</p>'
+    + '<p>Y en el camino habrá un recuerdo para <strong>Daniel</strong>, <strong>Pepe</strong> '
+    + 'y <strong>Fidel</strong>, que esta vez no vienen.</p>'
 
     + '<h2>Qué es esto</h2>'
     + '<p>Son los últimos <strong>115 km del Camino Francés</strong>, de Sarria a Santiago '
@@ -2220,8 +2228,9 @@ function panelPortada(){
     + '<a href="#" onclick="irA(1);irASeccion(\'sellos\');return false;">checklist de sellos</a> '
     + 'para ir marcándolos.</p>'
     + '<p><strong>De dónde salen los datos.</strong> Los horarios, alojamientos, restaurantes y '
-    + 'puntos de interés los preparó <strong>la tita Lucila</strong> en su guía. Los trazados '
-    + 'y desniveles vienen de archivos <strong>GPX reales de Wikiloc</strong>.</p>'
+    + 'puntos de interés salen de la guía de <strong>la tita Lucila</strong>, con aportes de '
+    + '<strong>Juan Martínez</strong>. Los trazados y desniveles vienen de archivos '
+    + '<strong>GPX reales de Wikiloc</strong>.</p>'
 
     + '<h2>Cómo usar la web</h2>'
     + '<p>Arriba tienes las <strong>seis etapas</strong>; cada una con su mapa, su perfil de subidas y '
@@ -2238,6 +2247,25 @@ function panelPortada(){
     + '<p><strong>Alejandro</strong> vuela de vuelta el <strong>jueves 20 por la tarde</strong>, nada '
     + 'más terminar la etapa 3 en Melide. Así que las <strong>tres primeras etapas</strong> las '
     + 'camináis doce y las <strong>tres últimas</strong>, once.</p>'
+
+    + '<h2>Cómo se mueven los coches</h2>'
+    + '<p>Sois doce y hay <strong>tres coches</strong>. La idea, cada día:</p>'
+    + '<ol class="coches">'
+    + '<li><strong>A primera hora</strong>, los tres coches van al <strong>destino</strong> de la '
+    + 'etapa. Hacen falta tres conductores.</li>'
+    + '<li>Allí se <strong>dejan dos</strong> y todos vuelven en el tercero al '
+    + '<strong>punto de partida</strong>.</li>'
+    + '<li>Se camina la etapa.</li>'
+    + '<li>Al llegar andando están esperando esos <strong>dos coches</strong>. Se coge uno para '
+    + 'volver al origen a por el que quedó allí: van dos personas y vuelven con los dos coches.</li>'
+    + '</ol>'
+    + '<p>Al final del día los tres coches están en el destino, que es justo el punto de partida '
+    + 'de la etapa siguiente. Y así encadenan las seis: solo el último día no hace falta, porque '
+    + 'en Santiago se acaba.</p>'
+    + '<div class="nota"><strong>Si alguien tiene que dejarlo a media etapa</strong>, en un taxi '
+    + 'normal caben <strong>cuatro personas</strong>: para los doce harían falta tres taxis. '
+    + 'Los <a href="#" onclick="irA(1);irASeccion(\'paradas\');return false;">puntos de escape</a> '
+    + 'de cada etapa llevan los teléfonos.</div>'
 
     + '<button class="portada-cta" onclick="irA(0)">Entrar al índice →</button>'
     + '<p class="firma">Buen Camino.</p>'
