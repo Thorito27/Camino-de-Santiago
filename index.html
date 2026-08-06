@@ -147,12 +147,14 @@ h2::after{content:'';flex:1;height:1px;background:#DED8C9}
 .portada strong{font-weight:600;color:var(--tinta)}
 .portada a{color:var(--musgo);font-weight:600}
 .portada .nota strong{color:var(--tinta)}
-/* El baile de los tres coches. Numerada porque es un orden, no una lista
-   de cosas sueltas: si se hace en otro orden, no sale. */
-.portada ol.coches{margin:.55rem 0 .2rem;padding-left:1.35rem}
-.portada ol.coches li{font-size:.82rem;line-height:1.62;margin-top:.35rem;padding-left:.15rem}
-.portada ol.coches li::marker{font-family:'JetBrains Mono',monospace;font-size:.72rem;
-  color:var(--concha);font-weight:600}
+/* Las opciones para mover los coches. SIN numerar a propósito: son
+   alternativas entre las que hay que elegir, no los pasos de un plan ya
+   decidido. Estuvo un rato como <ol> y daba a entender lo contrario. */
+.portada ul.coches{margin:.55rem 0 .2rem;padding-left:1.1rem;list-style:none}
+.portada ul.coches li{font-size:.82rem;line-height:1.62;margin-top:.5rem;position:relative;
+  padding-left:.75rem}
+.portada ul.coches li::before{content:'';position:absolute;left:0;top:.55em;width:.35rem;
+  height:.35rem;border-radius:50%;background:var(--concha)}
 .portada-cta{display:block;width:100%;margin:1.2rem 0 .3rem;padding:.9rem 1rem;
   font-family:'Fraunces',serif;font-weight:600;font-size:1.08rem;text-align:center;
   color:var(--tinta);background:var(--concha);border:none;border-radius:var(--radio);cursor:pointer}
@@ -1099,6 +1101,13 @@ const DECISIONES = [
     que:'Hay que comunicar a Mesón A Lareira qué va a cenar cada uno. Lo piden con una semana de antelación.',
     estado:'pendiente',
     wa:'Mesón A Lareira (Palas de Rei): hay que decirles antes del 12 de agosto qué cena cada uno. ¿Vamos apuntando los platos?'
+  },
+  {
+    id:'coches', titulo:'Cómo se mueven los coches',
+    lugar:'Todas las etapas', fecha:'2026-08-18', cuando:'Cada día del viaje',
+    que:'Sois doce y hay tres coches, y cada etapa acaba lejos de donde empieza. Hay dos formas de llevarlos: dejar dos en el destino y volver en el tercero al punto de partida, o llevarlos todos al destino y volver en taxi (en un taxi normal caben cuatro, así que harían falta tres). Va aparte lo de la abuela: si se cansa a media etapa, coger un taxi con ella hasta el inicio y seguir en el coche que se hubiera dejado allí, lo que solo cabe con la primera opción.',
+    estado:'pendiente',
+    wa:'Los coches: somos doce y hay tres. ¿Dejamos dos en el destino y volvemos en el tercero al inicio de la etapa, o los llevamos todos y volvemos en taxi? Lo pregunto también por si la abuela se cansa: con la primera opción quedaría un coche en el inicio.'
   }
 ];
 
@@ -2206,8 +2215,8 @@ function panelPortada(){
     + '<strong>Juan Luque</strong> y sus hijas <strong>Lucilita</strong> y <strong>Sofía</strong>. '
     + 'Y <strong>Rocío</strong> con su hijo <strong>Pablo</strong>. De la abuela a los nietos, '
     + 'todos hasta la catedral.</p>'
-    + '<p>Y en el camino habrá un recuerdo para <strong>Daniel</strong>, <strong>Pepe</strong> '
-    + 'y <strong>Fidel</strong>, que esta vez no vienen.</p>'
+    + '<p>Nos acordamos de <strong>Daniel</strong>, <strong>Pepe</strong> y '
+    + '<strong>Fidel</strong>.</p>'
 
     + '<h2>Qué es esto</h2>'
     + '<p>Son los últimos <strong>115 km del Camino Francés</strong>, de Sarria a Santiago '
@@ -2248,24 +2257,26 @@ function panelPortada(){
     + 'más terminar la etapa 3 en Melide. Así que las <strong>tres primeras etapas</strong> las '
     + 'camináis doce y las <strong>tres últimas</strong>, once.</p>'
 
-    + '<h2>Cómo se mueven los coches</h2>'
-    + '<p>Sois doce y hay <strong>tres coches</strong>. La idea, cada día:</p>'
-    + '<ol class="coches">'
-    + '<li><strong>A primera hora</strong>, los tres coches van al <strong>destino</strong> de la '
-    + 'etapa. Hacen falta tres conductores.</li>'
-    + '<li>Allí se <strong>dejan dos</strong> y todos vuelven en el tercero al '
-    + '<strong>punto de partida</strong>.</li>'
-    + '<li>Se camina la etapa.</li>'
-    + '<li>Al llegar andando están esperando esos <strong>dos coches</strong>. Se coge uno para '
-    + 'volver al origen a por el que quedó allí: van dos personas y vuelven con los dos coches.</li>'
-    + '</ol>'
-    + '<p>Al final del día los tres coches están en el destino, que es justo el punto de partida '
-    + 'de la etapa siguiente. Y así encadenan las seis: solo el último día no hace falta, porque '
-    + 'en Santiago se acaba.</p>'
-    + '<div class="nota"><strong>Si alguien tiene que dejarlo a media etapa</strong>, en un taxi '
-    + 'normal caben <strong>cuatro personas</strong>: para los doce harían falta tres taxis. '
-    + 'Los <a href="#" onclick="irA(1);irASeccion(\'paradas\');return false;">puntos de escape</a> '
-    + 'de cada etapa llevan los teléfonos.</div>'
+    + '<h2>Los coches</h2>'
+    + '<p><strong>Todavía sin decidir.</strong> Sois doce y hay <strong>tres coches</strong>, y '
+    + 'cada etapa acaba en un sitio distinto del que empieza, así que hay que llevarlos de una '
+    + 'punta a otra cada día. Lo que hay sobre la mesa:</p>'
+    + '<ul class="coches">'
+    + '<li><strong>Dejar dos coches en el destino.</strong> A primera hora los tres van al '
+    + 'destino de la etapa, se dejan dos allí y todos vuelven en el tercero al punto de partida. '
+    + 'Al llegar andando se coge uno de los dos para volver al origen a por el que quedó.</li>'
+    + '<li><strong>Llevarlos todos y volver en taxi.</strong> Los tres coches al destino y la '
+    + 'vuelta al inicio de la etapa en taxi. En un taxi normal caben <strong>cuatro personas</strong>, '
+    + 'así que para los doce harían falta tres.</li>'
+    + '<li><strong>Y si la abuela se cansa a media etapa.</strong> Que alguien coja un taxi con '
+    + 'ella hasta el <strong>inicio</strong> de la etapa y sigan desde allí en el coche que se '
+    + 'hubiera dejado. Ojo: esto solo cabe si queda un coche en el punto de partida, o sea, con '
+    + 'la primera opción.</li>'
+    + '</ul>'
+    + '<div class="nota">Está sin cerrar, en '
+    + '<a href="#" onclick="irA(0);return false;">Decisiones del grupo</a>, con su botón para '
+    + 'preguntarlo por WhatsApp. Los teléfonos de taxi de cada etapa están en sus '
+    + '<a href="#" onclick="irA(1);irASeccion(\'paradas\');return false;">puntos de escape</a>.</div>'
 
     + '<button class="portada-cta" onclick="irA(0)">Entrar al índice →</button>'
     + '<p class="firma">Buen Camino.</p>'

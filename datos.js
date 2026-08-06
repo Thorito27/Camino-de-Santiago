@@ -436,6 +436,13 @@ const DECISIONES = [
     que:'Hay que comunicar a Mesón A Lareira qué va a cenar cada uno. Lo piden con una semana de antelación.',
     estado:'pendiente',
     wa:'Mesón A Lareira (Palas de Rei): hay que decirles antes del 12 de agosto qué cena cada uno. ¿Vamos apuntando los platos?'
+  },
+  {
+    id:'coches', titulo:'Cómo se mueven los coches',
+    lugar:'Todas las etapas', fecha:'2026-08-18', cuando:'Cada día del viaje',
+    que:'Sois doce y hay tres coches, y cada etapa acaba lejos de donde empieza. Hay dos formas de llevarlos: dejar dos en el destino y volver en el tercero al punto de partida, o llevarlos todos al destino y volver en taxi (en un taxi normal caben cuatro, así que harían falta tres). Va aparte lo de la abuela: si se cansa a media etapa, coger un taxi con ella hasta el inicio y seguir en el coche que se hubiera dejado allí, lo que solo cabe con la primera opción.',
+    estado:'pendiente',
+    wa:'Los coches: somos doce y hay tres. ¿Dejamos dos en el destino y volvemos en el tercero al inicio de la etapa, o los llevamos todos y volvemos en taxi? Lo pregunto también por si la abuela se cansa: con la primera opción quedaría un coche en el inicio.'
   }
 ];
 
