@@ -236,6 +236,15 @@ El orden importa: `TRAZAS` antes que `ETAPAS`, y ambos antes que la lógica.
 - **`Persona`** — quién juega, en localStorage (`lolitas2026-persona`). Lista
   fija en `PERSONAS` (datos.js), sin contraseña. Sin persona elegida, Retos no
   deja jugar; la portada saluda por el nombre si está puesto.
+  **Se elige desde dos sitios y no son el mismo trozo de código.** En la
+  **portada** hay un «¿Quién eres?» que abre la **ventana** `#quien`
+  (`abrirDialogo` / `cerrarDialogo` / `pintarDialogo`), con la misma mecánica
+  que la de «¿Cuánto queda?»: `Esc` cierra y las flechas no navegan por
+  detrás. En **Retos** se sigue usando `panelElegirPersona()`, el panel
+  entero, porque allí es la primera pantalla y taparla con un diálogo no
+  aporta. `elegir()` cierra la ventana si estaba abierta, si no se queda
+  encima tapando el saludo. Si tocas el `keydown`, acuérdate de que ahora
+  intercepta **dos** diálogos, no uno.
 - **`Retos`** — cuestionario en localStorage (`lolitas2026-retos`). **Guarda un
   registro por respuesta**: `{id, opcion, acierto, ts}`, más `v` (versión de
   formato) y `persona`. Está pensado así a propósito: si algún día se
