@@ -31,6 +31,22 @@ se queda en una rama no lo ve nadie, porque **la web se publica desde `main`**
 (GitHub Pages, carpeta raíz). No dejes trabajo terminado sin fusionar salvo
 que se pida expresamente.
 
+**Ningún cambio se queda sin entregar, y no hay que pedirlo.** Cada encargo
+termina en `main`, aunque sea una palabra. No esperes a que te digan «haz
+commit»: forma parte de hacer el trabajo, igual que pasar las pruebas. Si en
+un turno tocas archivos, ese turno acaba con la rama fusionada.
+
+Y **compruébalo antes de decir que está hecho**, que decirlo no lo hace:
+
+```bash
+git status --short                    # vacío = nada sin guardar
+git log --oneline origin/main..HEAD   # 0 líneas = nada sin fusionar
+git diff --stat origin/main...HEAD    # vacío = la rama y main coinciden
+```
+
+Si de verdad hay una razón para no entregar algo, **dilo en la respuesta**;
+lo que no vale es dejarlo a medias en silencio.
+
 **Y comprueba si la PR de tu rama ya está fusionada antes de seguir
 trabajando en ella.** Ya pasó: se fusionó la PR #24 y después se siguieron
 subiendo commits a la misma rama, que quedaron fuera de `main` mientras
