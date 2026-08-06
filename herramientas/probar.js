@@ -144,6 +144,51 @@ console.log('\n1. Portada');
   comprobar('el destino de cada etapa es la salida de la siguiente',
     ETS.slice(0,-1).every((e,i) => e.destino === ETS[i+1].origen));
 
+  /* ---- "¿Quién eres?" desde la portada ----
+     Antes solo se podía elegir persona metiéndose en Retos, así que la
+     portada saludaba por el nombre a quien ya hubiera jugado y a nadie más.
+     Ahora se pregunta nada más entrar y se elige en una ventana, sin salir
+     de la portada. */
+  comprobar('la portada pregunta quién eres', /¿Quién eres\?/.test(hp));
+  comprobar('hay botón para elegir el nombre',
+    !!s.d.querySelector('.quien-portada .quien-btn'));
+  comprobar('la ventana empieza cerrada', s.w.eval('Persona.dialogoAbierto()') === false);
+
+  s.w.eval('Persona.abrirDialogo()');
+  comprobar('el botón abre la ventana', s.w.eval('Persona.dialogoAbierto()') === true);
+  const enVentana = s.d.querySelectorAll('#quienCuerpo .persona');
+  comprobar('la ventana lista a todo el grupo',
+    enVentana.length === s.w.eval('PERSONAS.length'));
+  comprobar('la ventana avisa de que es solo en este móvil',
+    /este móvil/.test(s.d.getElementById('quienCuerpo').textContent));
+  /* La portada no se pierde por abrir la ventana: sigue detrás. */
+  comprobar('la portada sigue debajo de la ventana', s.w.eval('vistaEtapa') === -1);
+
+  s.w.eval('Persona.elegirIdx(1)');
+  const elegida = s.w.eval('PERSONAS[1]');
+  comprobar('elegir guarda la persona', s.w.eval('Persona.nombre()') === elegida);
+  comprobar('elegir cierra la ventana sola', s.w.eval('Persona.dialogoAbierto()') === false);
+  comprobar('la persona se guarda en localStorage',
+    s.w.localStorage.getItem('lolitas2026-persona') === elegida);
+  comprobar('la portada saluda por el nombre', html(s).indexOf('Hola, <strong>'+elegida) >= 0);
+  comprobar('y dice cómo estás puesto', /Estás como/.test(html(s)));
+
+  /* Con nombre puesto, la ventana marca cuál eres: la lista es de doce y sin
+     marca no hay forma de saberlo. */
+  s.w.eval('Persona.abrirDialogo()');
+  const marcadas = s.d.querySelectorAll('#quienCuerpo .persona.elegida');
+  comprobar('la ventana marca quién eres ahora', marcadas.length === 1
+    && marcadas[0].textContent.trim() === elegida);
+  /* Esc cierra, y con la ventana abierta las flechas NO cambian de etapa. */
+  s.w.document.dispatchEvent(new s.w.KeyboardEvent('keydown', {key:'ArrowRight'}));
+  comprobar('con la ventana abierta las flechas no navegan', s.w.eval('vistaEtapa') === -1);
+  s.w.document.dispatchEvent(new s.w.KeyboardEvent('keydown', {key:'Escape'}));
+  comprobar('Esc cierra la ventana', s.w.eval('Persona.dialogoAbierto()') === false);
+
+  s.w.eval('Persona.olvidar()');
+  comprobar('se puede quitar el nombre', s.w.eval('Persona.nombre()') === null);
+  comprobar('sin nombre, la portada vuelve a preguntar', /¿Quién eres\?/.test(html(s)));
+
   s.w.irA(0);
   comprobar('el botón de entrar lleva al índice', s.w.eval('vistaEtapa') === 0);
   comprobar('el índice no sale vacío', largo(s) > 1000);

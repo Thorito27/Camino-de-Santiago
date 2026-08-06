@@ -93,6 +93,66 @@ en modo avión. Es justo la primera fila de la tabla.
 
 ---
 
+## 2026-08-06 — «¿Quién eres?» en la portada, en una ventana
+
+Hasta ahora la persona **solo se podía elegir metiéndose en Retos**, que es la
+pestaña 7. Consecuencia: la portada saludaba por el nombre a quien ya hubiera
+jugado, y a nadie más. Quien entrara por primera vez no tenía forma de decir
+quién era sin irse a otra pantalla.
+
+Ahora la portada lo pregunta, justo debajo del saludo y antes del texto largo
+—más abajo no lo ve nadie—, y se elige en una **ventana emergente** sin salir
+de la portada:
+
+| Estado | Qué se ve |
+|---|---|
+| sin nombre | «¿Quién eres?» + botón **Elegir mi nombre** |
+| con nombre | «Estás como **Juanje**» + botón **Cambiar** |
+
+### La ventana
+
+Es el mismo patrón que la de «¿Cuánto queda?», reutilizado en vez de inventar
+otro: un `div.modal` que se enseña y se esconde, con el foco devuelto al
+cerrar, clic fuera para cerrar y la X arriba.
+
+- **`Esc` cierra** y, con ella abierta, **las flechas NO cambian de etapa**.
+  Sin eso se navega por detrás del diálogo y al cerrarlo te has cambiado de
+  pestaña sin querer. El `keydown` intercepta ahora **dos** diálogos.
+- **Marca cuál eres** con fondo verde y un ✓. La lista es de doce nombres; sin
+  marca no hay manera de saber cuál está puesto.
+- **Elegir cierra la ventana sola.** Si no, se queda encima tapando justo el
+  saludo que acabas de ganar.
+- Dice de qué va: es solo para saludarte y para tu puntuación **en este
+  móvil**, sin contraseña y sin compartir con nadie.
+
+### Lo que NO se ha tocado
+
+En **Retos** se sigue usando `panelElegirPersona()`, el panel entero. Allí es
+la primera pantalla que sale si no hay nombre, y taparla con un diálogo no
+aporta nada. Son dos caminos al mismo `Persona.elegir()`.
+
+### Comprobado
+
+`npm test`: **412 comprobaciones, 0 fallos** (eran 395; 17 nuevas). `npm run
+validar` y `node --check` OK.
+
+Se prueba el recorrido entero, no solo que el botón exista: abrir, que la
+portada siga debajo, elegir, que se guarde en localStorage, que la ventana se
+cierre sola, que la portada salude, que al reabrir esté marcado quién eres,
+que las flechas no naveguen, que `Esc` cierre, y que al quitar el nombre se
+vuelva a preguntar.
+
+Probado **en negativo** con tres roturas a la vez (que elegir no cierre, que
+el teclado no esté interceptado y que no se marque quién eres): saltan cinco
+fallos. Después se restauró.
+
+`VERSION` a `camino-v27`. `APP_VERSION` sigue en `map-9`.
+
+**Sin comprobar en navegador real:** la ventana no la ha visto nadie en
+pantalla, ni en móvil, que es donde se va a usar.
+
+---
+
 ## 2026-08-06 — Tercera opción para los coches: no mover ninguno por la mañana
 
 Opción nueva sobre la mesa: **no llevar ningún coche al destino a primera

@@ -147,6 +147,18 @@ h2::after{content:'';flex:1;height:1px;background:#DED8C9}
 .portada strong{font-weight:600;color:var(--tinta)}
 .portada a{color:var(--musgo);font-weight:600}
 .portada .nota strong{color:var(--tinta)}
+/* "¿Quién eres?" en la portada. Va pegado al saludo, antes de que empiece
+   el texto largo: si cae más abajo no lo ve nadie. */
+.quien-portada{display:flex;align-items:center;justify-content:space-between;gap:.6rem;
+  flex-wrap:wrap;margin-top:.7rem;padding:.6rem .7rem;background:#fff;
+  border:1px solid #E2DCCC;border-left:3px solid var(--concha);border-radius:var(--radio)}
+.quien-portada .quien-eres{font-family:'Fraunces',serif;font-weight:600;font-size:.86rem;
+  color:var(--tinta)}
+.quien-portada .quien-btn{flex-shrink:0;font-family:'JetBrains Mono',monospace;
+  font-size:.64rem;font-weight:600;letter-spacing:.02em;color:#fff;background:var(--musgo);
+  border:0;padding:.42rem .7rem;border-radius:var(--radio);cursor:pointer}
+.quien-portada .quien-btn:hover{background:#3B5641}
+.quien-portada .quien-btn:focus-visible{outline:2px solid var(--tinta);outline-offset:2px}
 /* Las opciones para mover los coches. SIN numerar a propósito: son
    alternativas entre las que hay que elegir, no los pasos de un plan ya
    decidido. Estuvo un rato como <ol> y daba a entender lo contrario. */
@@ -171,6 +183,10 @@ h2::after{content:'';flex:1;height:1px;background:#DED8C9}
   transition:border-color .13s,transform .13s}
 .persona:hover{border-color:var(--musgo);transform:translateY(-1px)}
 .persona:focus-visible{outline:2px solid var(--musgo);outline-offset:1px}
+/* El que ya está elegido, marcado: en la ventana se ve la lista entera y
+   sin esto no hay forma de saber cuál eres. */
+.persona.elegida{background:#EAF1EA;border-color:var(--musgo);border-left-color:var(--musgo)}
+.persona.elegida::after{content:' ✓';color:var(--musgo)}
 .reto-aviso{margin-top:.4rem;font-family:'JetBrains Mono',monospace;font-size:.6rem;
   letter-spacing:.04em;color:var(--alerta)}
 .reto-mencion{background:var(--tinta);color:var(--concha);border-radius:var(--radio);
@@ -636,6 +652,17 @@ body.offline #sinRed{display:block}
     <button class="modal-x" id="quedaX" type="button" onclick="Queda.cerrar()"
       aria-label="Cerrar">&times;</button>
     <div id="quedaCuerpo"></div>
+  </div>
+</div>
+
+<!-- Ventana de "¿Quién eres?". Misma mecánica que la de arriba: vacía hasta
+     que se abre, la pinta Persona. -->
+<div id="quien" class="modal" hidden>
+  <div class="modal-fondo" onclick="Persona.cerrarDialogo()"></div>
+  <div class="modal-caja" role="dialog" aria-modal="true" aria-labelledby="quienT">
+    <button class="modal-x" id="quienX" type="button" onclick="Persona.cerrarDialogo()"
+      aria-label="Cerrar">&times;</button>
+    <div id="quienCuerpo"></div>
   </div>
 </div>
 <script>
@@ -2205,6 +2232,22 @@ function panelPortada(){
           + 'Esta web es vuestra guía de bolsillo para el viaje.</p>'
         : '<p class="lead">Doce personas y tres generaciones caminando juntas de Sarria a '
           + 'Santiago. Esta web es vuestra guía de bolsillo para el viaje.</p>')
+
+    /* Quién eres, nada más entrar. Antes solo se podía decir metiéndose en
+       Retos, así que la portada saludaba por el nombre a quien ya hubiera
+       jugado y a nadie más. El botón abre la ventana, no cambia de pantalla:
+       se elige y se sigue donde estabas. */
+    + (typeof Persona !== 'undefined'
+        ? '<div class="quien-portada">'
+          + (Persona.nombre()
+              ? '<span class="quien-eres">Estás como <strong>' + esc(Persona.nombre())
+                + '</strong></span>'
+                + '<button class="quien-btn" onclick="Persona.abrirDialogo()">Cambiar</button>'
+              : '<span class="quien-eres">¿Quién eres?</span>'
+                + '<button class="quien-btn" onclick="Persona.abrirDialogo()">'
+                + 'Elegir mi nombre</button>')
+          + '</div>'
+        : '')
 
     + '<h2>Quiénes van</h2>'
     + '<p>El grupo se llama <strong>las Lolitas</strong> por la abuela <strong>Lola</strong>, '
@@ -3875,12 +3918,16 @@ function panelEquipaje(){
    puntuación guardada en este móvil. --- */
 const Persona = {
   CLAVE: 'lolitas2026-persona',
+  _foco: null,
 
   nombre: function(){
     try{ return localStorage.getItem(this.CLAVE) || null; }catch(e){ return null; }
   },
   elegir: function(n){
     try{ localStorage.setItem(this.CLAVE, n); }catch(e){}
+    /* Si se eligió desde la ventana, se cierra sola: si no, se queda encima
+       tapando el saludo que se acaba de ganar. */
+    if(this.dialogoAbierto()) this.cerrarDialogo();
     pintarPanel();
   },
   elegirIdx: function(i){
@@ -3889,7 +3936,50 @@ const Persona = {
   },
   olvidar: function(){
     try{ localStorage.removeItem(this.CLAVE); }catch(e){}
+    if(this.dialogoAbierto()) this.cerrarDialogo();
     pintarPanel();
+  },
+
+  /* ---- La ventana de "¿Quién eres?" ----
+     Misma mecánica que la de "¿Cuánto queda?": un div .modal que se enseña y
+     se esconde, con el foco devuelto al cerrar. Se puede abrir desde la
+     portada, y desde Retos se sigue usando el panel entero (allí es la
+     primera pantalla y no tiene sentido taparla con un diálogo). */
+  dialogoAbierto: function(){
+    const el = document.getElementById('quien');
+    return !!(el && !el.hidden);
+  },
+  abrirDialogo: function(){
+    const el = document.getElementById('quien');
+    if(!el) return;
+    this._foco = document.activeElement;
+    el.hidden = false;
+    this.pintarDialogo();
+    const x = document.getElementById('quienX');
+    if(x) try{ x.focus(); }catch(e){}
+  },
+  cerrarDialogo: function(){
+    const el = document.getElementById('quien');
+    if(!el) return;
+    el.hidden = true;
+    if(this._foco) try{ this._foco.focus(); }catch(e){}
+    this._foco = null;
+  },
+  pintarDialogo: function(){
+    const c = document.getElementById('quienCuerpo');
+    if(!c) return;
+    const yo = this.nombre();
+    c.innerHTML = '<h2 id="quienT">¿Quién eres?</h2>'
+      + '<div class="nota">Es solo para saludarte por tu nombre y para llevar tu '
+      + 'puntuación de los Retos <strong>en este móvil</strong>. No hay contraseña, no se '
+      + 'comparte con nadie y se puede cambiar cuando quieras.</div>'
+      + '<div class="personas">' + PERSONAS.map(function(p, i){
+          return '<button class="persona' + (p === yo ? ' elegida' : '') + '" '
+            + 'onclick="Persona.elegirIdx(' + i + ')"'
+            + (p === yo ? ' aria-current="true"' : '') + '>' + esc(p) + '</button>';
+        }).join('') + '</div>'
+      + (yo ? '<div style="text-align:center"><button class="btn-recargar" '
+              + 'onclick="Persona.olvidar()">Quitar mi nombre</button></div>' : '');
   }
 };
 
@@ -4489,6 +4579,12 @@ document.addEventListener('keydown', function(e){
      NO cambian de etapa: se estaría navegando por detrás de un diálogo. */
   if(typeof Queda !== 'undefined' && Queda.abierto()){
     if(e.key === 'Escape') Queda.cerrar();
+    return;
+  }
+  /* Lo mismo con la de "¿Quién eres?": si no, se navega por detrás del
+     diálogo y al cerrarlo has cambiado de etapa sin querer. */
+  if(typeof Persona !== 'undefined' && Persona.dialogoAbierto()){
+    if(e.key === 'Escape') Persona.cerrarDialogo();
     return;
   }
   if(e.key === 'ArrowRight' && vistaEtapa < 8) irA(vistaEtapa+1);
