@@ -428,10 +428,16 @@ salida de la siguiente: también hay prueba, porque si algún día deja de
 encadenar, esa opción deja de tener sentido.
 
 **Cada alternativa lleva su `data-opcion`** (`dejar-dos`, `todos-taxi`,
-`ninguno`, `abuela`) y las pruebas se agarran a eso, no a frases del texto:
-antes había que perseguirlas cada vez que se retocaba una redacción. Si añades
-una opción, añádela a `OPCIONES` en `probar.js` y revisa la frase de `abuela`,
-que enumera con cuáles de ellas es compatible.
+`ninguno`) y las pruebas se agarran a eso, no a frases del texto: antes había
+que perseguirlas cada vez que se retocaba una redacción. Si añades una opción,
+añádela a `OPCIONES` en `probar.js`.
+
+**Lo de la abuela NO es una cuarta opción**, y llegó a estar pintado como tal:
+una viñeta suelta al final que parecía una alternativa más cuando en realidad
+es una **consecuencia** de las opciones que dejan un coche en el inicio. Va
+dentro de `dejar-dos`, y `ninguno` ya nace de ese caso. `todos-taxi` avisa de
+que con ella no queda coche en el inicio. Hay prueba de que no vuelva a
+aparecer una viñeta `abuela` suelta.
 
 **Cada cosa en una sola pestaña.** Itinerario es el día (horario, cama y
 comida reservada); Paradas es lo que hay por el camino (escapes, bares y qué
