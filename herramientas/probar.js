@@ -87,31 +87,52 @@ console.log('\n1. Portada');
   /* Los coches NO están decididos. Se llegó a escribir en la portada como si
      lo estuvieran («la idea, cada día») y no era cierto: hay varias opciones
      sobre la mesa. Estas comprobaciones evitan que vuelva a darse por hecho. */
-  const opciones = s.d.querySelectorAll('.portada ul.coches li');
-  comprobar('la portada da las opciones de los coches', opciones.length === 3);
-  comprobar('la portada dice que los coches están sin decidir',
-    /sin decidir/i.test(hp));
+  /* Cada alternativa lleva su `data-opcion`. Antes esto se comprobaba
+     buscando frases sueltas dentro del texto, y cada vez que se retocaba una
+     redacción había que perseguir la prueba. */
+  /* Devuelve un hueco en vez de null: si falta una opción quiero que lo
+     canten las comprobaciones de abajo, no que reviente el proceso y se
+     queden sin ejecutar las demás. */
+  const op = id => s.d.querySelector('.portada ul.coches li[data-opcion="'+id+'"]')
+    || {textContent:''};
+  const OPCIONES = ['dejar-dos','todos-taxi','ninguno','abuela'];
+  comprobar('la portada da las opciones de los coches',
+    s.d.querySelectorAll('.portada ul.coches li').length === OPCIONES.length);
+  /* Ojo: aquí se pregunta al DOM directamente, NO por `op()`, que devuelve un
+     hueco cuando falta y haría pasar siempre esta comprobación. */
+  OPCIONES.forEach(id => comprobar('está la opción «'+id+'»',
+    !!s.d.querySelector('.portada ul.coches li[data-opcion="'+id+'"]')));
+  comprobar('la portada dice que los coches están sin decidir', /sin decidir/i.test(hp));
   comprobar('las opciones NO se pintan como pasos numerados',
     s.d.querySelectorAll('.portada ol.coches li').length === 0);
-  comprobar('está la opción de dejar dos coches en el destino',
-    [...opciones].some(li => /dejan dos/.test(li.textContent)
-      && /punto de partida/.test(li.textContent)));
-  comprobar('está la opción de volver en taxi',
-    [...opciones].some(li => /un solo taxi/.test(li.textContent)));
-  /* Los coches los mueven TRES personas, no el grupo entero: se llegó a
-     escribir que iban los doce y volvían en tres taxis, y no es eso. Las dos
-     opciones tienen que decir quién va y que el resto espera en el inicio. */
-  const mueven = [...opciones].filter(li => /coches al destino|los tres coches/.test(li.textContent));
-  comprobar('las dos opciones de coche dicen que van tres personas',
-    mueven.length === 2 && mueven.every(li => /tres personas/.test(li.textContent)));
-  comprobar('las dos dicen que el resto espera en el punto de partida',
-    mueven.length === 2 && mueven.every(li => /punto de partida/.test(li.textContent)
-      && /resto/.test(li.textContent)));
+
+  /* Quién mueve los coches: un grupo pequeño, NO los doce. Se llegó a
+     escribir que iban todos y volvían en tres taxis, y no era eso. Cada
+     opción dice cuántos van, y las de la mañana que el resto espera. */
+  comprobar('con «dejar dos» y con «todos en taxi» van tres personas',
+    ['dejar-dos','todos-taxi'].every(id => /tres personas/.test(op(id).textContent)));
+  comprobar('esas dos dicen que el resto espera en el punto de partida',
+    ['dejar-dos','todos-taxi'].every(id =>
+      /resto/.test(op(id).textContent) && /punto de partida/.test(op(id).textContent)));
+  comprobar('con «no mover ninguno» van dos personas',
+    /dos personas/.test(op('ninguno').textContent));
+  comprobar('«todos en taxi» es un solo taxi', /un solo taxi/.test(op('todos-taxi').textContent));
   comprobar('no se dice que hagan falta tres taxis para el grupo',
     !/tres taxis/.test(hp) && !/harían falta tres/.test(hp));
-  comprobar('está lo de la abuela, y que depende de la primera opción',
-    [...opciones].some(li => /abuela/.test(li.textContent)
-      && /primera opci/.test(li.textContent)));
+
+  /* Lo de la abuela depende de que quede un coche en el inicio, y eso pasa
+     con «dejar dos» y con «no mover ninguno», pero NO con «todos en taxi».
+     Si se añade otra opción, hay que revisar esta frase. */
+  comprobar('lo de la abuela dice de qué opciones depende',
+    /primera opci/.test(op('abuela').textContent)
+      && /tercera/.test(op('abuela').textContent)
+      && /no con la segunda/.test(op('abuela').textContent));
+  /* Los dos cabos sueltos de «no mover ninguno» se dicen a propósito: son lo
+     que hay que resolver antes de poder elegir esa opción. */
+  const avisos = [...s.d.querySelectorAll('.portada .nota')]
+    .map(n => n.textContent).join(' ');
+  comprobar('se dicen los cabos sueltos de «no mover ninguno»',
+    /faltan por atar/i.test(avisos) && /necesita parar/.test(avisos));
   /* Y tiene que estar en las decisiones del grupo, no solo contado en la
      portada: es lo que hay que cerrar. */
   comprobar('los coches están en las decisiones del grupo, sin cerrar',

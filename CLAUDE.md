@@ -402,6 +402,12 @@ Hay pruebas que comprueban las tres cosas, **incluida que no vuelva a ser un
 salida de la siguiente: también hay prueba, porque si algún día deja de
 encadenar, esa opción deja de tener sentido.
 
+**Cada alternativa lleva su `data-opcion`** (`dejar-dos`, `todos-taxi`,
+`ninguno`, `abuela`) y las pruebas se agarran a eso, no a frases del texto:
+antes había que perseguirlas cada vez que se retocaba una redacción. Si añades
+una opción, añádela a `OPCIONES` en `probar.js` y revisa la frase de `abuela`,
+que enumera con cuáles de ellas es compatible.
+
 **Cada cosa en una sola pestaña.** Itinerario es el día (horario, cama y
 comida reservada); Paradas es lo que hay por el camino (escapes, bares y qué
 ver); Ruta son todos los puntos. La lista `cultura` llegó a pintarse **entera
@@ -444,10 +450,12 @@ quien lo marca). Al día del **6 de agosto de 2026**:
   va a la misa y se retrasa la cena, falta que Milongas confirme la hora.
 - Antes del 12 de agosto: comunicar el menú a Mesón A Lareira. **Pendiente, y
   es la que corre.**
-- Cómo se mueven los tres coches de una etapa a otra. **Pendiente**: dejar dos
-  en el destino y volver en el tercero, o llevarlos todos y volver en taxi. Va
-  atado a que la abuela pueda cortar a media etapa, que solo cabe si queda un
-  coche en el inicio.
+- Cómo se mueven los tres coches de una etapa a otra. **Pendiente**, con tres
+  opciones: dejar dos en el destino y volver en el tercero; llevarlos todos y
+  volver en un taxi; o no mover ninguno por la mañana y moverlos cuando la
+  abuela se canse. Va atado a que ella pueda cortar a media etapa, que solo
+  cabe si queda algún coche en el inicio (con la primera y la tercera, no con
+  la segunda). En todas mueve los coches un grupo pequeño, **no los doce**.
 
 Cuando una decisión recibe respuesta, se guarda en el campo `respuesta`:
 `texto` (la frase **literal**, sin reescribir), `quien`, `cuando` y un `aclara`
