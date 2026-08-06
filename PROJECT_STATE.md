@@ -93,6 +93,50 @@ en modo avión. Es justo la primera fila de la tabla.
 
 ---
 
+## 2026-08-06 — Los coches: los mueven tres personas, no los doce
+
+Corrección de la entrada de abajo, otra vez el mismo día. La opción de «llevar
+los tres coches y volver en taxi» estaba mal entendida.
+
+**Lo que decía la web:** «Los tres coches al destino y la vuelta al inicio de
+la etapa en taxi. En un taxi normal caben cuatro personas, así que para los
+doce harían falta tres.» Es decir, que se movía el grupo entero.
+
+**Lo que es:** son **tres personas** las que llevan los tres coches, y esas
+tres se vuelven en **un solo taxi** —caben cuatro, sobra sitio—. **El resto
+espera en el punto de partida.** Nadie más se mueve.
+
+Y lo mismo valía para la primera opción, donde ponía «todos vuelven en el
+tercero»: ese «todos» son los tres conductores, no los doce. También corregido.
+
+Así quedan las dos:
+
+| | Quién mueve | Cómo vuelven | Al acabar la etapa |
+|---|---|---|---|
+| **A** | tres personas | en el tercer coche | hay que ir a por el coche del origen |
+| **B** | tres personas | en un solo taxi | nada que mover, los tres ya están |
+
+La diferencia real entre las dos no es cuánta gente se mueve —es la misma—,
+sino si queda o no un coche en el punto de partida. Y de eso depende lo de la
+abuela, que solo cabe con la A.
+
+De paso, se cae el dato de «tres taxis para los doce», que no pintaba nada
+aquí: nunca hizo falta mover al grupo en taxi.
+
+### Comprobado
+
+`npm test`: **390 comprobaciones, 0 fallos** (eran 387). `npm run validar` y
+`node --check` OK.
+
+Hay una comprobación nueva que dice explícitamente **que no vuelva a aparecer
+lo de los tres taxis**, además de exigir que las dos opciones digan quién va y
+que el resto espera. Probado **en negativo**: reponiendo el texto viejo saltan
+cuatro fallos. Después se restauró.
+
+`VERSION` a `camino-v25`. `APP_VERSION` sigue en `map-9`.
+
+---
+
 ## 2026-08-06 — Los coches no estaban decididos, y la web decía que sí
 
 Corrección de la entrada de abajo, el mismo día. Dos cosas.
