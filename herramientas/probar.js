@@ -85,8 +85,29 @@ console.log('2. Índice: decisiones y teléfonos');
   s.w.irA(0);
   const h = html(s);
   comprobar('aparecen las decisiones del grupo', h.indexOf('Decisiones del grupo') >= 0);
-  comprobar('hay una tarjeta por decisión', (h.match(/class="decision"/g)||[]).length === s.w.eval('DECISIONES.length'));
-  comprobar('cada decisión tiene su botón de WhatsApp', (h.match(/wa\.me/g)||[]).length > 0);
+  /* Ojo: la clase lleva el estado detrás ("decision encurso"), así que
+     buscar class="decision" a secas solo contaba las que no lo tenían. */
+  comprobar('hay una tarjeta por decisión',
+    (h.match(/class="decision [a-z]+"/g)||[]).length === s.w.eval('DECISIONES.length'));
+  comprobar('todos los estados son válidos',
+    s.w.eval("DECISIONES.every(d=>['pendiente','encurso','resuelto'].includes(d.estado))"));
+  comprobar('cada decisión sale con su etiqueta de estado',
+    s.w.eval('DECISIONES').every(d => h.indexOf(
+      {pendiente:'Pendiente', encurso:'En curso', resuelto:'Resuelto'}[d.estado]) >= 0));
+  /* El botón de WhatsApp solo en lo que sigue abierto: en lo cerrado
+     sobra, y peor, invita a remover algo ya decidido. */
+  const abiertas = s.w.eval("DECISIONES.filter(d=>d.estado!=='resuelto').length");
+  comprobar('solo las decisiones abiertas llevan botón de WhatsApp',
+    (h.match(/wa\.me/g)||[]).length === abiertas);
+  /* Lo que dijo el grupo se enseña literal, y lo que hemos deducido va
+     aparte. Si se mezclaran, la web le atribuiría a alguien algo que no dijo. */
+  const escP = t => s.w.eval('esc(' + JSON.stringify(t) + ')');
+  s.w.eval('DECISIONES.filter(d=>d.respuesta)').forEach(d => {
+    comprobar('la respuesta de «'+d.id+'» sale literal', h.indexOf(escP(d.respuesta.texto)) >= 0);
+    if(d.respuesta.aclara)
+      comprobar('la aclaración de «'+d.id+'» va separada de la cita',
+        h.indexOf('class="aclara"') >= 0 && h.indexOf(escP(d.respuesta.aclara)) >= 0);
+  });
   comprobar('hay teléfonos', s.d.querySelectorAll('.tel').length > 10);
   comprobar('emergencias 112 presente', h.indexOf('112') >= 0);
   comprobar('centros de salud presentes', h.indexOf('PAC') >= 0);
@@ -217,12 +238,26 @@ console.log('5 bis. Equipaje');
     html(s).indexOf('no viene en la guía') >= 0);
   comprobar('la credencial está, y en el grupo añadido',
     s.w.eval("EQUIPAJE.find(g=>g.items.some(i=>/Credencial/.test(i.texto))).extra") === true);
-  ['Cargador del móvil','Batería portátil','DNI o pasaporte'].forEach(function(t){
+  ['Cargador del móvil','Batería portátil','DNI o pasaporte',
+   'Crema de masaje para los pies','Botella de agua'].forEach(function(t){
     comprobar('está «' + t + '»',
       s.w.eval(`EQUIPAJE.some(g=>g.extra && g.items.some(i=>i.texto===${JSON.stringify(t)}))`));
   });
   comprobar('ningún grupo de la guía se cuela como añadido',
     s.w.eval('EQUIPAJE.filter(g=>!g.extra).length') === 4);
+
+  /* Nada repetido. Al añadir cosas a mano es fácil meter algo que ya
+     estaba en la lista de la guía (pasó con la crema solar, que ya era
+     `bot-solar`): quedarían dos casillas para lo mismo y la cuenta de la
+     maleta no cuadraría nunca. Se compara en minúsculas y sin tildes,
+     que es como se cuelan los duplicados de verdad. */
+  const llave = t => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9]+/g,' ').trim();
+  const textos = s.w.eval('EQUIPAJE.flatMap(g=>g.items.map(i=>i.texto))').map(llave);
+  const ids = s.w.eval('EQUIPAJE.flatMap(g=>g.items.map(i=>i.id))');
+  comprobar('no hay dos cosas con el mismo nombre',
+    new Set(textos).size === textos.length);
+  comprobar('no hay dos cosas con el mismo id', new Set(ids).size === ids.length);
   comprobar('el texto compartido marca lo añadido',
     s.w.eval('Equipaje.comoTexto()').indexOf('añadido por el grupo') >= 0);
 

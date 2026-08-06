@@ -272,9 +272,14 @@ El orden importa: `TRAZAS` antes que `ETAPAS`, y ambos antes que la lógica.
   maleta.**
   Los cuatro primeros grupos son la lista de la tita Lucila, entera. El quinto
   lleva **`extra:true`** y NO es suyo: lo añadió el grupo (credencial, DNI,
-  cargador, batería, gafas, tarjeta). Se pinta aparte y con su aviso a
-  propósito. **No muevas un item con `extra` a un grupo de la guía**: sería
-  atribuirle algo que no escribió, y hay una prueba que lo caza.
+  cargador, batería, gafas, tarjeta, crema de masaje para pies, botella de
+  agua). Se pinta aparte y con su aviso a propósito. **No muevas un item con
+  `extra` a un grupo de la guía**: sería atribuirle algo que no escribió, y hay
+  una prueba que lo caza.
+  **Antes de añadir nada, mira si ya está.** Se pidió añadir «crema de sol» y
+  ya existía como `bot-solar` en el botiquín de la guía; duplicarla habría
+  dejado dos casillas para lo mismo. Ahora `npm test` comprueba que no hay dos
+  items con el mismo nombre (sin tildes y en minúsculas) ni con el mismo `id`.
 
 **Las cinco claves de localStorage** (no hay más, y no se usa para nada más):
 
@@ -383,16 +388,29 @@ avisos derivados (calor, lluvia, frío de mañana, viento), sellos, retos,
 checklist del equipaje, teléfonos, modo sin cobertura, compartir y vista previa
 propia por etapa en WhatsApp.
 
-**Pendiente del viaje** (no del código). Estas cinco viven ahora en la
-constante `DECISIONES` de `datos.js` y se ven en el apartado «Decisiones del
-grupo» del índice. El `estado` se edita a mano en `datos.js` cuando algo se
-cierra de verdad (no en localStorage: sería solo para quien lo marca):
+**Pendiente del viaje** (no del código). Estas cinco viven en la constante
+`DECISIONES` de `datos.js` y se ven en el apartado «Decisiones del grupo» del
+índice. El `estado` (`pendiente` | `encurso` | `resuelto`) se edita a mano en
+`datos.js` cuando algo se cierra de verdad (no en localStorage: sería solo para
+quien lo marca). Al día del **6 de agosto de 2026**:
 
-- Villa Xardín, 22 de agosto: 10 plazas para 11 personas.
-- La cena de Cerceda sigue sin confirmar.
-- Casa Nené: dos reservas de 8 + 4 cuando ya sois 11.
-- El 23: la misa de 19:30 y la cena de 20:30 no caben las dos.
-- Antes del 12 de agosto: comunicar el menú a Mesón A Lareira.
+- ~~Villa Xardín, 22 de agosto: 10 plazas para 11 personas.~~ **Resuelto**:
+  reservada una cama supletoria.
+- ~~La cena de Cerceda sin confirmar.~~ **Resuelto**: se cae O Ceadoiro, esa
+  noche se cena en el alojamiento.
+- Casa Nené: dos reservas de 8 + 4 cuando ya sois 11. **En curso**, quedó el
+  padre en llamar; sin unificar todavía.
+- El 23: la misa de 19:30 y la cena de 20:30 no caben las dos. **En curso**: se
+  va a la misa y se retrasa la cena, falta que Milongas confirme la hora.
+- Antes del 12 de agosto: comunicar el menú a Mesón A Lareira. **Pendiente, y
+  es la que corre.**
+
+Cuando una decisión recibe respuesta, se guarda en el campo `respuesta`:
+`texto` (la frase **literal**, sin reescribir), `quien`, `cuando` y un `aclara`
+opcional con lo que se ha entendido de ella. **La cita y la interpretación van
+en campos distintos y se pintan distinto a propósito**: mezclarlas sería
+atribuirle a alguien algo que no dijo. Si una respuesta es ambigua, se pregunta
+antes de elegir lectura; ya pasó con la de O Ceadoiro.
 
 **Vista previa por etapa:** las etiquetas Open Graph no se pueden generar en
 el cliente (WhatsApp no ejecuta JS), así que hay una página `etapaN.html` por

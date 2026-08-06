@@ -213,8 +213,9 @@ h2::after{content:'';flex:1;height:1px;background:#DED8C9}
 .reto-marcador.fuera{background:none;border:1px dashed #C4BCA6;color:var(--tinta)}
 .reto-marcador.fuera span{color:#7C776B}
 .decisiones{display:flex;flex-direction:column;gap:.5rem;margin-top:.5rem}
-.decision{background:#fff;border:1px solid #E2DCCC;border-left:3px solid var(--concha);
+.decision{background:#fff;border:1px solid #E2DCCC;border-left:3px solid var(--alerta);
   border-radius:var(--radio);padding:.6rem .7rem}
+.decision.encurso{border-left-color:var(--concha)}
 .decision.resuelto{border-left-color:var(--musgo)}
 .decision h3{font-family:'Fraunces',serif;font-weight:600;font-size:.92rem;color:var(--tinta);
   line-height:1.25;display:flex;justify-content:space-between;align-items:flex-start;gap:.6rem}
@@ -222,10 +223,20 @@ h2::after{content:'';flex:1;height:1px;background:#DED8C9}
   font-weight:600;letter-spacing:.07em;text-transform:uppercase;padding:.14rem .42rem;
   border-radius:100px;margin-top:.1rem}
 .decision .estado.pendiente{background:#FCF3F0;color:var(--alerta)}
+.decision .estado.encurso{background:#FBF3E2;color:#8A6A1E}
 .decision .estado.resuelto{background:#EAF1EA;color:var(--musgo)}
 .decision p{font-size:.75rem;line-height:1.5;color:#4A463D;margin-top:.4rem}
 .decision .cuando{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.03em;
   color:#7C776B;margin-top:.3rem}
+/* La respuesta del grupo. La frase literal va en <q> y lo que hemos
+   entendido de ella en .aclara, separado a propósito: no se mezcla lo
+   que alguien dijo con lo que nosotros dedujimos. */
+.decision .resp{margin-top:.55rem;padding:.45rem .6rem;background:var(--papel);
+  border-left:2px solid var(--piedra);border-radius:2px}
+.decision .resp q{font-size:.75rem;line-height:1.5;color:var(--tinta);font-style:italic}
+.decision .resp .quien{display:block;margin-top:.3rem;font-family:'JetBrains Mono',monospace;
+  font-size:.58rem;letter-spacing:.03em;text-transform:uppercase;color:#7C776B}
+.decision .resp .aclara{margin-top:.4rem;font-size:.73rem;line-height:1.45;color:#4A463D}
 .decision .wa{display:inline-block;margin-top:.55rem;font-family:'JetBrains Mono',monospace;
   font-size:.64rem;font-weight:600;letter-spacing:.02em;text-decoration:none;color:#fff;
   background:var(--musgo);padding:.4rem .65rem;border-radius:var(--radio)}
@@ -1003,37 +1014,57 @@ function grupoCamina(f){
    resuelve de verdad. No se guarda en localStorage a propósito:
    si cada móvil guardara lo suyo, alguien marcaría "resuelto" y
    creería que los demás lo ven, y no. Aquí todos ven lo mismo.
-   Valores de `estado`: 'pendiente' | 'resuelto'.
+   Valores de `estado`: 'pendiente' | 'encurso' | 'resuelto'.
+   'encurso' es para lo que ya tiene alguien detrás pero todavía no
+   está confirmado; se sigue pudiendo preguntar por WhatsApp, porque
+   justamente es lo que hay que perseguir.
    `fecha` es la fecha ISO a la que afecta (para ordenar); `cuando`
    es el texto que se muestra.
+
+   `respuesta` es opcional y guarda lo que contestó el grupo:
+     texto  — la frase TAL CUAL se dijo, sin reescribir
+     quien  — de quién es
+     cuando — cuándo lo dijo
+     aclara — opcional: qué se ha entendido de esa frase, cuando la
+              frase sola no basta. Va separado del `texto` a
+              propósito, para que nunca se confunda lo que alguien
+              dijo con lo que nosotros dedujimos.
    ============================================================ */
 const DECISIONES = [
   {
     id:'villa-xardin', titulo:'Villa Xardín: falta una cama',
     lugar:'O Pedrouzo', fecha:'2026-08-22', cuando:'Noche del sábado 22 de agosto',
     que:'La reserva de Villa Xardín es de 10 plazas y sois 11 personas. Falta una cama.',
-    estado:'pendiente',
+    estado:'resuelto',
+    respuesta:{ texto:'Reservada una cama supletoria', quien:'la tita Lucila', cuando:'28 de julio' },
     wa:'Villa Xardín (O Pedrouzo, noche del 22 ago): la reserva es de 10 plazas y somos 11. Falta una cama, ¿cómo lo resolvemos?'
   },
   {
     id:'ceadoiro', titulo:'Cena en O Ceadoiro sin confirmar',
     lugar:'Cerceda', fecha:'2026-08-22', cuando:'Cena del sábado 22 de agosto',
     que:'La cena en O Ceadoiro (Cerceda) está solicitada pero sin confirmar. Es la única cena del viaje que sigue sin cerrar.',
-    estado:'pendiente',
+    estado:'resuelto',
+    respuesta:{ texto:'Esta noche cenamos en casa. Encargamos pizza o algo',
+      quien:'la tita Lucila', cuando:'28 de julio',
+      aclara:'Se cae O Ceadoiro: esa noche se cena en el alojamiento, encargando pizza o algo.' },
     wa:'Cena en O Ceadoiro (Cerceda, 22 ago): está solicitada pero sin confirmar, es la única que queda. ¿Alguien puede llamar para cerrarla?'
   },
   {
     id:'casa-nene', titulo:'Casa Nené: dos reservas que no cuadran',
     lugar:'Arzúa', fecha:'2026-08-21', cuando:'Cena del viernes 21 de agosto',
     que:'Casa Nené tiene dos reservas, de 8 y de 4 personas (12 en total), a horas distintas: 20:00 y 20:30. Desde el jueves sois 11. Hay que unificarlas en una sola hora para 11.',
-    estado:'pendiente',
+    estado:'encurso',
+    respuesta:{ texto:'Quedó tu padre en llamar', quien:'la tita Lucila', cuando:'28 de julio',
+      aclara:'Hay alguien detrás, pero las dos reservas siguen sin unificar. No está cerrado.' },
     wa:'Casa Nené (Arzúa, 21 ago): hay dos reservas (8 + 4 = 12) a las 20:00 y 20:30, pero somos 11. ¿Las unificamos en una sola hora para 11?'
   },
   {
     id:'santiago-misa-cena', titulo:'Santiago: la misa y la cena se solapan',
     lugar:'Santiago', fecha:'2026-08-23', cuando:'Noche del domingo 23 de agosto',
     que:'La misa del peregrino es a las 19:30 y la cena en Milongas a las 20:30. No caben las dos: hay que elegir o mover una.',
-    estado:'pendiente',
+    estado:'encurso',
+    respuesta:{ texto:'Le dije a tu padre que retrasara la cena', quien:'la tita Lucila', cuando:'28 de julio',
+      aclara:'Elegido: se va a la misa de 19:30 y se retrasa la cena en Milongas. Falta que Milongas lo confirme y saber a qué hora queda.' },
     wa:'Santiago (23 ago): la misa del peregrino es a las 19:30 y la cena en Milongas a las 20:30, no caben las dos. ¿Qué preferís, o movemos alguna?'
   },
   {
@@ -1068,6 +1099,12 @@ const DECISIONES = [
      no aparecen ni una vez. Ese grupo se ve claramente separado
      para que nunca se le atribuya a la tita Lucila algo que no
      escribió. Los cuatro primeros grupos son suyos y solo suyos.
+   - El 6 de agosto de 2026 el grupo pidió añadir tres cosas: crema de
+     masaje para los pies, botella de agua y crema de sol. Las dos
+     primeras se añadieron al grupo `extra`. **La crema solar NO se
+     añadió: ya estaba** en el botiquín de la guía (`bot-solar`), y
+     duplicarla habría descuadrado la cuenta y puesto dos casillas
+     para lo mismo.
 
    Campos: `uds` es la cantidad que dice la guía; `nota` es su
    aclaración. `extra:true` en un grupo = no viene de la guía.
@@ -1142,7 +1179,11 @@ const EQUIPAJE = [
       {id:'ex-bateria',    texto:'Batería portátil', nota:'Un power bank, que el móvil hace de mapa todo el día'},
       {id:'ex-gafas',      texto:'Gafas de sol',
          nota:'La guía las nombra dentro de la riñonera, no como cosa aparte'},
-      {id:'ex-banco',      texto:'Tarjeta bancaria'}
+      {id:'ex-banco',      texto:'Tarjeta bancaria'},
+      {id:'ex-crema-pies', texto:'Crema de masaje para los pies',
+         nota:'La guía trae vaselina, que es para prevenir rozaduras antes de andar; esto es para el masaje de después'},
+      {id:'ex-botella',    texto:'Botella de agua',
+         nota:'La guía nombra el agua dentro de la mochilita, pero no la botella como cosa que meter'}
     ]
   }
 ];
@@ -2193,27 +2234,43 @@ function panelPortada(){
    con el mensaje preparado (wa.me sin número: deja elegir el chat).
    Deliberadamente NO hay votación ni localStorage: sin servidor,
    marcar algo aquí solo lo vería quien lo marca, y eso engaña. */
+const ETIQUETA_DECISION = {pendiente:'Pendiente', encurso:'En curso', resuelto:'Resuelto'};
+
 function decisionesIndice(){
   if(typeof DECISIONES === 'undefined' || !DECISIONES.length) return '';
   const tarjetas = DECISIONES.map(function(d){
-    const resuelto = d.estado === 'resuelto';
+    /* Un estado desconocido cae a 'pendiente': antes enseñarlo abierto de
+       más que darlo por cerrado sin serlo. */
+    const est = ETIQUETA_DECISION[d.estado] ? d.estado : 'pendiente';
+    const resuelto = est === 'resuelto';
+    const r = d.respuesta;
     const wa = 'https://wa.me/?text=' + encodeURIComponent(d.wa);
-    return '<div class="decision'+(resuelto?' resuelto':'')+'">'
+    return '<div class="decision '+est+'">'
       + '<h3>'+esc(d.titulo)
-      + '<span class="estado '+(resuelto?'resuelto':'pendiente')+'">'
-      + (resuelto?'Resuelto':'Pendiente')+'</span></h3>'
+      + '<span class="estado '+est+'">'+ETIQUETA_DECISION[est]+'</span></h3>'
       + '<p>'+esc(d.que)+'</p>'
       + '<p class="cuando">'+esc(d.cuando)+'</p>'
+      + (r ? '<div class="resp"><q>'+esc(r.texto)+'</q>'
+             + '<span class="quien">'+esc(r.quien)+' · '+esc(r.cuando)+'</span>'
+             + (r.aclara ? '<p class="aclara">'+esc(r.aclara)+'</p>' : '')
+             + '</div>' : '')
       + (resuelto ? '' :
          '<a class="wa" href="'+wa+'" target="_blank" rel="noopener">'
-         + 'Preguntar al grupo por WhatsApp</a>')
+         + (est === 'encurso' ? 'Preguntar cómo va por WhatsApp'
+                              : 'Preguntar al grupo por WhatsApp')+'</a>')
       + '</div>';
   }).join('');
+  const abiertas = DECISIONES.filter(function(d){ return d.estado !== 'resuelto'; }).length;
   return '<h2>Decisiones del grupo</h2>'
     + '<div class="nota">Estas '+DECISIONES.length+' cosas dependen de decisiones del grupo, '
-    + 'no del código. El estado que se ve aquí lo actualiza quien mantiene la web cuando algo se '
-    + 'cierra de verdad; no se guarda en cada móvil, así que todos veis lo mismo. Cada una lleva un '
-    + 'botón para preguntarla por WhatsApp.</div>'
+    + 'no del código. '
+    + (abiertas === 0 ? 'Ya están todas cerradas. '
+       : abiertas === 1 ? 'Queda una sin cerrar. '
+       : 'Quedan '+abiertas+' sin cerrar. ')
+    + 'El estado que se ve aquí lo actualiza quien mantiene la web cuando algo se '
+    + 'cierra de verdad; no se guarda en cada móvil, así que todos veis lo mismo. Las que siguen '
+    + 'abiertas llevan un botón para preguntarlas por WhatsApp, y donde el grupo ya ha contestado '
+    + 'se recoge la respuesta.</div>'
     + '<div class="decisiones">'+tarjetas+'</div>';
 }
 

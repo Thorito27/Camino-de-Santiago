@@ -357,37 +357,57 @@ function grupoCamina(f){
    resuelve de verdad. No se guarda en localStorage a propósito:
    si cada móvil guardara lo suyo, alguien marcaría "resuelto" y
    creería que los demás lo ven, y no. Aquí todos ven lo mismo.
-   Valores de `estado`: 'pendiente' | 'resuelto'.
+   Valores de `estado`: 'pendiente' | 'encurso' | 'resuelto'.
+   'encurso' es para lo que ya tiene alguien detrás pero todavía no
+   está confirmado; se sigue pudiendo preguntar por WhatsApp, porque
+   justamente es lo que hay que perseguir.
    `fecha` es la fecha ISO a la que afecta (para ordenar); `cuando`
    es el texto que se muestra.
+
+   `respuesta` es opcional y guarda lo que contestó el grupo:
+     texto  — la frase TAL CUAL se dijo, sin reescribir
+     quien  — de quién es
+     cuando — cuándo lo dijo
+     aclara — opcional: qué se ha entendido de esa frase, cuando la
+              frase sola no basta. Va separado del `texto` a
+              propósito, para que nunca se confunda lo que alguien
+              dijo con lo que nosotros dedujimos.
    ============================================================ */
 const DECISIONES = [
   {
     id:'villa-xardin', titulo:'Villa Xardín: falta una cama',
     lugar:'O Pedrouzo', fecha:'2026-08-22', cuando:'Noche del sábado 22 de agosto',
     que:'La reserva de Villa Xardín es de 10 plazas y sois 11 personas. Falta una cama.',
-    estado:'pendiente',
+    estado:'resuelto',
+    respuesta:{ texto:'Reservada una cama supletoria', quien:'la tita Lucila', cuando:'28 de julio' },
     wa:'Villa Xardín (O Pedrouzo, noche del 22 ago): la reserva es de 10 plazas y somos 11. Falta una cama, ¿cómo lo resolvemos?'
   },
   {
     id:'ceadoiro', titulo:'Cena en O Ceadoiro sin confirmar',
     lugar:'Cerceda', fecha:'2026-08-22', cuando:'Cena del sábado 22 de agosto',
     que:'La cena en O Ceadoiro (Cerceda) está solicitada pero sin confirmar. Es la única cena del viaje que sigue sin cerrar.',
-    estado:'pendiente',
+    estado:'resuelto',
+    respuesta:{ texto:'Esta noche cenamos en casa. Encargamos pizza o algo',
+      quien:'la tita Lucila', cuando:'28 de julio',
+      aclara:'Se cae O Ceadoiro: esa noche se cena en el alojamiento, encargando pizza o algo.' },
     wa:'Cena en O Ceadoiro (Cerceda, 22 ago): está solicitada pero sin confirmar, es la única que queda. ¿Alguien puede llamar para cerrarla?'
   },
   {
     id:'casa-nene', titulo:'Casa Nené: dos reservas que no cuadran',
     lugar:'Arzúa', fecha:'2026-08-21', cuando:'Cena del viernes 21 de agosto',
     que:'Casa Nené tiene dos reservas, de 8 y de 4 personas (12 en total), a horas distintas: 20:00 y 20:30. Desde el jueves sois 11. Hay que unificarlas en una sola hora para 11.',
-    estado:'pendiente',
+    estado:'encurso',
+    respuesta:{ texto:'Quedó tu padre en llamar', quien:'la tita Lucila', cuando:'28 de julio',
+      aclara:'Hay alguien detrás, pero las dos reservas siguen sin unificar. No está cerrado.' },
     wa:'Casa Nené (Arzúa, 21 ago): hay dos reservas (8 + 4 = 12) a las 20:00 y 20:30, pero somos 11. ¿Las unificamos en una sola hora para 11?'
   },
   {
     id:'santiago-misa-cena', titulo:'Santiago: la misa y la cena se solapan',
     lugar:'Santiago', fecha:'2026-08-23', cuando:'Noche del domingo 23 de agosto',
     que:'La misa del peregrino es a las 19:30 y la cena en Milongas a las 20:30. No caben las dos: hay que elegir o mover una.',
-    estado:'pendiente',
+    estado:'encurso',
+    respuesta:{ texto:'Le dije a tu padre que retrasara la cena', quien:'la tita Lucila', cuando:'28 de julio',
+      aclara:'Elegido: se va a la misa de 19:30 y se retrasa la cena en Milongas. Falta que Milongas lo confirme y saber a qué hora queda.' },
     wa:'Santiago (23 ago): la misa del peregrino es a las 19:30 y la cena en Milongas a las 20:30, no caben las dos. ¿Qué preferís, o movemos alguna?'
   },
   {
@@ -422,6 +442,12 @@ const DECISIONES = [
      no aparecen ni una vez. Ese grupo se ve claramente separado
      para que nunca se le atribuya a la tita Lucila algo que no
      escribió. Los cuatro primeros grupos son suyos y solo suyos.
+   - El 6 de agosto de 2026 el grupo pidió añadir tres cosas: crema de
+     masaje para los pies, botella de agua y crema de sol. Las dos
+     primeras se añadieron al grupo `extra`. **La crema solar NO se
+     añadió: ya estaba** en el botiquín de la guía (`bot-solar`), y
+     duplicarla habría descuadrado la cuenta y puesto dos casillas
+     para lo mismo.
 
    Campos: `uds` es la cantidad que dice la guía; `nota` es su
    aclaración. `extra:true` en un grupo = no viene de la guía.
@@ -496,7 +522,11 @@ const EQUIPAJE = [
       {id:'ex-bateria',    texto:'Batería portátil', nota:'Un power bank, que el móvil hace de mapa todo el día'},
       {id:'ex-gafas',      texto:'Gafas de sol',
          nota:'La guía las nombra dentro de la riñonera, no como cosa aparte'},
-      {id:'ex-banco',      texto:'Tarjeta bancaria'}
+      {id:'ex-banco',      texto:'Tarjeta bancaria'},
+      {id:'ex-crema-pies', texto:'Crema de masaje para los pies',
+         nota:'La guía trae vaselina, que es para prevenir rozaduras antes de andar; esto es para el masaje de después'},
+      {id:'ex-botella',    texto:'Botella de agua',
+         nota:'La guía nombra el agua dentro de la mochilita, pero no la botella como cosa que meter'}
     ]
   }
 ];
