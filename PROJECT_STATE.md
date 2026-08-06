@@ -93,6 +93,63 @@ en modo avión. Es justo la primera fila de la tabla.
 
 ---
 
+## 2026-08-06 — Tercera opción para los coches: no mover ninguno por la mañana
+
+Opción nueva sobre la mesa: **no llevar ningún coche al destino a primera
+hora**. Los tres se quedan en el punto de partida y no se toca nada hasta que
+haga falta. Cuando la abuela se canse, **dos personas** van con ella al inicio
+de la etapa, llevan dos coches al destino y luego vuelven esas dos a por el
+tercero.
+
+Con esto, lo de la abuela deja de depender solo de la primera opción: cabe con
+la primera **y con la tercera** (las dos dejan algún coche en el inicio), pero
+no con la segunda. La frase se corrigió.
+
+### Dos cabos sueltos que se dicen a propósito
+
+No venían en el encargo, pero salen solos al escribir la opción y hacen falta
+para poder elegir. Van en un aviso, no escondidos:
+
+1. **Cómo vuelven al inicio la abuela y sus dos acompañantes** desde donde
+   dejen la etapa. No está dicho. Se podría suponer que en taxi, pero suponerlo
+   sería inventarlo.
+2. **Qué pasa si ese día la abuela no necesita parar.** Entonces los tres
+   coches se quedan en el origen y al acabar hay que ir a por ellos igual.
+
+### Las pruebas ya no se agarran a frases sueltas
+
+Cada alternativa lleva ahora **`data-opcion`** (`dejar-dos`, `todos-taxi`,
+`ninguno`, `abuela`) y las comprobaciones seleccionan por ahí. Antes buscaban
+trozos de texto dentro de los `<li>`, y cada retoque de redacción obligaba a
+perseguir la prueba.
+
+### Dos fallos míos en las propias pruebas, encontrados al probarlas
+
+Merece la pena anotarlos, porque los dos son de manual:
+
+- Al quitar la opción a propósito para probar en negativo, `op('ninguno')`
+  devolvía `null` y el proceso **reventaba** en vez de informar: se perdían
+  todas las comprobaciones siguientes. Ahora `op()` devuelve un hueco.
+- Y ese arreglo rompió otra: `!!op(id)` pasó a ser **siempre cierto**, así que
+  «está la opción X» habría pasado aunque la opción no existiera. Esa
+  comprobación pregunta ahora al DOM directamente.
+
+Sin el negativo, las dos habrían quedado ahí pasando en verde y sin servir de
+nada.
+
+### Comprobado
+
+`npm test`: **395 comprobaciones, 0 fallos** (eran 390). `npm run validar` y
+`node --check` OK.
+
+Probado **en negativo**: quitando la tercera opción y devolviendo la frase
+vieja de la abuela, saltan cuatro fallos con nombre propio. Después se
+restauró.
+
+`VERSION` a `camino-v26`. `APP_VERSION` sigue en `map-9`.
+
+---
+
 ## 2026-08-06 — Los coches: los mueven tres personas, no los doce
 
 Corrección de la entrada de abajo, otra vez el mismo día. La opción de «llevar

@@ -1105,9 +1105,9 @@ const DECISIONES = [
   {
     id:'coches', titulo:'Cómo se mueven los coches',
     lugar:'Todas las etapas', fecha:'2026-08-18', cuando:'Cada día del viaje',
-    que:'Sois doce y hay tres coches, y cada etapa acaba lejos de donde empieza. En las dos opciones son TRES personas las que mueven los coches, mientras el resto espera en el punto de partida. Opción A: llevan los tres al destino, dejan dos y vuelven las tres en el tercero; al acabar la etapa se coge uno de los dos para ir a por el que quedó en el origen. Opción B: llevan los tres al destino y se vuelven en un solo taxi (caben cuatro), así no hay que mover nada al acabar. Va aparte lo de la abuela: si se cansa a media etapa, coger un taxi con ella hasta el inicio y seguir en el coche que se hubiera dejado allí, lo que solo cabe con la opción A.',
+    que:'Sois doce y hay tres coches, y cada etapa acaba lejos de donde empieza. En todas las opciones mueve los coches un grupo pequeño y el resto espera en el punto de partida. A: tres personas llevan los tres al destino a primera hora, dejan dos y vuelven las tres en el tercero; al acabar la etapa se coge uno de los dos para ir a por el que quedó en el origen. B: igual, pero esas tres se vuelven en un solo taxi (caben cuatro), así no hay que mover nada al acabar. C: no mover ninguno por la mañana; cuando la abuela se canse, dos personas van con ella al inicio, llevan dos coches al destino y vuelven esas dos a por el tercero. Lo de la abuela (taxi hasta el inicio y seguir en el coche que se haya dejado) solo cabe si queda algún coche en el punto de partida: con A o con C, no con B. Falta atar dos cosas de C: cómo vuelven al inicio la abuela y sus dos acompañantes, y qué se hace si ese día no necesita parar, porque entonces los tres coches se quedan en el origen.',
     estado:'pendiente',
-    wa:'Los coches: somos doce y hay tres. En las dos opciones van tres personas a moverlos y el resto espera en el inicio. ¿Dejamos dos coches en el destino y esas tres vuelven en el tercero, o llevamos los tres y vuelven en un taxi? Con la primera quedaría un coche en el inicio, que es lo que hace falta si la abuela se cansa a media etapa.'
+    wa:'Los coches: somos doce y hay tres, y los mueve siempre un grupo pequeño mientras el resto espera en el inicio. Tres opciones: (A) llevar los tres al destino, dejar dos y volver en el tercero; (B) llevar los tres y volver en un taxi; (C) no mover ninguno por la mañana y, cuando la abuela se canse, que dos vayan con ella al inicio, lleven dos coches al destino y vuelvan a por el tercero. ¿Cuál veis?'
   }
 ];
 
@@ -2262,19 +2262,28 @@ function panelPortada(){
     + 'cada etapa acaba en un sitio distinto del que empieza, así que hay que llevarlos de una '
     + 'punta a otra cada día. Lo que hay sobre la mesa:</p>'
     + '<ul class="coches">'
-    + '<li><strong>Dejar dos coches en el destino.</strong> A primera hora, <strong>tres '
-    + 'personas</strong> llevan los tres coches al destino de la etapa, dejan dos allí y vuelven '
-    + 'las tres en el tercero. El resto espera en el punto de partida. Al llegar andando se coge '
-    + 'uno de los dos coches para volver al origen a por el que quedó.</li>'
-    + '<li><strong>Llevarlos todos y volver en taxi.</strong> Lo mismo, pero esas <strong>tres '
-    + 'personas</strong> se vuelven al punto de partida en <strong>un solo taxi</strong> —caben '
-    + 'cuatro— en vez de en coche. Van los tres coches al destino y ya no hay que mover nada al '
-    + 'acabar la etapa. El resto sigue esperando en el punto de partida.</li>'
-    + '<li><strong>Y si la abuela se cansa a media etapa.</strong> Que alguien coja un taxi con '
-    + 'ella hasta el <strong>inicio</strong> de la etapa y sigan desde allí en el coche que se '
-    + 'hubiera dejado. Ojo: esto solo cabe si queda un coche en el punto de partida, o sea, con '
-    + 'la primera opción.</li>'
+    + '<li data-opcion="dejar-dos"><strong>Dejar dos coches en el destino.</strong> A primera '
+    + 'hora, <strong>tres personas</strong> llevan los tres coches al destino de la etapa, dejan '
+    + 'dos allí y vuelven las tres en el tercero. El resto espera en el punto de partida. Al '
+    + 'llegar andando se coge uno de los dos coches para volver al origen a por el que quedó.</li>'
+    + '<li data-opcion="todos-taxi"><strong>Llevarlos todos y volver en taxi.</strong> Lo mismo, '
+    + 'pero esas <strong>tres personas</strong> se vuelven al punto de partida en <strong>un solo '
+    + 'taxi</strong> —caben cuatro— en vez de en coche. Van los tres coches al destino y ya no hay '
+    + 'que mover nada al acabar la etapa. El resto sigue esperando en el punto de partida.</li>'
+    + '<li data-opcion="ninguno"><strong>No mover ninguno por la mañana.</strong> Los tres coches '
+    + 'se quedan en el punto de partida y no se toca nada hasta que haga falta. Cuando la abuela '
+    + 'se canse, <strong>dos personas</strong> van con ella al inicio de la etapa, llevan dos '
+    + 'coches al destino y luego vuelven esas dos a por el tercero.</li>'
+    + '<li data-opcion="abuela"><strong>Y si la abuela se cansa a media etapa.</strong> Que '
+    + 'alguien coja un taxi con ella hasta el <strong>inicio</strong> de la etapa y sigan desde '
+    + 'allí en el coche que se hubiera dejado. Esto solo cabe <strong>si queda algún coche en el '
+    + 'punto de partida</strong>: con la primera opción o con la tercera, no con la segunda.</li>'
     + '</ul>'
+    + '<div class="nota"><strong>Dos cosas que faltan por atar</strong>, y que conviene tener '
+    + 'delante al elegir. Con la tercera opción, cómo vuelven al inicio la abuela y las dos '
+    + 'personas que la acompañan desde donde lo deje: eso no está dicho. Y qué pasa ese día si '
+    + 'la abuela <em>no</em> necesita parar, porque entonces los tres coches se quedan en el '
+    + 'origen y hay que ir a por ellos al acabar.</div>'
     + '<div class="nota">Está sin cerrar, en '
     + '<a href="#" onclick="irA(0);return false;">Decisiones del grupo</a>, con su botón para '
     + 'preguntarlo por WhatsApp. Los teléfonos de taxi de cada etapa están en sus '
