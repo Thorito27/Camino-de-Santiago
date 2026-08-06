@@ -70,6 +70,35 @@ console.log('\n1. Portada');
   comprobar('la portada es la vista inicial', s.w.eval('vistaEtapa') === -1);
   comprobar('la portada no sale vacía', largo(s) > 2000);
   comprobar('el subnav está oculto en portada', s.d.getElementById('subnav').style.display === 'none');
+
+  const hp = html(s);
+  /* Los tres que no vienen. Están puestos a mano y no salen de ningún dato,
+     así que si alguien reescribe la portada es fácil que se los lleve por
+     delante sin darse cuenta. */
+  ['Daniel','Pepe','Fidel'].forEach(nom =>
+    comprobar('la portada recuerda a ' + nom, hp.indexOf(nom) >= 0));
+
+  /* La procedencia de los datos: la guía es de la tita Lucila y hay aportes
+     de Juan Martínez. Es una atribución, no adorno. */
+  comprobar('la portada dice de quién es la guía', hp.indexOf('tita Lucila') >= 0);
+  comprobar('la portada reconoce los aportes de Juan Martínez',
+    /aportes de <strong>Juan Mart/.test(hp));
+
+  /* El baile de los coches: cuatro pasos y en ese orden. */
+  const pasos = s.d.querySelectorAll('.portada ol.coches li');
+  comprobar('la portada explica el movimiento de los coches', pasos.length === 4);
+  comprobar('los coches van primero al destino y se vuelve al origen',
+    pasos.length === 4
+      && /destino/.test(pasos[0].textContent)
+      && /dejan dos/.test(pasos[1].textContent)
+      && /punto de partida/.test(pasos[1].textContent));
+  comprobar('dice cuántos caben en un taxi', /cuatro personas/.test(hp));
+  /* La portada afirma que el destino de cada etapa es la salida de la
+     siguiente, y en eso se apoya todo el baile de los coches. Si algún día
+     se cambia una etapa y deja de encadenar, esa explicación deja de valer. */
+  comprobar('el destino de cada etapa es la salida de la siguiente',
+    s.w.eval('ETAPAS').slice(0,-1).every((e,i) => e.destino === s.w.eval('ETAPAS')[i+1].origen));
+
   s.w.irA(0);
   comprobar('el botón de entrar lleva al índice', s.w.eval('vistaEtapa') === 0);
   comprobar('el índice no sale vacío', largo(s) > 1000);
