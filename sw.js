@@ -23,7 +23,7 @@
    el resto del margen es para lo que se navegue.
    ============================================================ */
 
-const VERSION      = 'camino-v24';
+const VERSION      = 'camino-v25';
 const CACHE_APP    = VERSION + '-app';
 const CACHE_TILES  = VERSION + '-tiles';
 const CACHE_METEO  = VERSION + '-meteo';

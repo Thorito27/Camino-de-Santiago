@@ -97,7 +97,18 @@ console.log('\n1. Portada');
     [...opciones].some(li => /dejan dos/.test(li.textContent)
       && /punto de partida/.test(li.textContent)));
   comprobar('está la opción de volver en taxi',
-    [...opciones].some(li => /taxi/.test(li.textContent) && /cuatro personas/.test(li.textContent)));
+    [...opciones].some(li => /un solo taxi/.test(li.textContent)));
+  /* Los coches los mueven TRES personas, no el grupo entero: se llegó a
+     escribir que iban los doce y volvían en tres taxis, y no es eso. Las dos
+     opciones tienen que decir quién va y que el resto espera en el inicio. */
+  const mueven = [...opciones].filter(li => /coches al destino|los tres coches/.test(li.textContent));
+  comprobar('las dos opciones de coche dicen que van tres personas',
+    mueven.length === 2 && mueven.every(li => /tres personas/.test(li.textContent)));
+  comprobar('las dos dicen que el resto espera en el punto de partida',
+    mueven.length === 2 && mueven.every(li => /punto de partida/.test(li.textContent)
+      && /resto/.test(li.textContent)));
+  comprobar('no se dice que hagan falta tres taxis para el grupo',
+    !/tres taxis/.test(hp) && !/harían falta tres/.test(hp));
   comprobar('está lo de la abuela, y que depende de la primera opción',
     [...opciones].some(li => /abuela/.test(li.textContent)
       && /primera opci/.test(li.textContent)));

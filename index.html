@@ -1105,9 +1105,9 @@ const DECISIONES = [
   {
     id:'coches', titulo:'Cómo se mueven los coches',
     lugar:'Todas las etapas', fecha:'2026-08-18', cuando:'Cada día del viaje',
-    que:'Sois doce y hay tres coches, y cada etapa acaba lejos de donde empieza. Hay dos formas de llevarlos: dejar dos en el destino y volver en el tercero al punto de partida, o llevarlos todos al destino y volver en taxi (en un taxi normal caben cuatro, así que harían falta tres). Va aparte lo de la abuela: si se cansa a media etapa, coger un taxi con ella hasta el inicio y seguir en el coche que se hubiera dejado allí, lo que solo cabe con la primera opción.',
+    que:'Sois doce y hay tres coches, y cada etapa acaba lejos de donde empieza. En las dos opciones son TRES personas las que mueven los coches, mientras el resto espera en el punto de partida. Opción A: llevan los tres al destino, dejan dos y vuelven las tres en el tercero; al acabar la etapa se coge uno de los dos para ir a por el que quedó en el origen. Opción B: llevan los tres al destino y se vuelven en un solo taxi (caben cuatro), así no hay que mover nada al acabar. Va aparte lo de la abuela: si se cansa a media etapa, coger un taxi con ella hasta el inicio y seguir en el coche que se hubiera dejado allí, lo que solo cabe con la opción A.',
     estado:'pendiente',
-    wa:'Los coches: somos doce y hay tres. ¿Dejamos dos en el destino y volvemos en el tercero al inicio de la etapa, o los llevamos todos y volvemos en taxi? Lo pregunto también por si la abuela se cansa: con la primera opción quedaría un coche en el inicio.'
+    wa:'Los coches: somos doce y hay tres. En las dos opciones van tres personas a moverlos y el resto espera en el inicio. ¿Dejamos dos coches en el destino y esas tres vuelven en el tercero, o llevamos los tres y vuelven en un taxi? Con la primera quedaría un coche en el inicio, que es lo que hace falta si la abuela se cansa a media etapa.'
   }
 ];
 
@@ -2262,12 +2262,14 @@ function panelPortada(){
     + 'cada etapa acaba en un sitio distinto del que empieza, así que hay que llevarlos de una '
     + 'punta a otra cada día. Lo que hay sobre la mesa:</p>'
     + '<ul class="coches">'
-    + '<li><strong>Dejar dos coches en el destino.</strong> A primera hora los tres van al '
-    + 'destino de la etapa, se dejan dos allí y todos vuelven en el tercero al punto de partida. '
-    + 'Al llegar andando se coge uno de los dos para volver al origen a por el que quedó.</li>'
-    + '<li><strong>Llevarlos todos y volver en taxi.</strong> Los tres coches al destino y la '
-    + 'vuelta al inicio de la etapa en taxi. En un taxi normal caben <strong>cuatro personas</strong>, '
-    + 'así que para los doce harían falta tres.</li>'
+    + '<li><strong>Dejar dos coches en el destino.</strong> A primera hora, <strong>tres '
+    + 'personas</strong> llevan los tres coches al destino de la etapa, dejan dos allí y vuelven '
+    + 'las tres en el tercero. El resto espera en el punto de partida. Al llegar andando se coge '
+    + 'uno de los dos coches para volver al origen a por el que quedó.</li>'
+    + '<li><strong>Llevarlos todos y volver en taxi.</strong> Lo mismo, pero esas <strong>tres '
+    + 'personas</strong> se vuelven al punto de partida en <strong>un solo taxi</strong> —caben '
+    + 'cuatro— en vez de en coche. Van los tres coches al destino y ya no hay que mover nada al '
+    + 'acabar la etapa. El resto sigue esperando en el punto de partida.</li>'
     + '<li><strong>Y si la abuela se cansa a media etapa.</strong> Que alguien coja un taxi con '
     + 'ella hasta el <strong>inicio</strong> de la etapa y sigan desde allí en el coche que se '
     + 'hubiera dejado. Ojo: esto solo cabe si queda un coche en el punto de partida, o sea, con '

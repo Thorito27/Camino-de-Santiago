@@ -440,9 +440,9 @@ const DECISIONES = [
   {
     id:'coches', titulo:'Cómo se mueven los coches',
     lugar:'Todas las etapas', fecha:'2026-08-18', cuando:'Cada día del viaje',
-    que:'Sois doce y hay tres coches, y cada etapa acaba lejos de donde empieza. Hay dos formas de llevarlos: dejar dos en el destino y volver en el tercero al punto de partida, o llevarlos todos al destino y volver en taxi (en un taxi normal caben cuatro, así que harían falta tres). Va aparte lo de la abuela: si se cansa a media etapa, coger un taxi con ella hasta el inicio y seguir en el coche que se hubiera dejado allí, lo que solo cabe con la primera opción.',
+    que:'Sois doce y hay tres coches, y cada etapa acaba lejos de donde empieza. En las dos opciones son TRES personas las que mueven los coches, mientras el resto espera en el punto de partida. Opción A: llevan los tres al destino, dejan dos y vuelven las tres en el tercero; al acabar la etapa se coge uno de los dos para ir a por el que quedó en el origen. Opción B: llevan los tres al destino y se vuelven en un solo taxi (caben cuatro), así no hay que mover nada al acabar. Va aparte lo de la abuela: si se cansa a media etapa, coger un taxi con ella hasta el inicio y seguir en el coche que se hubiera dejado allí, lo que solo cabe con la opción A.',
     estado:'pendiente',
-    wa:'Los coches: somos doce y hay tres. ¿Dejamos dos en el destino y volvemos en el tercero al inicio de la etapa, o los llevamos todos y volvemos en taxi? Lo pregunto también por si la abuela se cansa: con la primera opción quedaría un coche en el inicio.'
+    wa:'Los coches: somos doce y hay tres. En las dos opciones van tres personas a moverlos y el resto espera en el inicio. ¿Dejamos dos coches en el destino y esas tres vuelven en el tercero, o llevamos los tres y vuelven en un taxi? Con la primera quedaría un coche en el inicio, que es lo que hace falta si la abuela se cansa a media etapa.'
   }
 ];
 
