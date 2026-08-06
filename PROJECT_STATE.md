@@ -93,6 +93,60 @@ en modo avión. Es justo la primera fila de la tabla.
 
 ---
 
+## 2026-08-06 — Un despliegue atascado en la cola, y qué significa «cancelado»
+
+Aviso de que «parece que ha fallado el deploy». **No había fallado ninguno**,
+pero sí había un problema real, y distinto del que parecía.
+
+### Lo que se veía
+
+| Commit | PR | Estado |
+|---|---|---|
+| `c0f28b0` | #36 los coches | **en cola**, sin arrancar |
+| `3ff6a4f` | #35 la norma | cancelado |
+| `d2c2e56` | #34 ¿Quién eres? | cancelado |
+| `d9fcaf6` | #33 tercera opción | correcto |
+
+### «Cancelado» no es «fallado»
+
+Pages **despliega de uno en uno**. Si fusionas algo mientras hay un despliegue
+en marcha, cancela el viejo: ya no sirve, porque el nuevo lleva ese contenido y
+más. Las PR #34, #35 y #36 se fusionaron en **ocho minutos**, así que las dos
+primeras se quedaron por el camino. Es el comportamiento normal, no un error.
+
+**La consecuencia sí importaba:** como los dos cancelados eran los únicos que
+llevaban ese contenido y el que quedaba vivo estaba atascado en la cola, la web
+publicada seguía sirviendo lo de la **PR #33**. En el móvil no estaban ni el
+«¿Quién eres?» de la portada ni las correcciones de los coches, y no por falta
+de commit —estaban en `main`, se comprobó leyendo `origin/main` directamente—
+sino porque el despliegue que los llevaba no había arrancado.
+
+### Cómo se desatascó
+
+Con este mismo commit. Un commit nuevo en `main` lanza un despliegue nuevo, que
+además **sustituye al que estaba en cola** en vez de competir con él. Se eligió
+esto antes que cancelar y relanzar, porque cancelar algo que puede arrancar en
+cualquier momento arriesga a dejarlo peor.
+
+### La lección, para la próxima
+
+**Fusionar varias PR seguidas en pocos minutos deja despliegues cancelados por
+el camino**, y si el último se atasca, lo publicado se queda en un punto
+anterior al que dice `main`. Que un cambio esté en `main` **no** es lo mismo a
+que esté publicado. Cuando algo no se vea en el móvil, mirar en este orden:
+
+1. ¿Está en `main`? — `git show origin/main:index.html | grep ...`
+2. ¿Se ha desplegado ese commit concreto? — Actions, «pages build and
+   deployment», y comprobar el `head_sha`.
+3. Solo entonces, sospechar de la caché del navegador.
+
+**Sin comprobar desde aquí:** el proxy de este entorno bloquea `github.io` y
+también `api.github.com` por `curl`, así que no se ha podido abrir la web
+publicada ni dejar un vigilante automático. Todo lo anterior sale de consultar
+Actions por el MCP de GitHub.
+
+---
+
 ## 2026-08-06 — Los coches: tres opciones, y lo de la abuela dentro de la primera
 
 Repaso sobre captura del móvil, con dos correcciones.
