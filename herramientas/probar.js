@@ -95,7 +95,7 @@ console.log('\n1. Portada');
      queden sin ejecutar las demás. */
   const op = id => s.d.querySelector('.portada ul.coches li[data-opcion="'+id+'"]')
     || {textContent:''};
-  const OPCIONES = ['dejar-dos','todos-taxi','ninguno','abuela'];
+  const OPCIONES = ['dejar-dos','todos-taxi','ninguno'];
   comprobar('la portada da las opciones de los coches',
     s.d.querySelectorAll('.portada ul.coches li').length === OPCIONES.length);
   /* Ojo: aquí se pregunta al DOM directamente, NO por `op()`, que devuelve un
@@ -120,19 +120,18 @@ console.log('\n1. Portada');
   comprobar('no se dice que hagan falta tres taxis para el grupo',
     !/tres taxis/.test(hp) && !/harían falta tres/.test(hp));
 
-  /* Lo de la abuela depende de que quede un coche en el inicio, y eso pasa
-     con «dejar dos» y con «no mover ninguno», pero NO con «todos en taxi».
-     Si se añade otra opción, hay que revisar esta frase. */
-  comprobar('lo de la abuela dice de qué opciones depende',
-    /primera opci/.test(op('abuela').textContent)
-      && /tercera/.test(op('abuela').textContent)
-      && /no con la segunda/.test(op('abuela').textContent));
-  /* Los dos cabos sueltos de «no mover ninguno» se dicen a propósito: son lo
-     que hay que resolver antes de poder elegir esa opción. */
-  const avisos = [...s.d.querySelectorAll('.portada .nota')]
-    .map(n => n.textContent).join(' ');
-  comprobar('se dicen los cabos sueltos de «no mover ninguno»',
-    /faltan por atar/i.test(avisos) && /necesita parar/.test(avisos));
+  /* Lo de la abuela va DENTRO de las opciones que dejan un coche en el
+     inicio, no en una viñeta suelta al final: era una cuarta alternativa
+     aparente cuando en realidad es una consecuencia de dos de las tres.
+     «Dejar dos» lo dice explícitamente; «no mover ninguno» ya nace de ahí. */
+  comprobar('lo de la abuela va dentro de «dejar dos»',
+    /abuela/.test(op('dejar-dos').textContent) && /taxi/.test(op('dejar-dos').textContent));
+  comprobar('«no mover ninguno» también contempla a la abuela',
+    /abuela/.test(op('ninguno').textContent));
+  comprobar('«todos en taxi» avisa de que no deja coche en el inicio',
+    /no queda ningún coche/.test(op('todos-taxi').textContent));
+  comprobar('ya no hay una viñeta suelta para la abuela',
+    !s.d.querySelector('.portada ul.coches li[data-opcion="abuela"]'));
   /* Y tiene que estar en las decisiones del grupo, no solo contado en la
      portada: es lo que hay que cerrar. */
   comprobar('los coches están en las decisiones del grupo, sin cerrar',

@@ -93,6 +93,50 @@ en modo avión. Es justo la primera fila de la tabla.
 
 ---
 
+## 2026-08-06 — Los coches: tres opciones, y lo de la abuela dentro de la primera
+
+Repaso sobre captura del móvil, con dos correcciones.
+
+### Fuera el párrafo de «dos cosas que faltan por atar»
+
+Era un aviso que se había añadido por iniciativa propia, señalando dos cabos
+sueltos de la tercera opción. Se pidió quitarlo y se quita, de la portada **y
+de la tarjeta de `DECISIONES`**, que arrastraba el mismo texto: dejarlo en una
+sola de las dos habría sido quitarlo a medias.
+
+### Lo de la abuela no era una cuarta opción
+
+Estaba como **viñeta suelta al final**, con el mismo formato que las tres
+alternativas, así que se leía como una cuarta opción entre las que elegir. No
+lo es: es una **consecuencia** de las opciones que dejan un coche en el inicio.
+Tanto, que tenía que explicar en su propio texto con cuáles era compatible
+(«con la primera opción o con la tercera, no con la segunda»), que es la señal
+de que estaba en el sitio equivocado.
+
+Ahora:
+
+- va **dentro de «dejar dos coches en el destino»**, que es la que la habilita;
+- **«no mover ninguno»** ya nacía de ese caso y no hace falta repetirlo;
+- **«llevarlos todos y volver en taxi»** avisa de que con ella **no queda
+  ningún coche en el inicio**, que es justo el precio de esa opción.
+
+Quedan **tres viñetas**, tres alternativas de verdad, y cada una dice sola qué
+pasa con la abuela. Se ha quitado la frase que enumeraba opciones por número,
+que era frágil: cambiar el orden la habría dejado mintiendo.
+
+### Comprobado
+
+`npm test`: **413 comprobaciones, 0 fallos** (eran 412). `npm run validar` y
+`node --check` OK.
+
+Hay comprobación de que **no vuelva a aparecer una viñeta `abuela` suelta**.
+Probado **en negativo**: devolviéndola y quitando el aviso de «no queda ningún
+coche», saltan cuatro fallos. Después se restauró.
+
+`VERSION` a `camino-v28`. `APP_VERSION` sigue en `map-9`.
+
+---
+
 ## 2026-08-06 — «¿Quién eres?» en la portada, en una ventana
 
 Hasta ahora la persona **solo se podía elegir metiéndose en Retos**, que es la
