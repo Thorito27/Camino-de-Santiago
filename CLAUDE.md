@@ -389,12 +389,18 @@ sin imágenes externas.
 
 **El texto de la portada está escrito a mano y no sale de ningún dato**, así
 que una reescritura se lo lleva por delante sin que salte nada. Por eso hay
-pruebas que lo fijan: que están **Daniel, Pepe y Fidel** (los tres que no
-vienen, y el recuerdo es intencionado), que la guía se atribuye a **la tita
-Lucila con aportes de Juan Martínez**, y que el apartado «Cómo se mueven los
-coches» tiene sus **cuatro pasos en orden**. Ese apartado se apoya en que el
-destino de cada etapa es la salida de la siguiente: hay una prueba que lo
-comprueba, porque si algún día deja de encadenar, la explicación deja de valer.
+pruebas que lo fijan: que están **Daniel, Pepe y Fidel** (el recuerdo es
+intencionado y la frase es literalmente «Nos acordamos de…», sin adornos), y
+que la guía se atribuye a **la tita Lucila con aportes de Juan Martínez**.
+
+**Lo de los coches NO está decidido.** Se escribió una vez como si lo
+estuviera —«la idea, cada día», en lista numerada— y era falso: hay varias
+opciones sobre la mesa. Ahora va en `<ul>` (alternativas, no pasos), dice
+«todavía sin decidir» y vive además en `DECISIONES` con su botón de WhatsApp.
+Hay pruebas que comprueban las tres cosas, **incluida que no vuelva a ser un
+`<ol>`**. La primera opción se apoya en que el destino de cada etapa es la
+salida de la siguiente: también hay prueba, porque si algún día deja de
+encadenar, esa opción deja de tener sentido.
 
 **Cada cosa en una sola pestaña.** Itinerario es el día (horario, cama y
 comida reservada); Paradas es lo que hay por el camino (escapes, bares y qué
@@ -438,6 +444,10 @@ quien lo marca). Al día del **6 de agosto de 2026**:
   va a la misa y se retrasa la cena, falta que Milongas confirme la hora.
 - Antes del 12 de agosto: comunicar el menú a Mesón A Lareira. **Pendiente, y
   es la que corre.**
+- Cómo se mueven los tres coches de una etapa a otra. **Pendiente**: dejar dos
+  en el destino y volver en el tercero, o llevarlos todos y volver en taxi. Va
+  atado a que la abuela pueda cortar a media etapa, que solo cabe si queda un
+  coche en el inicio.
 
 Cuando una decisión recibe respuesta, se guarda en el campo `respuesta`:
 `texto` (la frase **literal**, sin reescribir), `quien`, `cuando` y un `aclara`

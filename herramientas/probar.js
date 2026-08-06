@@ -84,20 +84,33 @@ console.log('\n1. Portada');
   comprobar('la portada reconoce los aportes de Juan Martínez',
     /aportes de <strong>Juan Mart/.test(hp));
 
-  /* El baile de los coches: cuatro pasos y en ese orden. */
-  const pasos = s.d.querySelectorAll('.portada ol.coches li');
-  comprobar('la portada explica el movimiento de los coches', pasos.length === 4);
-  comprobar('los coches van primero al destino y se vuelve al origen',
-    pasos.length === 4
-      && /destino/.test(pasos[0].textContent)
-      && /dejan dos/.test(pasos[1].textContent)
-      && /punto de partida/.test(pasos[1].textContent));
-  comprobar('dice cuántos caben en un taxi', /cuatro personas/.test(hp));
-  /* La portada afirma que el destino de cada etapa es la salida de la
-     siguiente, y en eso se apoya todo el baile de los coches. Si algún día
-     se cambia una etapa y deja de encadenar, esa explicación deja de valer. */
+  /* Los coches NO están decididos. Se llegó a escribir en la portada como si
+     lo estuvieran («la idea, cada día») y no era cierto: hay varias opciones
+     sobre la mesa. Estas comprobaciones evitan que vuelva a darse por hecho. */
+  const opciones = s.d.querySelectorAll('.portada ul.coches li');
+  comprobar('la portada da las opciones de los coches', opciones.length === 3);
+  comprobar('la portada dice que los coches están sin decidir',
+    /sin decidir/i.test(hp));
+  comprobar('las opciones NO se pintan como pasos numerados',
+    s.d.querySelectorAll('.portada ol.coches li').length === 0);
+  comprobar('está la opción de dejar dos coches en el destino',
+    [...opciones].some(li => /dejan dos/.test(li.textContent)
+      && /punto de partida/.test(li.textContent)));
+  comprobar('está la opción de volver en taxi',
+    [...opciones].some(li => /taxi/.test(li.textContent) && /cuatro personas/.test(li.textContent)));
+  comprobar('está lo de la abuela, y que depende de la primera opción',
+    [...opciones].some(li => /abuela/.test(li.textContent)
+      && /primera opci/.test(li.textContent)));
+  /* Y tiene que estar en las decisiones del grupo, no solo contado en la
+     portada: es lo que hay que cerrar. */
+  comprobar('los coches están en las decisiones del grupo, sin cerrar',
+    s.w.eval("DECISIONES.some(d=>d.id==='coches' && d.estado!=='resuelto')"));
+
+  /* La primera opción se apoya en que el destino de cada etapa es la salida
+     de la siguiente. Si algún día deja de encadenar, deja de valer. */
+  const ETS = s.w.eval('ETAPAS');
   comprobar('el destino de cada etapa es la salida de la siguiente',
-    s.w.eval('ETAPAS').slice(0,-1).every((e,i) => e.destino === s.w.eval('ETAPAS')[i+1].origen));
+    ETS.slice(0,-1).every((e,i) => e.destino === ETS[i+1].origen));
 
   s.w.irA(0);
   comprobar('el botón de entrar lleva al índice', s.w.eval('vistaEtapa') === 0);

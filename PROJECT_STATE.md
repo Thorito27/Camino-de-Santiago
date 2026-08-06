@@ -93,6 +93,64 @@ en modo avión. Es justo la primera fila de la tabla.
 
 ---
 
+## 2026-08-06 — Los coches no estaban decididos, y la web decía que sí
+
+Corrección de la entrada de abajo, el mismo día. Dos cosas.
+
+### El recuerdo, más corto
+
+«Y en el camino habrá un recuerdo para Daniel, Pepe y Fidel, que esta vez no
+vienen» pasa a ser, tal cual: **«Nos acordamos de Daniel, Pepe y Fidel»**. Lo
+pidió así el encargo. La versión anterior explicaba de más.
+
+### Los coches: se dieron por decididos y no lo estaban
+
+Esto es el fallo de verdad. El apartado se escribió como **«La idea, cada
+día»**, en una **lista numerada** de cuatro pasos: la forma misma decía «esto
+ya está resuelto, hazlo en este orden». No lo está. Hay más opciones sobre la
+mesa:
+
+1. **Dejar dos coches en el destino** y volver en el tercero al punto de
+   partida (lo que se había escrito como si fuera el plan).
+2. **Llevarlos todos al destino y volver en taxi** al inicio de la etapa. Con
+   cuatro plazas por taxi, para los doce hacen falta tres.
+3. Y aparte, **lo de la abuela**: si se cansa a media etapa, que alguien coja
+   un taxi con ella hasta el **inicio** y sigan en el coche que se hubiera
+   dejado allí. Se dice explícitamente que **esto solo cabe con la primera
+   opción**, porque es la única que deja un coche en el punto de partida. Esa
+   dependencia no venía en el encargo; se deduce y por eso se dice.
+
+Cambios:
+
+- La lista pasa de `<ol>` a `<ul>`, con viñetas en vez de números. **La forma
+  importa**: numerada son pasos de un plan, sin numerar son alternativas.
+- Encabeza «**Todavía sin decidir**».
+- Se añade a `DECISIONES` (id `coches`, `pendiente`), que es donde vive lo que
+  está sin cerrar, con su botón de WhatsApp. El índice pasa a decir «Estas 6
+  cosas… Quedan 4 sin cerrar», sin tocar nada: la cuenta ya era automática.
+
+### La lección
+
+Un apartado puede ser correcto palabra por palabra y aun así mentir por cómo
+está montado. Aquí el contenido describía bien una opción; lo falso era
+presentarla como **la** opción, y buena parte de eso lo decía el `<ol>`. Hay
+una prueba que comprueba que **no vuelva a ser una lista numerada**.
+
+### Comprobado
+
+`npm test`: **387 comprobaciones, 0 fallos** (eran 383). `npm run validar` y
+`node --check` OK.
+
+Probado **en negativo**: devolviendo el `<ol>` y quitando el «sin decidir»,
+saltan **seis** fallos. Después se restauró.
+
+`VERSION` a `camino-v24`. `APP_VERSION` sigue en `map-9`.
+
+**Sin comprobar en navegador real:** las viñetas doradas de la lista nueva no
+las ha visto nadie.
+
+---
+
 ## 2026-08-06 — Portada: los que no vienen, la autoría y el baile de los coches
 
 Tres correcciones pedidas sobre la portada.
