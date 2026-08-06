@@ -342,6 +342,22 @@ Cada punto de `ETAPAS[n].puntos` puede llevar:
 | `fiable: false` + `ajustado` | dato dudoso; `ajustado` son los metros que se corrigió al integrar los GPX |
 | `sellar`, `horario`, `ficha`, `tipo` | información de la guía |
 
+**`cultura` es `{donde, texto}`, no una lista de cadenas.** `donde` vale
+`salida`, `camino`, `destino` o `desvio`, y decide bajo qué rótulo se pinta en
+Paradas. Antes eran cadenas sueltas y salían todas bajo «Además, en el
+destino», que era **falso**: la lista recorre la etapa entera, incluye cosas
+del pueblo de salida y desvíos a 7 y 10 km fuera del Camino.
+
+**Y en `cultura` no va nada que ya se vea en la pestaña Paradas.** Los puntos
+de tipo `taxi`, `comida`, `cultura`, `iglesia` y `mirador` se pintan ahí como
+tarjeta, con su km y su ficha, así que dicen más: si el dato es de uno de
+ellos, va en su `ficha`. De los de tipo `inicio`, `fin` y `paso` sí puede
+hablar `cultura`, porque esos no salen en Paradas (por eso la catedral de
+Santiago sigue en la lista). Hay una prueba que compara por nombre y por
+frases de cuatro palabras contra las fichas; si una entrada nombra un punto a
+propósito (para situarse, o porque son dos sitios distintos con el mismo
+nombre), se marca con `refiere:'<nombre del punto>'`.
+
 Y en `datos.js`: **`tamanoGrupo(fecha)`** son los que DUERMEN esa noche (manda
 en las plazas de alojamiento) y **`grupoCamina(fecha)`** los que CAMINAN esa
 etapa. Difieren el 20 de agosto: caminan 12 y duermen 11, porque Alejandro
@@ -370,6 +386,15 @@ La portada es la pantalla de bienvenida (`panelPortada`), lo primero que se
 ve al entrar sin `?etapa=N`; con `?etapa=N` se salta directo a esa etapa. El
 trazado de la portada es un SVG propio generado de `TRAZAS` (`svgPortadaMapa`),
 sin imágenes externas.
+
+**Cada cosa en una sola pestaña.** Itinerario es el día (horario, cama y
+comida reservada); Paradas es lo que hay por el camino (escapes, bares y qué
+ver); Ruta son todos los puntos. La lista `cultura` llegó a pintarse **entera
+en Itinerario y en Paradas a la vez**, palabra por palabra: ahora vive solo en
+Paradas y hay una prueba que lo comprueba en las seis etapas. Los rótulos de
+Paradas son «Puntos de escape», «Bares y comida» y «Qué ver»; ojo, los
+restaurantes reservados NO son «Bares y comida», están en Itinerario bajo
+«Comer y cenar».
 
 Las sub-pestañas de una etapa, en orden, son `dia` (**se muestra como
 "Itinerario"**), `ruta`, `perfil`, `paradas`, `sellos`, `tiempo`. **La sección

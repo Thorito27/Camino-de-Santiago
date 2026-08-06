@@ -93,6 +93,108 @@ en modo avión. Es justo la primera fila de la tabla.
 
 ---
 
+## 2026-08-06 — Repaso de los apartados de etapa: se repetían y mentían
+
+Encargo: revisar los apartados dentro de cada etapa, que no sean repetitivos y
+se ajusten a la realidad, y dejar los rótulos simples. El ejemplo que se dio
+—no se puede decir «en el destino» y meter ahí cosas de todo el trayecto— era
+la punta del ovillo. Había cinco fallos.
+
+### 1. La misma lista, pintada dos veces
+
+`et.cultura` se renderizaba **entera en Itinerario** (`<h2>Qué ver</h2>`) **y
+otra vez en Paradas** («Además, en el destino»). El mismo contenido, palabra
+por palabra, en dos pestañas. Ahora vive **solo en Paradas**.
+
+### 2. «Además, en el destino» era falso
+
+La lista recorre la etapa entera. Ejemplos: la etapa 1 empieza con «Ponte da
+Aspera — se ve al salir de Sarria», que es el **punto de salida**; la etapa 4
+abría con «Melide — Iglesia de Santa María», que es **de donde se sale**; y la
+etapa 2 metía ahí la Iglesia de Vilar de Donas y el Castillo de Pambre, que
+están **a 7 y 10 km fuera del Camino**.
+
+`cultura` pasa de cadenas sueltas a `{donde, texto}`, con `donde` ∈ `salida` /
+`camino` / `destino` / `desvio`, y Paradas agrupa bajo rótulos que dicen la
+verdad: «Al salir de Sarria», «Por el camino», «Al llegar a Portomarín»,
+«Fuera del Camino, hay que desviarse».
+
+### 3. Diez entradas repetían una tarjeta que estaba justo encima
+
+Y **la tarjeta siempre decía más**, porque lleva km, horario, ficha y distancia
+desde donde estás. Se quitaron de la lista después de comprobar una por una que
+no se perdía nada; los dos detalles que solo estaban ahí se pasaron a la ficha
+de su punto:
+
+| Detalle | Se pasó a |
+|---|---|
+| el hórreo de Castañeda | ficha de Castañeda (etapa 4) |
+| el puente del s. XIV sobre el río Seco | ficha de O Leboreiro (etapa 3) |
+| el hospital de la Orden de Santiago | ficha de Ligonde (etapa 2) |
+
+La regla que queda: en `cultura` no va nada que ya se vea en Paradas. Los tipos
+`taxi`, `comida`, `cultura`, `iglesia` y `mirador` salen ahí como tarjeta; los
+de `inicio`, `fin` y `paso` no, y por eso la catedral de Santiago sí sigue en
+la lista.
+
+### 4. «La tita Lucila propone parar aquí» mentía en dos de cinco
+
+Ese bloque resumía las entradas `destacado` del horario. En la etapa 1 la
+entrada es la descripción de un tramo («Barbadelo-Ferreiros, dificultad BAJA,
+el mejor tramo») y en la 6 es una llegada («Llegada a Monte do Gozo»). Ninguna
+de las dos es una parada. Además ya salían enteras en el horario del
+Itinerario. Se quitó el bloque.
+
+### 5. Un rótulo obsoleto
+
+La nota de Ruta remitía a «El día», pestaña que se llama **«Itinerario»** desde
+hace tiempo.
+
+### Los rótulos, más cortos
+
+| Antes | Ahora |
+|---|---|
+| Si alguien quiere parar | Puntos de escape |
+| Dónde descansar | Bares y comida |
+| Qué merece la pena ver | Qué ver |
+
+«Bares y comida» son los del recorrido; los restaurantes reservados siguen en
+Itinerario, bajo «Comer y cenar». Estaban mezclándose en la cabeza de
+cualquiera que leyera «Dónde descansar».
+
+### De paso: los datos de etapa contradecían las decisiones cerradas hoy
+
+Al cerrar las decisiones esta misma mañana quedaron descolgadas tres fichas:
+
+- Villa Xardín seguía diciendo «PROBLEMA SIN RESOLVER: falta una cama», y salía
+  **en rojo**, cuando la cama supletoria ya está reservada. Se añadió
+  `supletorias` al alojamiento; el rojo ahora solo salta si de verdad faltan
+  camas contando las supletorias.
+- La etapa 5 seguía con la cena en O Ceadoiro y «Única cena del viaje SIN
+  CONFIRMAR». Ahora dice que se cena en el alojamiento, **y por qué**.
+- La etapa 6 seguía preguntando «misa completa o cena puntual». Ahora recoge lo
+  decidido y **lo que falta**: confirmar con Milongas la hora nueva. No se
+  inventó la hora, que no se sabe.
+
+Hay tres comprobaciones nuevas que atan las fichas de etapa al estado de
+`DECISIONES`, para que no vuelvan a divergir.
+
+### Comprobado
+
+`npm test`: **374 comprobaciones, 0 fallos** (eran 324; 50 nuevas, casi todas
+del apartado «3 bis. Paradas»). `npm run validar` y `node --check` OK.
+
+Las tres guardas nuevas se probaron **en negativo**: metiendo a propósito un
+duplicado de ficha, una entrada sin `donde` y la nota vieja de Villa Xardín,
+saltan cuatro fallos. Después se restauró.
+
+`VERSION` a `camino-v22`. `APP_VERSION` sigue en `map-9`: no se tocó el mapa.
+
+**Sin comprobar en navegador real**, como siempre: jsdom no pinta. Sí se leyó
+el texto plano de las seis Paradas, y los rótulos salen correctos en las seis.
+
+---
+
 ## 2026-08-06 — Dos cosas al equipaje y las respuestas del grupo a las decisiones
 
 A doce días de salir. Dos encargos: añadir tres cosas al checklist de la maleta

@@ -148,6 +148,113 @@ console.log('3. Las 37 vistas');
   s.dom.window.close();
 }
 
+/* ---------- 3 bis. Paradas: sin repetir y cada cosa en su sitio ----------
+   Tres fallos reales que había aquí y que ninguna prueba veía:
+   1. La lista `cultura` se pintaba ENTERA en dos pestañas, Itinerario y
+      Paradas, palabra por palabra.
+   2. Dentro de Paradas, diez entradas repetían una tarjeta que estaba
+      justo encima (y la tarjeta siempre dice más: lleva km y horario).
+   3. Todo salía bajo «Además, en el destino», y la lista incluye cosas
+      del pueblo de SALIDA y desvíos a 7 y 10 km fuera del Camino.
+   ------------------------------------------------------------------ */
+console.log('3 bis. Paradas: sin repetir y en su sitio');
+{
+  const s = abrir();
+  const DONDES = ['salida','camino','destino','desvio'];
+  const norm = t => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+
+  for(let n=1; n<=6; n++){
+    const et = s.w.eval(`ETAPAS[${n-1}]`);
+    const cultura = et.cultura || [];
+
+    comprobar(`etapa ${n}: cada cosa que ver dice dónde está`,
+      cultura.every(c => c && typeof c === 'object' && DONDES.includes(c.donde)));
+
+    /* Nada de la lista puede repetir algo que ya se vea EN ESTA MISMA
+       pestaña. Eso son los tres tipos de tarjeta que pinta Paradas:
+       escapes (taxi), bares (comida) y qué ver (cultura/iglesia/mirador).
+       Los puntos de tipo inicio/fin/paso NO salen aquí, así que de esos
+       sí puede hablar la lista (la catedral de Santiago, por ejemplo).
+       Se compara por nombre y por frases de cuatro palabras seguidas,
+       que es como estaban escritos los duplicados de verdad.
+       Excepción declarada a mano con `refiere`: revisado, no es repe. */
+    const EN_PARADAS = ['taxi','comida','cultura','iglesia','mirador'];
+    const visibles = et.puntos.filter(p => EN_PARADAS.includes(p.tipo));
+    const repes = cultura.filter(c => visibles.some(function(p){
+      if(norm(c.refiere || '') === norm(p.nombre)) return false;
+      const enTarjeta = norm(p.nombre + ' ' + (p.ficha || ''));
+      if(enTarjeta.includes(norm(p.nombre)) && norm(c.texto).includes(norm(p.nombre))) return true;
+      const pal = norm(c.texto).split(' ');
+      for(let i = 0; i + 4 <= pal.length; i++)
+        if(enTarjeta.includes(pal.slice(i, i+4).join(' '))) return true;
+      return false;
+    }));
+    comprobar(`etapa ${n}: la lista no repite ninguna tarjeta`, repes.length === 0);
+    if(repes.length) repes.forEach(r => console.error('      repetido: ' + r.texto.slice(0,60)));
+
+    /* La lista vive SOLO en Paradas. Si vuelve a aparecer en Itinerario,
+       esto salta: se compara el texto de cada entrada contra las dos vistas. */
+    s.w.irA(n);
+    s.w.irASeccion('dia');
+    const hDia = html(s);
+    s.w.irASeccion('paradas');
+    const hPar = html(s);
+    const trozo = c => s.w.eval('esc(' + JSON.stringify(c.texto.slice(0,40)) + ')');
+    comprobar(`etapa ${n}: lo que ver sale en Paradas`,
+      cultura.every(c => hPar.indexOf(trozo(c)) >= 0));
+    comprobar(`etapa ${n}: y NO se repite en Itinerario`,
+      cultura.every(c => hDia.indexOf(trozo(c)) < 0));
+
+    /* Los rótulos tienen que decir la verdad: si no hay nada de salida,
+       no puede salir «Al salir de…», y lo de fuera del Camino tiene que
+       estar dicho como tal. */
+    const hay = d => cultura.some(c => c.donde === d);
+    comprobar(`etapa ${n}: el rótulo de salida solo si hay algo a la salida`,
+      hay('salida') === (hPar.indexOf('Al salir de') >= 0));
+    comprobar(`etapa ${n}: los desvíos se avisan como fuera del Camino`,
+      hay('desvio') === (hPar.indexOf('Fuera del Camino') >= 0));
+    comprobar(`etapa ${n}: ya no se dice «Además, en el destino»`,
+      hPar.indexOf('Además, en el destino') < 0);
+  }
+  /* La etapa 2 es la única con desvíos (Vilar de Donas y Pambre). Si esto
+     falla, o se han perdido o se han colado en otra etapa. */
+  comprobar('solo la etapa 2 tiene desvíos fuera del Camino',
+    s.w.eval("ETAPAS.filter(e=>(e.cultura||[]).some(c=>c.donde==='desvio')).map(e=>e.num).join()") === '2');
+
+  /* La nota de Ruta remitía a «El día», pestaña que se llama «Itinerario». */
+  s.w.irA(1); s.w.irASeccion('ruta');
+  comprobar('la nota de Ruta nombra la pestaña por su nombre actual',
+    html(s).indexOf('«Itinerario»') >= 0 && html(s).indexOf('«El día»') < 0);
+
+  /* Coherencia entre las decisiones y los datos de la etapa. Al cerrar una
+     decisión es fácil olvidar la ficha de la etapa, y entonces el índice
+     dice «resuelto» mientras la etapa sigue diciendo «SIN RESOLVER». Pasó
+     con Villa Xardín y con la cena de O Ceadoiro. */
+  const dec = id => s.w.eval(`DECISIONES.find(d=>d.id===${JSON.stringify(id)}).estado`);
+  const et5 = s.w.eval('ETAPAS[4]'), et6 = s.w.eval('ETAPAS[5]');
+
+  if(dec('villa-xardin') === 'resuelto'){
+    comprobar('Villa Xardín resuelta: la etapa ya no dice que falte una cama',
+      et5.alojamiento.nota.indexOf('SIN RESOLVER') < 0);
+    comprobar('Villa Xardín resuelta: las camas cubren al grupo',
+      (et5.alojamiento.plazas||0) + (et5.alojamiento.supletorias||0)
+        >= s.w.eval(`tamanoGrupo('${et5.fecha}')`));
+  }
+  if(dec('ceadoiro') === 'resuelto'){
+    comprobar('cena del 22 resuelta: la etapa ya no la da por sin confirmar',
+      et5.comidas.nota.indexOf('SIN CONFIRMAR') < 0);
+    comprobar('cena del 22 resuelta: ya no consta reserva en O Ceadoiro',
+      et5.comidas.cena.every(c => c.indexOf('O Ceadoiro') < 0));
+  }
+  if(dec('santiago-misa-cena') !== 'pendiente'){
+    comprobar('la etapa 6 recoge que la cena se retrasa por la misa',
+      /misa/i.test(et6.comidas.nota) && /retras/i.test(et6.comidas.nota));
+  }
+
+  comprobar('Paradas sin errores', s.errores.length === 0);
+  s.dom.window.close();
+}
+
 /* ---------- 4. Slider del perfil ---------- */
 console.log('4. Slider del perfil');
 {

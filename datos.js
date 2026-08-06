@@ -12,6 +12,28 @@
    - Kilometrajes: de la guía. Sin verificar contra GPX.
 
    Cada dato dudoso lleva `fiable: false` y una `nota` visible.
+
+   CULTURA — qué ver, y DÓNDE está de verdad
+   `cultura` es una lista de objetos `{donde, texto}`. Antes eran
+   cadenas sueltas y la web las pintaba todas bajo el rótulo «Además,
+   en el destino», que era falso: la lista recorre la etapa entera e
+   incluye cosas del punto de salida (la Ponte da Aspera de la etapa 1)
+   y hasta desvíos a 7 y 10 km fuera del Camino (Vilar de Donas y
+   Pambre, etapa 2). Valores de `donde`:
+     'salida'  — en el pueblo de donde se sale
+     'camino'  — por el recorrido, entre origen y destino
+     'destino' — en el pueblo donde se acaba la etapa
+     'desvio'  — FUERA del Camino, hay que ir aparte
+   Aquí NO se repite nada que ya tenga su tarjeta en `puntos`: las
+   tarjetas llevan km, horario y distancia desde donde estás, así que
+   siempre dicen más. Lo que se quitó de aquí estaba ya en una.
+
+   `refiere` es la excepción, y hay que ponerla a mano: una entrada
+   puede NOMBRAR una tarjeta sin repetirla, cuando la usa de referencia
+   para situarse («la piedra con mensajes, poco después de Santa
+   Irene»). Ahí se pone `refiere:'Santa Irene'` para decir que se ha
+   mirado y no es un duplicado. La prueba que caza repeticiones lo
+   respeta; sin ese campo, saltaría.
    ============================================================ */
 'use strict';
 
@@ -82,11 +104,10 @@ const ETAPAS = [
     cena:['O Mirador — RESERVADO 20:30. Lorena López, omiradorportomarin@gmail.com, 982 545323'],
     nota:'El mapa de la guía marca Restaurante Pérez y Dgusta como "cerrado temporalmente", pero el texto lo recomienda. Capturas de fechas distintas. Sin verificar.',
     otros:'Supermercado Claudio cierra a las 14:00. Covirán no cierra. Hay italiano con pizzas para llevar.'},
-  cultura:['Ponte da Aspera — se ve al salir de Sarria.',
-    'Iglesia de Santa María en Mirallos (s. XII-XIII). Suele estar cerrada, a 300 m de la salida del pueblo.',
-    'Mojón km 100 — el clásico entre Brea y Morgade; el oficial actual cerca de A Pena, después de Ferreiros.',
-    'Escalinata y capilla de la Virgen de las Nieves, Portomarín.',
-    'Palacio de Berbetoros (s. XVII), Crucero de la Casa del Conde de la Maza, Iglesia de San Pedro (1182).'],
+  cultura:[
+    {donde:'salida',  texto:'Ponte da Aspera, nada más salir de Sarria.'},
+    {donde:'destino', texto:'Escalinata y capilla de la Virgen de las Nieves.'},
+    {donde:'destino', texto:'Palacio de Berbetoros (s. XVII), Crucero de la Casa del Conde de la Maza e Iglesia de San Pedro (1182).'}],
   avisos:['La guía deja anotado: "Falta incluir los puntos de interés cultural de la DIAPO 4".',
     'Distancia de Mirallos a Sarria: el PDF dice "a __ km", falta el número.',
     'La bajada final a Portomarín pierde unos 130 m en 3 km. Es lo más exigente para las rodillas de todo el viaje.']
@@ -107,7 +128,7 @@ const ETAPAS = [
     {nombre:"Ventas de Narón", lat:42.844240, lon:-7.748800, km:14.62, ele:688, kmGuia:13.5, tipo:'iglesia', sellar:true, fiable:true, ficha:"Ermita de la Magdalena. SELLAR si está abierta, pero abre poco tiempo. Albergue.", desviacion_m:0},
     {nombre:"Sierra de Ligonde", lat:42.850060, lon:-7.762060, km:16.17, ele:691, kmGuia:15, tipo:'mirador', fiable:true, ficha:"Punto más alto de toda la ruta: 722 m.", desviacion_m:0},
     {nombre:"Cruceiro de Lameiros", lat:42.855300, lon:-7.777380, km:17.76, ele:616, kmGuia:16, tipo:'cultura', fiable:true, ficha:"Uno de los más famosos del camino, doble cara, mucha simbología. FECHA EN DISPUTA: la guía dice 1674 en una diapositiva y 1670 en otra. Google recoge 1670.", desviacion_m:0},
-    {nombre:"Ligonde", lat:42.858850, lon:-7.779650, km:18.24, ele:614, kmGuia:16.5, tipo:'taxi', fiable:true, ficha:"Punto de escape. Bar Restaurante Ligonde, Casa Mariluz, Trisquel. Cementerio de peregrinos.", desviacion_m:0},
+    {nombre:"Ligonde", lat:42.858850, lon:-7.779650, km:18.24, ele:614, kmGuia:16.5, tipo:'taxi', fiable:true, ficha:"Punto de escape. Bar Restaurante Ligonde, Casa Mariluz, Trisquel. Cementerio de peregrinos, anexo a un desaparecido hospital de la Orden de Santiago.", desviacion_m:0},
     {nombre:"Airexe", lat:42.865620, lon:-7.790760, km:19.66, ele:613, kmGuia:17.4, tipo:'iglesia', fiable:false, ajustado:407, ficha:"Iglesia de Santiago de Airexe. Bares y albergue público.", desviacion_m:0},
     {nombre:"Portos", lat:42.868340, lon:-7.797770, km:20.36, ele:629, kmGuia:18.9, tipo:'paso', fiable:false, ajustado:767, ficha:"Entre Portos y Lestedo sale el desvío a Vilar de Donas: 2,5 km de ida y otros tantos de vuelta.", desviacion_m:0},
     {nombre:"Lestedo", lat:42.872170, lon:-7.814280, km:22.19, ele:578, kmGuia:20, tipo:'paso', fiable:false, ajustado:554, desviacion_m:0},
@@ -134,11 +155,10 @@ const ETAPAS = [
             'Restaurante Ultreya — menú 15 €','Restaurante Castro','Albergue Mesón de Benito','Quinto Carallo'],
     cena:['Mesón A Lareira — RESERVADO 21:00. Menús de 16 € y 22 €, o a la carta. Vanesa Vilela, vanesavilelacastro@gmail.com'],
     nota:'FECHA LÍMITE: hay que comunicar a A Lareira qué va a cenar cada uno una semana antes, es decir antes del 12 de agosto de 2026.'},
-  cultura:['Iglesia de Santa María, en Gonzar.','Iglesia de Santiago de Airexe, después de Portos.',
-    'Cementerio de Ligonde — anexo a un desaparecido hospital de la Orden de Santiago.',
-    'Iglesia de San Tirso, Palas de Rei. SELLAR.',
-    'Iglesia de Vilar de Donas — fuera del camino, a 7 km de Palas de Rei. Abierta 16:00-20:00.',
-    'Castillo de Pambre — a 10 km de Palas de Rei, fuera del camino.'],
+  cultura:[
+    {donde:'destino', texto:'Iglesia de San Tirso. SELLAR.'},
+    {donde:'desvio',  texto:'Iglesia de Vilar de Donas, a 7 km de Palas de Rei. Abierta 16:00-20:00.'},
+    {donde:'desvio',  texto:'Castillo de Pambre, a 10 km de Palas de Rei.'}],
   avisos:['Vilar de Donas: la guía dice "10 min en coche" tanto desde Palas de Rei como desde Melide (etapa 3). Ambas no pueden ser ciertas.',
     'Castillo de Pambre aparece también como "Pombre" y con tres distancias distintas: 10 km, 15 min, 20 min desde Melide.',
     'Es la etapa más larga y con más desnivel del viaje. La Sierra de Ligonde (722 m) es el punto más alto de toda la ruta.']
@@ -156,7 +176,7 @@ const ETAPAS = [
     {nombre:"Pontecampaña", lat:42.879820, lon:-7.918430, km:5.31, ele:435, kmGuia:4.7, tipo:'comida', fiable:true, ficha:"Mesón A Pontecampaña.", desviacion_m:0},
     {nombre:"Casanova", lat:42.880790, lon:-7.934540, km:6.75, ele:491, kmGuia:6, tipo:'paso', fiable:true, desviacion_m:0},
     {nombre:"Límite Lugo / A Coruña", lat:42.881790, lon:-7.948470, km:8.03, ele:446, kmGuia:7.2, tipo:'cultura', fiable:false, ajustado:378, ficha:"Se entra en la provincia de A Coruña, la última del Camino.", desviacion_m:0},
-    {nombre:"O Leboreiro", lat:42.890130, lon:-7.968940, km:10.21, ele:439, kmGuia:9.2, tipo:'taxi', fiable:true, ficha:"Aldea medieval. Cabazo (granero-canasta para maíz). Iglesia de Santa María, románico de transición. Punto de escape: taxi desde la iglesia. Taberna de Leboreiro.", desviacion_m:0},
+    {nombre:"O Leboreiro", lat:42.890130, lon:-7.968940, km:10.21, ele:439, kmGuia:9.2, tipo:'taxi', fiable:true, ficha:"Aldea medieval. Cabazo (granero-canasta para maíz). Puente del s. XIV sobre el río Seco. Iglesia de Santa María, románico de transición. Punto de escape: taxi desde la iglesia. Taberna de Leboreiro.", desviacion_m:0},
     {nombre:"Parque empresarial", lat:42.900280, lon:-7.986080, km:12.15, ele:460, kmGuia:11.2, tipo:'paso', fiable:true, desviacion_m:0},
     {nombre:"Furelos", lat:42.909050, lon:-7.999120, km:13.81, ele:408, kmGuia:13, tipo:'cultura', fiable:true, ficha:"Puente medieval. Sitio agradable junto al río.", desviacion_m:0},
     {nombre:"Melide", lat:42.914640, lon:-8.017500, km:15.63, ele:453, kmGuia:14.5, tipo:'fin', fiable:false, ajustado:620, desviacion_m:0}
@@ -179,13 +199,14 @@ const ETAPAS = [
     cena:['Restaurante O Codeseira — RESERVADO 20:30. Pedro Ultrich, 691605015'],
     nota:'CONFLICTO: la misa de Sancti Spiritus es a las 20:00 y la cena a las 20:30. Además A Garnacha aparece bajo "comida" pero el texto dice que está reservada para cenar: dos cenas el mismo día. El nombre baila entre O Codeseira y A Codeseira (la URL).',
     otros:'El pulpo a feira es la especialidad. Pedir cachelos. Repostería: ricos y melindres.'},
-  cultura:['San Xulián do Camiño — iglesia románica s. XII y cementerio.',
-    'Leboreiro — aldea medieval, cabazo, puente del s. XIV sobre el río Seco.',
-    'Furelos — puente medieval.',
-    'Melide: Iglesia de Sancti Spiritus / San Pedro (misa 20:00), Museo da Terra de Melide, Capilla de San Antonio — todo en la Plaza del Convento.',
-    'Capilla de San Roque (s. XX) con portada románica del s. XII de la antigua San Pedro.',
-    'Iglesia de Santa María — Monumento Nacional s. XII, a las afueras. SELLAR.',
-    'Cruceiro del s. XIV — el más antiguo de Galicia, Rúa Cantón San Roque 38.'],
+  cultura:[
+    {donde:'destino', texto:'Plaza del Convento: Iglesia de Sancti Spiritus / San Pedro (misa 20:00), Museo da Terra de Melide y Capilla de San Antonio, todo junto.'},
+    {donde:'destino', texto:'Capilla de San Roque (s. XX), con portada románica del s. XII de la antigua San Pedro.'},
+    /* La Santa María de MELIDE, que no es la de Leboreiro aunque se llamen
+       igual y las dos aparezcan en esta etapa. */
+    {donde:'destino', texto:'Iglesia de Santa María, Monumento Nacional s. XII, a las afueras. SELLAR.',
+       refiere:'O Leboreiro'},
+    {donde:'destino', texto:'Cruceiro del s. XIV, el más antiguo de Galicia, en Rúa Cantón San Roque 38.'}],
   avisos:['La guía se contradice sobre Melide: en un sitio equipara Sancti Spiritus con San Pedro, en otro dice que San Pedro es hoy la capilla de San Roque. Son edificios distintos.',
     'Alternativa apuntada en la guía: hay quien hace Palas de Rei-Arzúa directamente.',
     'Plan B por la tarde: Iglesia de Vilar de Donas, 10 min en coche, abierta 16:00-20:00.',
@@ -203,7 +224,7 @@ const ETAPAS = [
     {nombre:"Raido", lat:42.915800, lon:-8.055060, km:3.88, ele:463, kmGuia:3.2, tipo:'paso', fiable:true, desviacion_m:0},
     {nombre:"Parabispo", lat:42.917050, lon:-8.064210, km:4.70, ele:427, kmGuia:4, tipo:'paso', fiable:true, desviacion_m:0},
     {nombre:"Boente", lat:42.916290, lon:-8.078020, km:5.99, ele:396, kmGuia:5.8, tipo:'iglesia', horario:"7:30-14:30", fiable:true, ficha:"Iglesia de Santiago. Cafetería El Alemán, Panadería A Castellana, Albergue Boente enfrente de la iglesia.", desviacion_m:0},
-    {nombre:"Castañeda", lat:42.923230, lon:-8.100650, km:8.60, ele:413, kmGuia:8, tipo:'cultura', fiable:false, ajustado:351, ficha:"Aquí hubo un horno de cal para la catedral de Santiago. Tradición: llevar una piedra desde Triacastela. Bar No Camino. COORDENADA APROXIMADA: la búsqueda devolvió A Fraga Alta, localidad vecina.", desviacion_m:0},
+    {nombre:"Castañeda", lat:42.923230, lon:-8.100650, km:8.60, ele:413, kmGuia:8, tipo:'cultura', fiable:false, ajustado:351, ficha:"Hórreo. Aquí hubo un horno de cal para la catedral de Santiago. Tradición: llevar una piedra desde Triacastela. Bar No Camino. COORDENADA APROXIMADA: la búsqueda devolvió A Fraga Alta, localidad vecina.", desviacion_m:0},
     {nombre:"Ribadiso da Baixo", lat:42.929920, lon:-8.153070, km:13.97, ele:388, kmGuia:11.1, tipo:'taxi', fiable:false, ajustado:933, ficha:"Puente medieval sobre el río Iso. Hospital de San Antón (s. XV) hoy albergue. Playa fluvial. Punto de escape junto al Albergue Público, a la entrada.", desviacion_m:0},
     {nombre:"Arzúa", lat:42.927770, lon:-8.159420, km:14.73, ele:390, kmGuia:14.1, tipo:'fin', fiable:true, desviacion_m:240}
   ],
@@ -225,12 +246,11 @@ const ETAPAS = [
             'Mesón Ribadiso — junto al río, después del puente','Chiringuito de la Playa Fluvial'],
     cena:['Casa Nené — RESERVADO 20:30 para 8 pax + reserva adicional de 4 pax a las 20:00. 981 508107, https://casanene.es/',
           'Restaurante Casa Chelo — 981 50 82 48, por si queréis reservar'],
-    nota:'Las dos reservas de Casa Nené suman 12, pero desde el jueves sois 11. Probablemente se hizo antes de saberlo. Conviene ajustar y unificar la hora.',
+    nota:'Las dos reservas de Casa Nené suman 12, pero desde el jueves sois 11. Probablemente se hizo antes de saberlo. EN CURSO: quedó el padre en llamar (28 de julio) para unificarlas en una sola hora; todavía sin cerrar.',
     otros:'Hay que probar el queso DO Arzúa-Ulloa.'},
-  cultura:['Melide — Iglesia de Santa María.','Boente — Iglesia de Santiago, 7:30-14:30.',
-    'Castañeda — hórreo.','Ribadiso — puente medieval sobre el río Iso, playa fluvial.',
-    'Arzúa — convento de la Magdalena (s. XIV, en ruinas), iglesia parroquial de Santiago con Apóstol Peregrino y Matamoros. SELLAR.',
-    'Fiesta del queso desde 1975.'],
+  cultura:[
+    {donde:'destino', texto:'Convento de la Magdalena (s. XIV, en ruinas) e iglesia parroquial de Santiago, con Apóstol Peregrino y Matamoros. SELLAR.'},
+    {donde:'destino', texto:'Arzúa celebra la Fiesta del Queso desde 1975.'}],
   avisos:['El desvío a la playa fluvial de Ribadiso NO está señalizado y la propia guía duda de dónde está.',
     'Los últimos 3 km son en subida: +80 m desde Ribadiso. Poco según el modelo, pero se notan al final.']
 },
@@ -269,18 +289,19 @@ const ETAPAS = [
     {hora:'14:45', texto:'Llegada a O Pedrouzo (3 km).'}
   ],
   alojamiento:{nombre:'Villa Xardín', direccion:'Rúa Nova 26', checkin:null,
-    telefono:'600427167', plazas:10,
-    nota:'PROBLEMA SIN RESOLVER: 5 dormitorios dobles = 10 plazas, pero sois 11. Falta una cama. Tampoco consta hora de check-in.'},
+    telefono:'600427167', plazas:10, supletorias:1,
+    nota:'RESUELTO: 5 dormitorios dobles son 10 plazas y sois 11, así que se reservó una cama supletoria (la tita Lucila, 28 de julio). Sigue sin constar la hora de check-in.'},
   comidas:{
     comida:['Trebol Arca — mucho ambiente de peregrino',
             'Km19 — comida rápida, mucho ambiente; por la noche bar de copas',
             'Buenas pizzerías en el pueblo; también se puede cocinar en la casa'],
-    cena:['Restaurante O Ceadoiro (Cerceda) — RESERVA SOLICITADA 20:00, 981313354, rafatrasmallo@gmail.com'],
-    nota:'Única cena del viaje SIN CONFIRMAR. Además la guía sitúa O Ceadoiro en Santa Irene y en Cerceda: ¿mismo restaurante o dos distintos?'},
-  cultura:['Santa Irene — ermita y fuente barroca de aguas curativas.',
-    'Piedra del camino con mensajes, después de Santa Irene.',
-    'O Pedrouzo — Iglesia de Santa Eulalia de Arca. SELLAR. Misa 19:00.'],
-  avisos:['Conflicto de horas: misa a las 19:00 en Santa Eulalia y cena a las 20:00 en Cerceda. Ajustado.',
+    cena:['En el alojamiento: se encarga pizza o algo parecido'],
+    nota:'Se descarta O Ceadoiro (Cerceda), que estaba solicitado sin confirmar: el 28 de julio se decidió cenar en el alojamiento. Queda sin aclarar un lío de la guía, que sitúa O Ceadoiro en Santa Irene y en Cerceda; ya no afecta a la cena, pero el de Santa Irene sigue nombrado en la ficha de esa parada.'},
+  cultura:[
+    {donde:'camino',  texto:'Piedra del camino con mensajes, poco después de Santa Irene.',
+       refiere:'Santa Irene'},
+    {donde:'destino', texto:'Iglesia de Santa Eulalia de Arca. SELLAR. Misa 19:00.'}],
+  avisos:['El choque entre la misa de 19:00 en Santa Eulalia y la cena de las 20:00 en Cerceda ya no existe: la cena es en el alojamiento.',
     'O Pedrouzo tiene todos los servicios: albergues, pensiones, cajero, restaurantes, farmacia, centro de salud.',
     'El timing sitúa A Calzada a 10 km, pero el perfil de la guía la coloca hacia el km 5,8. Discrepancia sin resolver.']
 },
@@ -324,10 +345,9 @@ const ETAPAS = [
     comida:['Mesón Cestaños — junto al parque, buen punto de espera. Aprovechar para ver el Mirador de la catedral'],
     cena:['Parrillada Galaico Argentina Milongas — RESERVADO 20:30, 881 820 820, https://milongasparrilada.com. Junto al Parque de la Alameda',
           'Restaurante Anoiesa — hay que llamar, sin disponibilidad online. 981565081'],
-    nota:'Choca con la misa de 19:30. Hay que decidir: misa completa o cena puntual.'},
-  cultura:['Lavacolla — donde los peregrinos se lavaban antes de entrar en Santiago.',
-    'Monte do Gozo — colina desde donde se intuye la catedral.',
-    'Catedral de Santiago — Praza do Obradoiro. Abierta 7:00-21:00.'],
+    nota:'DECIDIDO el 28 de julio: se va a la misa del peregrino de 19:30 y se retrasa la cena. FALTA confirmar con Milongas la hora nueva; la reserva que consta sigue siendo la de las 20:30.'},
+  cultura:[
+    {donde:'destino', texto:'Catedral de Santiago, en la Praza do Obradoiro. Abierta 7:00-21:00.'}],
   avisos:['La sección "Pueblos" de esta etapa está vacía en la guía: solo pone "Concello de O Pino" sin texto.',
     'Las comidas de San Paio, Lavacolla y Monte do Gozo aparecen sin ningún establecimiento asociado.',
     'Los dos coches quedan en Santiago. Confirmar si hace falta traslado de vuelta a Sarria.']
