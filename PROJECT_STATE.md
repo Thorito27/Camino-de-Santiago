@@ -93,6 +93,93 @@ en modo avión. Es justo la primera fila de la tabla.
 
 ---
 
+## 2026-08-06 — Dos cosas al equipaje y las respuestas del grupo a las decisiones
+
+A doce días de salir. Dos encargos: añadir tres cosas al checklist de la maleta
+y recoger en la web las respuestas que dio la tita Lucila por WhatsApp a las
+preguntas del apartado «Decisiones del grupo».
+
+### Equipaje: se añadieron dos de las tres
+
+Pedidas: crema de masaje para pies, botella de agua y crema de sol.
+
+**La crema de sol NO se añadió, porque ya estaba.** Es `bot-solar`, «Crema
+solar», en el botiquín, y viene de la guía. Duplicarla habría dejado dos
+casillas para lo mismo y descuadrado la cuenta de la maleta para siempre. Se
+dijo en vez de meterla callando.
+
+Las otras dos van al grupo `extra` («Además de la guía»), que es donde va lo
+que no escribió la tita Lucila:
+
+- `ex-crema-pies` — Crema de masaje para los pies. La guía trae vaselina, pero
+  es para prevenir rozaduras **antes** de andar; esto es el masaje de después.
+  Son cosas distintas y la nota lo dice.
+- `ex-botella` — Botella de agua. El agua se nombra en la guía, pero dentro de
+  la nota de la mochilita («para el agua y lo de cada día»), no como cosa que
+  meter. La nota lo aclara.
+
+**Y una prueba nueva que habría cazado esto solo:** ahora `npm test` comprueba
+que no hay dos items con el mismo nombre (comparando en minúsculas y sin
+tildes) ni dos con el mismo `id`. Se verificó que **falla de verdad**: metiendo
+«Crema solar» duplicada a propósito, salta `FALLO: no hay dos cosas con el
+mismo nombre`. Después se restauró.
+
+### Decisiones: cuatro respuestas de las cinco
+
+De la captura del chat, del 28 de julio. Estado nuevo de las cinco:
+
+| Decisión | Respuesta | Estado |
+|---|---|---|
+| Villa Xardín, cama que falta | «Reservada una cama supletoria» | **Resuelto** |
+| Cena en O Ceadoiro | «Esta noche cenamos en casa. Encargamos pizza o algo» | **Resuelto** |
+| Casa Nené, dos reservas | «Quedó tu padre en llamar» | **En curso** |
+| Santiago, misa y cena | «Le dije a tu padre que retrasara la cena» | **En curso** |
+| Mesón A Lareira, el menú | (sin respuesta) | Pendiente |
+
+**La de O Ceadoiro era ambigua y no se resolvió a solas.** «Esta noche cenamos
+en casa» podía ser la respuesta a la cena del 22 en Cerceda o un mensaje
+suelto sobre esa misma noche del 28 de julio, sin relación con el viaje. Se
+preguntó, y la lectura buena es la primera: se cae O Ceadoiro y esa noche se
+cena en el alojamiento.
+
+**A Lareira sigue pendiente y es la urgente**: la fecha límite para comunicar
+el menú es el **12 de agosto**, dentro de seis días.
+
+### Lo que se tocó en el código
+
+- **Estado nuevo `encurso`** («En curso»), para lo que tiene a alguien detrás
+  pero no está confirmado. Antes solo había `pendiente` y `resuelto`, y las dos
+  mentían aquí: «pendiente» daba a entender que nadie se había movido, y
+  «resuelto» habría dado por cerrado lo que no lo está. El borde de la tarjeta
+  hace de semáforo: rojo sin empezar, dorado en curso, verde cerrado.
+- **Campo `respuesta`** en `DECISIONES`, con `texto` / `quien` / `cuando` y un
+  `aclara` opcional. **La frase literal y lo que hemos entendido de ella van en
+  campos distintos y se pintan distinto** (`<q>` con cita, y `.aclara` debajo).
+  No es cosmético: si se mezclaran, la web le estaría atribuyendo a la tita
+  Lucila una interpretación nuestra.
+- El botón de WhatsApp ya no sale en lo cerrado, y en lo que está en curso dice
+  «Preguntar cómo va».
+- La nota de cabecera cuenta cuántas quedan abiertas.
+
+### Comprobado
+
+`npm test`: **324 comprobaciones, 0 fallos** (eran 311; 13 nuevas). `npm run
+validar`: OK. `node --check` sobre los tres bloques del HTML, `sw.js` y
+`probar.js`: OK.
+
+Se arregló de paso una prueba que se habría quedado callada: contaba las
+tarjetas con `class="decision"` exacto, y al añadir el estado a la clase
+(`class="decision encurso"`) habría dejado de contarlas sin avisar.
+
+`VERSION` a `camino-v21` porque cambió `index.html`. `APP_VERSION` se queda en
+`map-9`: no se tocó el mapa.
+
+**Lo que NO se ha comprobado:** nada de esto se ha visto en un navegador de
+verdad, solo en jsdom, que no pinta. El semáforo de colores de las tarjetas y
+el bloque de la cita están sin mirar con los ojos.
+
+---
+
 ## 2026-07-28 — La pantalla en blanco: el service worker devolvía `undefined`
 
 Aviso de que **la web no cargaba, pantalla en blanco**. Lo primero fue
