@@ -245,8 +245,15 @@ El orden importa: `TRAZAS` antes que `ETAPAS`, y ambos antes que la lógica.
 
 - **`Marcha`** — Naismith-Langmuir. `perfil()`, `horarios()`, `enKm()`,
   `coordEnKm()`, `tramo()`. `Geo` depende de `tramo()`, ojo al tocarla.
-- **`Meteo`** — Open-Meteo, sin clave. Solo consulta si la etapa está a 9
-  días o menos; si no, dice que no hay previsión en vez de inventarla.
+- **`Meteo`** — Open-Meteo, sin clave. **Tiene DOS límites y no son lo mismo**:
+  `LIMITE_DIAS` (16) es hasta dónde sirve datos la API, y `DIAS_FIABLES` (9)
+  hasta dónde merecen confianza. Entre uno y otro la previsión **se enseña
+  marcada como orientativa** (`avisoOrientativa()`, clase `.nota.lejos`);
+  más allá de `LIMITE_DIAS` no se pide y se dice que no hay. Antes había un
+  límite solo, en 9, y lo de más allá se escondía: pero enseñar lo que
+  responde Open-Meteo no es inventarlo — inventarlo sería darlo por firme.
+  Si tocas esto, `DIAS_FIABLES` nunca puede ser mayor que `LIMITE_DIAS`; hay
+  prueba.
 - **`Geo`** — geolocalización proyectada sobre la traza.
 - **`Sellos`** — checklist en localStorage (`lolitas2026-sellos`).
 - **`Persona`** — quién juega, en localStorage (`lolitas2026-persona`). Lista
@@ -469,7 +476,7 @@ propia por etapa en WhatsApp.
 `DECISIONES` de `datos.js` y se ven en el apartado «Decisiones del grupo» del
 índice. El `estado` (`pendiente` | `encurso` | `resuelto`) se edita a mano en
 `datos.js` cuando algo se cierra de verdad (no en localStorage: sería solo para
-quien lo marca). Al día del **6 de agosto de 2026**:
+quien lo marca). Al día del **11 de agosto de 2026**:
 
 - ~~Villa Xardín, 22 de agosto: 10 plazas para 11 personas.~~ **Resuelto**:
   reservada una cama supletoria.

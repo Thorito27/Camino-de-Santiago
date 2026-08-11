@@ -469,7 +469,7 @@ const DECISIONES = [
      no aparecen ni una vez. Ese grupo se ve claramente separado
      para que nunca se le atribuya a la tita Lucila algo que no
      escribió. Los cuatro primeros grupos son suyos y solo suyos.
-   - El 6 de agosto de 2026 el grupo pidió añadir tres cosas: crema de
+   - El 11 de agosto de 2026 el grupo pidió añadir tres cosas: crema de
      masaje para los pies, botella de agua y crema de sol. Las dos
      primeras se añadieron al grupo `extra`. **La crema solar NO se
      añadió: ya estaba** en el botiquín de la guía (`bot-solar`), y
