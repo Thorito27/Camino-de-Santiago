@@ -93,7 +93,76 @@ en modo avión. Es justo la primera fila de la tabla.
 
 ---
 
-## 2026-08-06 — Un despliegue atascado en la cola, y qué significa «cancelado»
+## 2026-08-11 — La previsión, hasta donde llegue. Y la fecha estaba mal
+
+### Primero, el fallo gordo: la fecha
+
+Todas las entradas de hoy se escribieron fechadas **6 de agosto**, y hoy es
+**11**. El error venía del contexto de la sesión, y no se detectó hasta mirar
+por otra cosa el registro del proxy, que traía la fecha real. Corregidas las
+**nueve** entradas del diario, la línea de `CLAUDE.md` y una de `datos.js`.
+
+No es cosmético. Dos consecuencias:
+
+- Se le dijo al grupo que para el **menú de A Lareira** quedaban seis días.
+  Quedaba **uno**: la fecha límite es mañana, 12 de agosto.
+- La previsión llevaba ya tres días saliendo en las etapas 1-3 sin que
+  nadie lo supiera, porque se creía que faltaban doce días y faltaban siete.
+
+**Lección:** cuando una cuenta de días importe, mirar el reloj del sistema
+(`date`), no la fecha que venga en el contexto.
+
+### La previsión, hasta donde llegue
+
+Había **un solo límite**, `LIMITE_DIAS: 9`, y todo lo que caía más allá se
+escondía con un «mostrar un dato ahora sería inventarlo». Esa frase mezclaba
+dos cosas distintas:
+
+- **Inventar** un dato es fabricarlo. Eso no se hace.
+- **Enseñar lo que responde Open-Meteo a doce días** no es inventarlo. Lo que
+  sería deshonesto es enseñarlo *como si fuera firme*.
+
+Así que ahora hay **dos límites**:
+
+| | Qué es | Valor |
+|---|---|---|
+| `LIMITE_DIAS` | hasta dónde sirve datos la API gratuita | 16 |
+| `DIAS_FIABLES` | hasta dónde merecen confianza | 9 |
+
+Entre uno y otro, la previsión **se enseña marcada**: etiqueta «orientativa»
+en la fila del índice y un aviso en la etapa diciendo cuántos días faltan y que
+sirve para hacerse una idea, no para decidir qué meter en la mochila. Más allá
+de 16 se sigue diciendo que no hay.
+
+Con esto, hoy (a 7 días de salir) **las seis etapas tienen previsión**: las
+tres primeras como fiables, las tres últimas marcadas.
+
+También se afinó el mensaje de fila sin dato. Antes decía «No se ha podido
+consultar», que afirmaba una causa; ahora dice «sin red, o Open-Meteo no llega
+aún a ese día», porque desde el cliente no se distingue.
+
+### Comprobado
+
+`npm test`: **426 comprobaciones, 0 fallos** (eran 413; 13 nuevas). `npm run
+validar` y `node --check` OK.
+
+Las pruebas nuevas **no llaman a Open-Meteo** —corren sin red— y construyen las
+fechas a partir de hoy, para que no caduquen. Comprueban los dos umbrales por
+ambos lados y que lo fiable sea siempre un subconjunto de lo disponible.
+Probado **en negativo**: devolviendo el límite único de 9, saltan tres fallos.
+
+`VERSION` a `camino-v29`. `APP_VERSION` sigue en `map-9`.
+
+**Lo que NO se ha podido comprobar, y es importante:** el proxy de este entorno
+**bloquea `api.open-meteo.com`** (403 en el CONNECT), así que no se ha llamado
+a la API ni una vez. Que devuelva 16 días es lo que documenta Open-Meteo, no
+algo verificado aquí. Si a doce días respondiera con error en vez de con datos,
+la fila saldría con el mensaje de «no se ha podido consultar» —degrada bien,
+pero no es lo que se busca—. **Hay que mirarlo en el móvil.**
+
+---
+
+## 2026-08-11 — Un despliegue atascado en la cola, y qué significa «cancelado»
 
 Aviso de que «parece que ha fallado el deploy». **No había fallado ninguno**,
 pero sí había un problema real, y distinto del que parecía.
@@ -147,7 +216,7 @@ Actions por el MCP de GitHub.
 
 ---
 
-## 2026-08-06 — Los coches: tres opciones, y lo de la abuela dentro de la primera
+## 2026-08-11 — Los coches: tres opciones, y lo de la abuela dentro de la primera
 
 Repaso sobre captura del móvil, con dos correcciones.
 
@@ -191,7 +260,7 @@ coche», saltan cuatro fallos. Después se restauró.
 
 ---
 
-## 2026-08-06 — «¿Quién eres?» en la portada, en una ventana
+## 2026-08-11 — «¿Quién eres?» en la portada, en una ventana
 
 Hasta ahora la persona **solo se podía elegir metiéndose en Retos**, que es la
 pestaña 7. Consecuencia: la portada saludaba por el nombre a quien ya hubiera
@@ -251,7 +320,7 @@ pantalla, ni en móvil, que es donde se va a usar.
 
 ---
 
-## 2026-08-06 — Tercera opción para los coches: no mover ninguno por la mañana
+## 2026-08-11 — Tercera opción para los coches: no mover ninguno por la mañana
 
 Opción nueva sobre la mesa: **no llevar ningún coche al destino a primera
 hora**. Los tres se quedan en el punto de partida y no se toca nada hasta que
@@ -308,7 +377,7 @@ restauró.
 
 ---
 
-## 2026-08-06 — Los coches: los mueven tres personas, no los doce
+## 2026-08-11 — Los coches: los mueven tres personas, no los doce
 
 Corrección de la entrada de abajo, otra vez el mismo día. La opción de «llevar
 los tres coches y volver en taxi» estaba mal entendida.
@@ -352,7 +421,7 @@ cuatro fallos. Después se restauró.
 
 ---
 
-## 2026-08-06 — Los coches no estaban decididos, y la web decía que sí
+## 2026-08-11 — Los coches no estaban decididos, y la web decía que sí
 
 Corrección de la entrada de abajo, el mismo día. Dos cosas.
 
@@ -410,7 +479,7 @@ las ha visto nadie.
 
 ---
 
-## 2026-08-06 — Portada: los que no vienen, la autoría y el baile de los coches
+## 2026-08-11 — Portada: los que no vienen, la autoría y el baile de los coches
 
 Tres correcciones pedidas sobre la portada.
 
@@ -476,7 +545,7 @@ dorado) no lo ha visto nadie.
 
 ---
 
-## 2026-08-06 — Repaso de los apartados de etapa: se repetían y mentían
+## 2026-08-11 — Repaso de los apartados de etapa: se repetían y mentían
 
 Encargo: revisar los apartados dentro de cada etapa, que no sean repetitivos y
 se ajusten a la realidad, y dejar los rótulos simples. El ejemplo que se dio
@@ -578,7 +647,7 @@ el texto plano de las seis Paradas, y los rótulos salen correctos en las seis.
 
 ---
 
-## 2026-08-06 — Dos cosas al equipaje y las respuestas del grupo a las decisiones
+## 2026-08-11 — Dos cosas al equipaje y las respuestas del grupo a las decisiones
 
 A doce días de salir. Dos encargos: añadir tres cosas al checklist de la maleta
 y recoger en la web las respuestas que dio la tita Lucila por WhatsApp a las

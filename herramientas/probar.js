@@ -521,6 +521,51 @@ console.log('5 bis. Equipaje');
   s.dom.window.close();
 }
 
+/* ---------- 5 quater. Meteo: hasta dónde se enseña y cómo ----------
+   Aquí NO se llama a Open-Meteo: las pruebas corren sin red. Se comprueba
+   solo la lógica de los dos límites, que es donde estaba el fallo de criterio:
+   antes había uno solo y todo lo de más allá se escondía, cuando el dato
+   existe y lo honesto es enseñarlo marcado. */
+console.log('5 quater. Meteo: dos límites');
+{
+  const s = abrir();
+  const LIM = s.w.eval('Meteo.LIMITE_DIAS'), FIA = s.w.eval('Meteo.DIAS_FIABLES');
+  comprobar('hay dos límites y el de fiabilidad es el más corto', FIA < LIM);
+  comprobar('el límite de consulta no promete más de lo que da Open-Meteo', LIM <= 16);
+
+  /* Fechas artificiales alrededor de los dos umbrales. Se construyen desde
+     hoy para que la prueba no caduque. */
+  const iso = d => {
+    const x = new Date(); x.setHours(0,0,0,0); x.setDate(x.getDate() + d);
+    return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')
+      + '-'+String(x.getDate()).padStart(2,'0');
+  };
+  const disp = f => s.w.eval(`Meteo.disponible(${JSON.stringify(f)})`);
+  const fia  = f => s.w.eval(`Meteo.fiable(${JSON.stringify(f)})`);
+
+  comprobar('hoy es fiable y disponible', fia(iso(0)) && disp(iso(0)));
+  comprobar('ayer no está disponible', !disp(iso(-1)));
+  comprobar('justo en el umbral de fiabilidad sigue siendo fiable', fia(iso(FIA)));
+  comprobar('un día después ya no es fiable, pero sí se consulta',
+    !fia(iso(FIA+1)) && disp(iso(FIA+1)));
+  comprobar('en el último día que da Open-Meteo todavía se consulta', disp(iso(LIM)));
+  comprobar('más allá ya no se consulta', !disp(iso(LIM+1)));
+  /* Lo fiable siempre tiene que ser un subconjunto de lo disponible: si
+     alguien baja LIMITE_DIAS por debajo de DIAS_FIABLES, esto salta. */
+  comprobar('todo lo fiable está disponible',
+    [0, 1, FIA-1, FIA].every(d => !fia(iso(d)) || disp(iso(d))));
+
+  /* El aviso de «orientativa» sale exactamente en la franja de en medio. */
+  const aviso = f => s.w.eval(`avisoOrientativa({fecha:${JSON.stringify(f)}})`);
+  comprobar('lo fiable no lleva aviso de orientativa', aviso(iso(FIA)) === '');
+  comprobar('lo lejano sí lo lleva, y dice cuántos días faltan',
+    /nota lejos/.test(aviso(iso(FIA+1))) && aviso(iso(FIA+1)).indexOf((FIA+1)+' días') >= 0);
+  comprobar('lo que ni se consulta no lleva aviso', aviso(iso(LIM+1)) === '');
+
+  comprobar('Meteo sin errores', s.errores.length === 0);
+  s.dom.window.close();
+}
+
 /* ---------- 5 ter. ¿Cuánto queda? ---------- */
 console.log('5 ter. ¿Cuánto queda?');
 {

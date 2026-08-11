@@ -141,6 +141,14 @@ h2::after{content:'';flex:1;height:1px;background:#DED8C9}
   font-size:.62rem;letter-spacing:.06em;text-transform:uppercase}
 .nota.km::before{content:'Los km no cuadran · ';font-weight:600;color:var(--alerta);
   font-size:.62rem;letter-spacing:.06em;text-transform:uppercase}
+/* Previsión que llega de Open-Meteo pero está lejos en el tiempo: el dato es
+   real, la confianza es poca. Ni verde (fiable) ni roja (sin verificar). */
+.nota.lejos{border-left-color:var(--concha);background:#FBF3E2}
+.nota.lejos::before{content:'Orientativa · ';font-weight:600;color:#8A6A1E;
+  font-size:.62rem;letter-spacing:.06em;text-transform:uppercase}
+.meteo-h .lejos-tag{font-family:'JetBrains Mono',monospace;font-size:.55rem;font-weight:600;
+  letter-spacing:.05em;text-transform:uppercase;color:#8A6A1E;background:#FBF3E2;
+  padding:.08rem .3rem;border-radius:100px;margin-left:.3rem}
 .portada-mapa{width:100%;height:auto;display:block;border-radius:var(--radio);margin:.4rem 0 .2rem}
 .portada .lead{font-size:.9rem;line-height:1.6;color:var(--pizarra);margin-top:.7rem}
 .portada p{font-size:.82rem;line-height:1.62;margin-top:.55rem}
@@ -1161,7 +1169,7 @@ const DECISIONES = [
      no aparecen ni una vez. Ese grupo se ve claramente separado
      para que nunca se le atribuya a la tita Lucila algo que no
      escribió. Los cuatro primeros grupos son suyos y solo suyos.
-   - El 6 de agosto de 2026 el grupo pidió añadir tres cosas: crema de
+   - El 11 de agosto de 2026 el grupo pidió añadir tres cosas: crema de
      masaje para los pies, botella de agua y crema de sol. Las dos
      primeras se añadieron al grupo `extra`. **La crema solar NO se
      añadió: ya estaba** en el botiquín de la guía (`bot-solar`), y
@@ -1701,7 +1709,19 @@ const Marcha = {
    ============================================================ */
 const Meteo = {
   cache: new Map(),
-  LIMITE_DIAS: 9,
+
+  /* DOS límites, y no son lo mismo.
+     LIMITE_DIAS es hasta dónde SIRVE datos la API gratuita de Open-Meteo (16
+     días). DIAS_FIABLES es hasta dónde la previsión merece confianza.
+     Antes había uno solo, en 9, y todo lo de más allá se escondía con un
+     «mostrar un dato ahora sería inventarlo». Pero enseñar lo que responde
+     Open-Meteo NO es inventarlo: inventarlo sería enseñarlo como si fuera
+     firme. Así que a partir de DIAS_FIABLES se enseña MARCADO como
+     orientativo, que es la diferencia entre callar un dato y contarlo con su
+     grado de confianza. */
+  LIMITE_DIAS: 16,
+  DIAS_FIABLES: 9,
+
   diasHasta(fechaISO){
     const hoy = new Date(); hoy.setHours(0,0,0,0);
     const [a,m,d] = fechaISO.split('-').map(Number);
@@ -1710,6 +1730,11 @@ const Meteo = {
   disponible(fechaISO){
     const d = this.diasHasta(fechaISO);
     return d >= 0 && d <= this.LIMITE_DIAS;
+  },
+  /* ¿Es de fiar, o solo orientativa? */
+  fiable(fechaISO){
+    const d = this.diasHasta(fechaISO);
+    return d >= 0 && d <= this.DIAS_FIABLES;
   },
   async pedir(lat, lon, fecha){
     const clave = lat.toFixed(3)+','+lon.toFixed(3)+','+fecha;
@@ -2571,13 +2596,25 @@ function seccionTiempo(et){
       + 'hacia adelante.</div>';
   } else {
     estado = '<div class="meteo-estado"><b>Previsión aún no disponible.</b><br>Faltan '+dias
-      + ' días para esta etapa y la previsión fiable llega a '+Meteo.LIMITE_DIAS
+      + ' días para esta etapa y Open-Meteo llega a '+Meteo.LIMITE_DIAS
       + '. Mostrar un dato ahora sería inventarlo.</div>';
   }
   return '<h2>Previsión de la etapa</h2><div id="meteoEtapa">'+estado+'</div>'
+    + avisoOrientativa(et)
     + '<div class="nota">Agosto en Galicia interior: mañanas frescas y con niebla en los valles, '
     + 'tardes calurosas. La previsión se pide para el punto medio de la etapa y para las horas '
     + 'en que estaréis caminando.</div>';
+}
+
+/* Aviso para las etapas que YA tienen previsión pero están lejos. El dato es
+   real, viene de Open-Meteo; lo que no es de fiar es su exactitud. Se enseña
+   marcado en vez de esconderlo, que es lo que se pidió: «hasta donde llegue». */
+function avisoOrientativa(et){
+  if(!Meteo.disponible(et.fecha) || Meteo.fiable(et.fecha)) return '';
+  return '<div class="nota lejos">Faltan <b>'+Meteo.diasHasta(et.fecha)+' días</b>, y a más de '
+    + Meteo.DIAS_FIABLES+' la previsión cambia bastante de un día para otro. Sirve para hacerse '
+    + 'una idea; no para decidir con ella qué meter en la mochila. Vuelve a mirarla según se '
+    + 'acerque la fecha.</div>';
 }
 
 function seccionDia(et, color, perfil){
@@ -2777,24 +2814,35 @@ function cargarMeteoIndice(){
 
   Promise.all(promesas).then(function(res){
     const filas = res.map(function(r){
+      /* Sin dato puede ser falta de red o que Open-Meteo no alcance ese día.
+         No se afirma cuál de las dos: no se sabe desde aquí. */
       if(!r.j) return '<div class="meteo-h"><span class="hh">'+r.et.fecha.slice(8)
-        + ' ago</span><span class="ic">\u00B7</span><span class="ds">No se ha podido consultar</span><span></span></div>';
+        + ' ago</span><span class="ic">·</span><span class="ds">No se ha podido consultar '
+        + '(sin red, o Open-Meteo no llega aún a ese día)</span><span></span></div>';
       const dd = r.j.daily;
       const cod = r.j.hourly.weather_code[13];
       const d = Meteo.describir(cod);
+      const lejos = !Meteo.fiable(r.et.fecha);
       const clases = (dd.temperature_2m_max[0]>=30?'calor ':'')
                    + (dd.precipitation_sum[0]>=1?'moja':'');
       return '<div class="meteo-h '+clases+'"><span class="hh">'+r.et.fecha.slice(8)+' ago</span>'
         + '<span class="ic">'+d[1]+'</span>'
-        + '<span><b class="tt">'+Math.round(dd.temperature_2m_max[0])+'\u00B0</b>'
-        + '<span class="ds"> / '+Math.round(dd.temperature_2m_min[0])+'\u00B0 \u00B7 '+esc(d[0])+'</span><br>'
+        + '<span><b class="tt">'+Math.round(dd.temperature_2m_max[0])+'°</b>'
+        + '<span class="ds"> / '+Math.round(dd.temperature_2m_min[0])+'° · '+esc(d[0])+'</span>'
+        + (lejos ? '<span class="lejos-tag">orientativa</span>' : '') + '<br>'
         + '<span class="ds">'+esc(r.et.destino)+'</span></span>'
         + '<span class="pp">'+dd.precipitation_sum[0].toFixed(1)+' mm</span></div>';
     }).join('');
     const fuera = ETAPAS.length - conPrevision.length;
-    cont.innerHTML = filas + (fuera>0
-      ? '<div class="meteo-estado">Las otras '+fuera+' etapas están a más de '
-        + Meteo.LIMITE_DIAS+' días: su previsión aún no es fiable.</div>' : '');
+    const orientativas = conPrevision.filter(function(e){ return !Meteo.fiable(e.fecha); }).length;
+    cont.innerHTML = filas
+      + (orientativas>0
+        ? '<div class="nota lejos">'+(orientativas===1 ? 'Una etapa está' : orientativas+' etapas están')
+          + ' a más de '+Meteo.DIAS_FIABLES+' días. Su previsión es real —viene de Open-Meteo— '
+          + 'pero a esa distancia cambia bastante de un día para otro.</div>' : '')
+      + (fuera>0
+        ? '<div class="meteo-estado">Las otras '+fuera+' etapas están a más de '
+          + Meteo.LIMITE_DIAS+' días, que es hasta donde llega Open-Meteo.</div>' : '');
   });
 }
 
