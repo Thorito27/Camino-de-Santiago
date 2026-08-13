@@ -158,15 +158,30 @@ que todas las ramas devuelven una `Response`.
 `.js` servido desde el mismo origen. Por eso `sw.js` va suelto. Y solo
 funciona publicado en Pages, no abriendo el archivo local.
 
+**El caché de mapas NO lleva la `VERSION` dentro, y no es un despiste.** Lo
+llevaba (`CACHE_TILES = VERSION + '-tiles'`) y `activate` borraba todo caché
+cuyo nombre no empezara por la VERSION nueva. Como la VERSION sube en **cada**
+cambio de `index.html` (van veintitantas), **cada despliegue tiraba los 8,4 MB
+de mapas descargados**: había que volver a guardarlos una y otra vez, y desde
+el móvil parecía que la descarga no se guardaba nunca. Ahora los nombres de
+tiles y meteo son fijos (`camino-tiles-v1`, `camino-meteo-v1`), el purgado va
+por lista blanca (`CACHES_VIVOS`) y `migrarTilesViejos()` rescata lo que
+quedara en los cachés versionados antiguos antes de borrarlos. Las teselas son
+del terreno: no caducan con la web. **Si tocas los nombres de caché, el
+apartado 9 de `npm test` ejecuta el service worker de verdad y lo comprueba.**
+
 **Hay DOS versiones que subir, y no son lo mismo.**
 
-- **`VERSION` en `sw.js`** (ahora `camino-v20`): súbela **siempre que cambies
-  `index.html`**. Nombra los cachés; si no la subes, los móviles que ya tengan
-  la web guardada pueden seguir con la vieja.
-- **`APP_VERSION` en `index.html`** (ahora `map-9`): súbela **al tocar el
+- **`VERSION` en `sw.js`** (ahora `camino-v30`): súbela **siempre que cambies
+  `index.html`**. Nombra el caché de la página; si no la subes, los móviles que
+  ya tengan la web guardada pueden seguir con la vieja. **No nombra el de los
+  mapas** (ver arriba).
+- **`APP_VERSION` en `index.html`** (ahora `map-10`): súbela **al tocar el
   mapa**. No afecta al caché: es la etiqueta que enseña el diagnóstico `?debug`
   para saber, desde el propio móvil y sin Mac, qué versión ha cargado de
   verdad. Sirvió para descubrir que el problema del mapa era caché y no código.
+  Ese diagnóstico enseña además **cuántas teselas hay guardadas**, que es la
+  forma de comprobar desde el propio móvil si la descarga sigue ahí.
 
 **Las pruebas con jsdom deben cerrar la ventana.** La página deja algún
 `setInterval` vivo (la cuenta atrás), y sin `dom.window.close()` al final el

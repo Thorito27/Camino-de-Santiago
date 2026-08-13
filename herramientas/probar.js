@@ -828,7 +828,116 @@ console.log('8. Estados raros');
   r.dom.window.close();
 }
 
+/* ---------- 9. Los mapas guardados sobreviven a los despliegues ---------- */
+/* Esta es la regresión del 13 de agosto: `CACHE_TILES` llevaba la VERSION
+   dentro y `activate` borraba todo caché que no empezara por ella, así que
+   cada despliegue tiraba los 8,4 MB de mapas descargados. Aquí se ejecuta el
+   service worker de verdad, con un caché de mentira, y se comprueba que tras
+   activar dos versiones seguidas las teselas siguen ahí. */
+console.log('9. Los mapas guardados sobreviven a los despliegues');
+
+function cargarSW(almacen){
+  const vm = require('vm');
+  const manejadores = {};
+  const clave = r => (typeof r === 'string' ? r : r.url);
+
+  function envolver(n){
+    const m = () => almacen[n];
+    return {
+      match:  r => Promise.resolve(m().get(clave(r))),
+      put:    (r, res) => { m().set(clave(r), res); return Promise.resolve(); },
+      add:    u => { m().set(clave(u), {cuerpo:'esencial'}); return Promise.resolve(); },
+      keys:   () => Promise.resolve(Object.keys(Object.fromEntries(m()))),
+      delete: r => { m().delete(clave(r)); return Promise.resolve(true); }
+    };
+  }
+  const caches = {
+    open:   n => { almacen[n] = almacen[n] || new Map(); return Promise.resolve(envolver(n)); },
+    keys:   () => Promise.resolve(Object.keys(almacen)),
+    delete: n => { const habia = !!almacen[n]; delete almacen[n]; return Promise.resolve(habia); },
+    match:  r => {
+      for(const n of Object.keys(almacen)){
+        const hit = almacen[n].get(clave(r));
+        if(hit) return Promise.resolve(hit);
+      }
+      return Promise.resolve(undefined);
+    }
+  };
+  const self = {
+    addEventListener: (t, f) => { manejadores[t] = f; },
+    skipWaiting: () => Promise.resolve(),
+    clients: {claim: () => Promise.resolve()}
+  };
+  const ctx = vm.createContext({
+    self, caches, console,
+    location: {origin:'https://ejemplo.org'},
+    fetch: () => Promise.reject(new Error('sin red en la prueba')),
+    Response: function(){}, URL
+  });
+  vm.runInContext(fs.readFileSync(path.join(raiz,'sw.js'),'utf8'), ctx);
+
+  /* Dispara un evento y devuelve la promesa que el service worker registró */
+  return function disparar(tipo){
+    let p = Promise.resolve();
+    manejadores[tipo]({waitUntil: q => { p = q; }});
+    return p;
+  };
+}
+
+function pruebaSW(){
+  const fuente = fs.readFileSync(path.join(raiz,'sw.js'),'utf8');
+  /* Sin el comentario de al lado, que precisamente habla de la VERSION */
+  const lineaTiles = (fuente.match(/const\s+CACHE_TILES\s*=[^;]*/) || [''])[0];
+  comprobar('CACHE_TILES no lleva VERSION dentro (si la lleva, cada despliegue '
+          + 'borra los mapas)', lineaTiles.indexOf('VERSION') < 0);
+
+  /* Un móvil que ya tenía mapas guardados con el esquema viejo */
+  const almacen = {
+    'camino-v29-app':   new Map([['./index.html', {cuerpo:'pagina vieja'}]]),
+    'camino-v29-tiles': new Map([
+      ['https://ign.es/t/1', {cuerpo:'tesela 1'}],
+      ['https://ign.es/t/2', {cuerpo:'tesela 2'}],
+      ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/12/1/1.png', {cuerpo:'relieve'}]
+    ]),
+    'camino-v29-meteo': new Map([['https://api.open-meteo.com/x', {cuerpo:'meteo'}]])
+  };
+
+  const disparar = cargarSW(almacen);
+  return disparar('install').then(function(){
+    return disparar('activate');
+  }).then(function(){
+    const tiles = almacen['camino-tiles-v1'];
+    comprobar('tras actualizar existe el caché de tiles permanente', !!tiles);
+    comprobar('las 3 teselas guardadas se conservan', !!tiles && tiles.size === 3);
+    comprobar('se rescata una tesela concreta del caché viejo',
+      !!tiles && tiles.get('https://ign.es/t/2').cuerpo === 'tesela 2');
+    comprobar('el caché de tiles viejo se borra tras rescatarlo',
+      !almacen['camino-v29-tiles']);
+    comprobar('el caché de la página vieja sí se borra', !almacen['camino-v29-app']);
+    comprobar('la página nueva se guarda al activar',
+      !!almacen['camino-v30-app'] && almacen['camino-v30-app'].size > 0);
+
+    /* Y ahora un segundo despliegue: es donde antes se perdían */
+    const disparar2 = cargarSW(almacen);
+    return disparar2('install').then(function(){ return disparar2('activate'); });
+  }).then(function(){
+    const tiles = almacen['camino-tiles-v1'];
+    comprobar('las teselas siguen ahí tras un segundo despliegue',
+      !!tiles && tiles.size === 3);
+    comprobar('no quedan cachés de versiones anteriores',
+      Object.keys(almacen).every(n => n.indexOf('camino-v29') < 0));
+  });
+}
+
 /* ---------- Resumen ---------- */
-console.log('\n' + pasos + ' comprobaciones, ' + fallos + ' fallos.');
-if(fallos){ console.error('HAY FALLOS.'); process.exit(1); }
-console.log('Todo correcto.');
+function resumen(){
+  console.log('\n' + pasos + ' comprobaciones, ' + fallos + ' fallos.');
+  if(fallos){ console.error('HAY FALLOS.'); process.exit(1); }
+  console.log('Todo correcto.');
+}
+
+pruebaSW().then(resumen).catch(function(e){
+  fallos++;
+  console.error('   FALLO: la prueba del service worker reventó: ' + e.message);
+  resumen();
+});

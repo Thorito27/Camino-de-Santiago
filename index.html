@@ -1839,7 +1839,7 @@ let mapa=null, marcadores=[], marcadorPos=null, mapaListo=false;
 /* Etiqueta de build, visible en el diagnóstico (?debug). Sirve para saber, sin
    Mac ni consola, qué versión ha cargado de verdad el móvil (por si la caché
    sigue sirviendo una vieja). Súbela cuando cambies algo del mapa. */
-const APP_VERSION = 'map-9';
+const APP_VERSION = 'map-10';
 
 function iniciarMapa(){
   if(typeof maplibregl === 'undefined'){
@@ -2469,9 +2469,12 @@ function panelIndice(){
     + '<div class="descarga"><p>Entre Ferreiros y Portomarín, o cruzando la Sierra de Ligonde, '
     + 'no hay señal. Que cada Lolita pulse aquí con wifi antes de salir: se guardan los mapas de '
     + 'las seis etapas, unos 9 MB, y después funciona todo sin conexión.</p>'
-    + '<div class="barra"><i id="barraDesc"></i></div>'
-    + '<p id="estadoDesc">Sin descargar todavía.</p>'
-    + '<button id="btnDesc" onclick="descargarMapas()">Guardar mapas para sin cobertura</button>'
+    + '<div class="barra"><i id="barraDesc"'
+    + (tilesGuardados > 0 ? ' style="width:100%"' : '') + '></i></div>'
+    + '<p id="estadoDesc">' + textoEstadoDesc() + '</p>'
+    + '<button id="btnDesc" onclick="descargarMapas()">'
+    + (tilesGuardados > 0 ? 'Volver a guardar' : 'Guardar mapas para sin cobertura')
+    + '</button>'
     + '</div>'
 
     + '<h2>Sobre los datos</h2><div class="nota">Las seis trazas son de Wikiloc, de cuatro '
@@ -2781,7 +2784,7 @@ function pintarPanel(){
               : panelEtapa(vistaEtapa);
   p.style.setProperty('--et', (vistaEtapa>=1 && vistaEtapa<=6)
     ? COLORES_ETAPA[vistaEtapa-1] : vistaEtapa===8 ? '#8A6D3B' : '#D8A33C');
-  if(vistaEtapa===0) cargarMeteoIndice();
+  if(vistaEtapa===0){ cargarMeteoIndice(); pedirEstadoTiles(); }
   /* Solo las etapas tienen sección de tiempo. `seccionActual` puede seguir
      valiendo 'tiempo' al saltar a Retos o Equipaje, y ETAPAS[6] no existe. */
   else if(vistaEtapa>=1 && vistaEtapa<=6 && seccionActual==='tiempo') cargarMeteoEtapa(vistaEtapa);
@@ -4641,6 +4644,37 @@ document.addEventListener('keydown', function(e){
    ============================================================ */
 let sw = null;
 
+/* Cuántos fragmentos de mapa hay ya guardados. `null` = todavía no se le ha
+   preguntado al service worker. Se guarda aquí porque el panel del índice se
+   repinta entero cada vez que se navega: sin esto, al volver al índice se
+   leía «Sin descargar todavía» aunque los mapas estuvieran guardados, y daba
+   la impresión de que había que descargarlos otra vez. */
+let tilesGuardados = null;
+
+function textoEstadoDesc(){
+  if(tilesGuardados === null) return 'Comprobando qué hay guardado…';
+  if(tilesGuardados === 0)    return 'Sin descargar todavía.';
+  return tilesGuardados + ' fragmentos de mapa ya guardados en este móvil. '
+       + 'Se conservan al actualizarse la web; no hay que volver a bajarlos.';
+}
+
+/* Refresca el bloque de descarga si está pintado ahora mismo */
+function pintarEstadoDesc(){
+  const t  = document.getElementById('estadoDesc');
+  const bt = document.getElementById('btnDesc');
+  const b  = document.getElementById('barraDesc');
+  if(t)  t.textContent = textoEstadoDesc();
+  if(b && tilesGuardados > 0) b.style.width = '100%';
+  if(bt && !bt.disabled && tilesGuardados > 0) bt.textContent = 'Volver a guardar';
+}
+
+/* Le pregunta al service worker cuántos tiles tiene guardados */
+function pedirEstadoTiles(){
+  if(!('serviceWorker' in navigator)) return;
+  if(!navigator.serviceWorker.controller) return;
+  navigator.serviceWorker.controller.postMessage({tipo:'estado'});
+}
+
 function registrarSW(){
   if(!('serviceWorker' in navigator)) return;
   /* Con file:// no funciona: hace falta http(s) */
@@ -4653,20 +4687,21 @@ function registrarSW(){
         const b = document.getElementById('barraDesc');
         const t = document.getElementById('estadoDesc');
         const bt = document.getElementById('btnDesc');
+        tilesGuardados = e.data.hechos;
         if(b) b.style.width = '100%';
         if(t) t.textContent = 'Listo: ' + e.data.hechos + ' fragmentos de mapa guardados. '
                             + 'Ya funciona sin conexión.';
         if(bt){ bt.disabled = false; bt.textContent = 'Volver a guardar'; }
       }
       if(e.data.tipo === 'estado'){
-        const t = document.getElementById('estadoDesc');
-        if(t && e.data.tiles > 0)
-          t.textContent = e.data.tiles + ' fragmentos de mapa ya guardados en este móvil.';
+        tilesGuardados = e.data.tiles;
+        pintarEstadoDesc();
       }
     });
-    if(navigator.serviceWorker.controller){
-      navigator.serviceWorker.controller.postMessage({tipo:'estado'});
-    }
+    pedirEstadoTiles();
+    /* La primera visita se registra sin controlador: el service worker toma el
+       control unos instantes después y solo entonces se le puede preguntar. */
+    navigator.serviceWorker.addEventListener('controllerchange', pedirEstadoTiles);
   }).catch(function(){ /* sin service worker se sigue navegando normal */ });
 }
 
@@ -4838,10 +4873,13 @@ function diagnostico(){
       + 'lienzo     ' + cw + ' x ' + ch + '\n'
       + 'mapaListo ' + (typeof mapaListo !== 'undefined' && mapaListo)
       + '   webgl ' + webgl() + '\n'
-      + 'vistaMapa ' + document.getElementById('main').classList.contains('mapa');
+      + 'vistaMapa ' + document.getElementById('main').classList.contains('mapa') + '\n'
+      + 'tiles     ' + (tilesGuardados === null ? '?' : tilesGuardados) + ' guardados';
   }
   upd();
   setInterval(upd, 700);
+  /* Refresca la cuenta de tiles sin depender de que el índice esté pintado */
+  setInterval(pedirEstadoTiles, 3000);
 }
 
 </script>
