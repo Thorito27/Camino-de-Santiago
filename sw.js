@@ -21,13 +21,26 @@
    El caché de tiles se limita a 1200 entradas. La descarga
    completa de la ruta son ~510 teselas y unos 8,4 MB (medido);
    el resto del margen es para lo que se navegue.
+
+   OJO CON LOS NOMBRES DE CACHÉ. El de la aplicación lleva la
+   VERSION dentro a propósito: al subirla se descarta la copia
+   vieja de la página. Los de TILES y METEO **no la llevan**, y no
+   es un descuido. Cuando la llevaban, cada subida de VERSION (una
+   por cada cambio de `index.html`, casi treinta hasta ahora)
+   borraba los 8,4 MB de mapas descargados, así que había que
+   volver a guardarlos después de cada despliegue. Los mapas no
+   caducan con la web: son teselas del terreno.
    ============================================================ */
 
-const VERSION      = 'camino-v29';
+const VERSION      = 'camino-v30';
 const CACHE_APP    = VERSION + '-app';
-const CACHE_TILES  = VERSION + '-tiles';
-const CACHE_METEO  = VERSION + '-meteo';
+const CACHE_TILES  = 'camino-tiles-v1';   /* SIN VERSION: sobrevive a los despliegues */
+const CACHE_METEO  = 'camino-meteo-v1';   /* SIN VERSION: es solo respaldo, no estorba */
 const MAX_TILES    = 1200;
+
+/* Los que hay que conservar en el purgado. Todo lo demás que empiece
+   por 'camino' es de una versión anterior y se borra. */
+const CACHES_VIVOS = [CACHE_APP, CACHE_TILES, CACHE_METEO];
 
 /* Lo imprescindible para arrancar sin red */
 const ESENCIALES = [
@@ -49,12 +62,46 @@ self.addEventListener('install', function(e){
   );
 });
 
+/* Rescata los tiles que quedaron en los cachés versionados de antes
+   (`camino-vNN-tiles`) y los pasa al caché permanente. Así, quien ya tenía
+   los mapas guardados no tiene que volver a descargarlos al actualizar a
+   esta versión. Solo copia de caché a caché: no toca la red. */
+function migrarTilesViejos(nombres){
+  const viejos = nombres.filter(function(n){
+    return n !== CACHE_TILES && /-tiles$/.test(n) && n.indexOf('camino') === 0;
+  });
+  if(!viejos.length) return Promise.resolve();
+
+  return caches.open(CACHE_TILES).then(function(destino){
+    return viejos.reduce(function(cadena, nombre){
+      return cadena.then(function(){
+        return caches.open(nombre).then(function(origen){
+          return origen.keys().then(function(claves){
+            return Promise.all(claves.map(function(req){
+              return destino.match(req).then(function(ya){
+                if(ya) return;
+                return origen.match(req).then(function(res){
+                  if(res) return destino.put(req, res);
+                });
+              });
+            }));
+          });
+        }).catch(function(){ /* si uno falla, seguimos con el resto */ });
+      });
+    }, Promise.resolve());
+  }).then(function(){ podar(CACHE_TILES, MAX_TILES); });
+}
+
 self.addEventListener('activate', function(e){
   e.waitUntil(
     caches.keys().then(function(nombres){
-      return Promise.all(nombres.map(function(n){
-        if(n.indexOf(VERSION) !== 0) return caches.delete(n);
-      }));
+      /* Primero se rescatan los tiles viejos y DESPUÉS se purga: al revés se
+         borrarían justo lo que se quiere conservar. */
+      return migrarTilesViejos(nombres).then(function(){
+        return Promise.all(nombres.map(function(n){
+          if(CACHES_VIVOS.indexOf(n) < 0) return caches.delete(n);
+        }));
+      });
     }).then(function(){
       /* Al subir de VERSION se acaban de borrar las cachés viejas. Si la
          instalación no consiguió guardar la página (móvil con mala cobertura

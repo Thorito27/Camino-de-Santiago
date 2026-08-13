@@ -93,6 +93,82 @@ en modo avión. Es justo la primera fila de la tabla.
 
 ---
 
+## 2026-08-13 — Los mapas guardados se borraban en cada despliegue
+
+**Rama:** `claude/mapas-no-guardan-7dwumy`.
+
+Aviso desde el móvil: «no consigo que se me queden guardados los mapas, cada
+vez que entro tengo que volver a descargarlos». No era impresión suya ni un
+problema de espacio del teléfono: era un fallo nuestro, y llevaba ahí desde el
+principio.
+
+### La causa
+
+En `sw.js` los tres cachés se nombraban con la `VERSION` dentro:
+
+```js
+const CACHE_TILES = VERSION + '-tiles';   // ← el fallo
+```
+
+y `activate` borraba **todo caché cuyo nombre no empezara por la VERSION
+nueva**. Eso es lo correcto para la página (se quiere tirar la copia vieja),
+pero para los mapas es justo lo contrario de lo que hace falta. Y como la
+regla del proyecto es subir la `VERSION` **en cada cambio de `index.html`**,
+íbamos por `camino-v29`: **veintinueve borrados** de los 8,4 MB de teselas.
+El bucle era exacto: guardas los mapas → se despliega cualquier cosa → al
+volver a entrar, cero fragmentos.
+
+Las teselas son fotos del terreno. No caducan cuando cambia el texto de una
+pestaña.
+
+### Lo que se ha hecho
+
+1. **Nombres fijos para lo que no caduca**: `camino-tiles-v1` y
+   `camino-meteo-v1`, sin `VERSION`. El de la página sigue versionado.
+2. **Purgado por lista blanca** (`CACHES_VIVOS`) en vez de «todo lo que no
+   empiece por la VERSION nueva».
+3. **`migrarTilesViejos()`**: al activar esta versión, las teselas que aún
+   queden en un `camino-vNN-tiles` se copian al caché permanente antes de
+   borrarlo. Solo de caché a caché, sin tocar la red. Quien tuviera los mapas
+   guardados ahora mismo **no tiene que volver a bajarlos**.
+
+Y un segundo fallo que empujaba a lo mismo, este de la interfaz: el estado
+(«N fragmentos ya guardados») se pedía **una sola vez, al registrar el service
+worker**, y se escribía en el DOM. Como el panel del índice se repinta entero
+en cada navegación, al volver al índice se leía otra vez «Sin descargar
+todavía» aunque los mapas estuvieran ahí. Es decir: aunque el caché hubiese
+sobrevivido, la web te decía que no. Ahora la cuenta se guarda en
+`tilesGuardados`, se vuelve a pedir cada vez que se pinta el índice
+(`pedirEstadoTiles`) y también en cuanto el service worker toma el control
+(`controllerchange`). El botón sale ya como «Volver a guardar» cuando hay algo
+guardado.
+
+El diagnóstico `?debug` enseña además la línea `tiles N guardados`, que es la
+manera de comprobar esto **desde el propio móvil**, sin ordenador: era la duda
+abierta de la auditoría.
+
+### Comprobado
+
+`npm test`: **435 comprobaciones, 0 fallos** (eran 426; 9 nuevas). `npm run
+validar` y `node --check` OK.
+
+El apartado 9 nuevo no lee el código: **ejecuta `sw.js` de verdad** en un `vm`
+con un caché de mentira, parte de un móvil que ya tenía tres teselas guardadas
+con el esquema viejo, dispara `install` y `activate` **dos veces seguidas**
+(dos despliegues) y comprueba que las tres siguen ahí. Se verificó que la
+prueba caza la regresión: devolviendo `CACHE_TILES` a `VERSION + '-tiles'`
+saltan 5 fallos.
+
+`VERSION` → `camino-v30`; `APP_VERSION` → `map-10`.
+
+**Lo que sigue sin comprobarse aquí** es lo de siempre: esto no se ha probado
+en un móvil real en modo avión. La prueba demuestra que las teselas sobreviven
+al cambio de versión, no que el PNOA se pinte sin cobertura. Al entrar la
+próxima vez, mirad si la línea dice ya «N fragmentos ya guardados» sin haber
+tocado el botón; eso es la señal de que el arreglo funciona.
+
+---
+
 ## 2026-08-11 — La previsión, hasta donde llegue. Y la fecha estaba mal
 
 ### Primero, el fallo gordo: la fecha
