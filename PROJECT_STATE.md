@@ -93,6 +93,53 @@ en modo avión. Es justo la primera fila de la tabla.
 
 ---
 
+## 2026-08-16 — «Cada vez que se entra» son tres puertas, no una
+
+Pedido: que el recado salte **cada vez que se entra a la web**. Antes de tocar
+nada se midió qué hacía ya, abriendo la página en Chromium:
+
+| Situación | Antes |
+|---|---|
+| Primera entrada, recarga, `?etapa=N`, pestaña nueva, botón atrás | sale |
+| Moverse por las pestañas de la web (sin recargar) | no sale (correcto) |
+| **Volver desde otra app con la pestaña ya abierta** | **no salía** |
+
+Ese último es el caso normal del móvil: la pestaña se queda abierta días y
+nadie recarga; se entra volviendo de WhatsApp o desbloqueando la pantalla. Así
+que ahora `Recado.vigilar()` deja puestas dos puertas más:
+
+- **`pageshow` con `persisted`** — volver con el botón atrás. El navegador
+  restaura la página tal cual y **no reejecuta el arranque**, así que sin esto
+  no saldría.
+- **`visibilitychange`** — volver a primer plano.
+
+Moverse por las pestañas de la propia web sigue sin sacarlo: no se ha vuelto a
+entrar, se sigue dentro.
+
+**`MINUTOS_DESCANSO`**, en 0. Con 0 sale cada vez, que es lo que se pidió. Si
+durante el Camino se hace pesado ir y venir de WhatsApp, se sube a 10 o 30 y no
+hay que tocar nada más. La primera aparición nunca la frena.
+
+`abrir()` además ya no repinta si la ventana está abierta: si no, cada vuelta a
+primer plano le robaba el foco al botón.
+
+### Comprobado
+
+En Chromium, las ocho situaciones: primera entrada, tras «Vale», navegando,
+recarga, `?etapa=2`, botón atrás, volver de otra app y pestaña nueva. La
+primera vez la prueba estaba mal escrita —no cerraba la ventana entre pasos, y
+el paso 7 daba «sale» porque venía abierta del 6—; repetida cerrando entre
+pasos, sale bien de verdad.
+
+`npm test`: **461 comprobaciones, 0 fallos** (eran 455; 6 nuevas, incluida que
+con `TEXTO` vacío tampoco salga al volver de otra app, que si no el «quitarlo»
+sería mentira). `VERSION` → `camino-v33`.
+
+Nota para la próxima auditoría: los listeners globales ya no son cuatro, son
+seis (se suman el `pageshow` y el `visibilitychange` de `Recado`).
+
+---
+
 ## 2026-08-16 — El recado no se veía: un `id` repetido
 
 Aviso desde el móvil: «no me salta el mensaje emergente». Y no era la caché ni

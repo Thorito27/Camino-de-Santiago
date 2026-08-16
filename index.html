@@ -4657,10 +4657,20 @@ function metaSantiago(){
    totalmente transparente; y además `avisar()` la habría machacado con un
    `textContent`. jsdom no calcula estilos y no lo cazó: lo vio un Chromium.
 
+   QUÉ CUENTA COMO "ENTRAR A LA WEB". No solo cargar la página. En el móvil
+   la pestaña se queda abierta días, así que también cuenta **volver a la web
+   desde otra app** o desde la pantalla bloqueada. Por eso hay tres puertas:
+   el arranque, `pageshow` (volver con el botón atrás, que restaura la página
+   sin reejecutar el arranque) y `visibilitychange` (volver a primer plano).
+   Moverse por las pestañas de la propia web NO cuenta: no se ha vuelto a
+   entrar, se sigue dentro.
+
    PARA CAMBIARLO O QUITARLO, solo hay que tocar aquí:
    - cambiar el recado → cambia TEXTO (y el emoji de ICONO si quieres).
    - quitarlo del todo  → pon TEXTO a '' y deja de salir; no hay que borrar
      nada más, ni el HTML ni el arranque.
+   - si sale demasiado → sube MINUTOS_DESCANSO (en 0 sale siempre, que es lo
+     que se pidió: cada vez que se entra).
    El texto se escapa con esc(), así que puede llevar comillas o < sin
    romper la página.
    ============================================================ */
@@ -4668,7 +4678,12 @@ const Recado = {
   /* 🤦🏼‍♂️ = persona con la mano en la cara */
   TEXTO: 'Pablo se ha olvidado los zapatos!!',
   ICONO: '🤦🏼‍♂️',
+  /* Minutos mínimos entre dos apariciones. 0 = cada vez que se entra, sin
+     excepción. Súbelo a 10 o 30 si en el Camino se hace pesado al ir y venir
+     de WhatsApp; no hace falta tocar nada más. */
+  MINUTOS_DESCANSO: 0,
   _foco: null,
+  _ultima: 0,
 
   hayRecado: function(){ return !!(this.TEXTO && this.TEXTO.trim()); },
   abierto: function(){
@@ -4677,9 +4692,15 @@ const Recado = {
   },
   abrir: function(){
     if(!this.hayRecado()) return;
+    if(this.abierto()) return;              /* ya está puesto: no repintar ni robar el foco */
+    /* El descanso solo frena las reapariciones; la primera vez (_ultima = 0)
+       sale siempre, valga lo que valga MINUTOS_DESCANSO. */
+    if(this.MINUTOS_DESCANSO > 0 && this._ultima
+       && Date.now() - this._ultima < this.MINUTOS_DESCANSO * 60000) return;
     const el = document.getElementById('recado');
     const c  = document.getElementById('recadoCuerpo');
     if(!el || !c) return;
+    this._ultima = Date.now();
     c.innerHTML = '<div class="recado-ico" aria-hidden="true">' + this.ICONO + '</div>'
       + '<p class="recado-t" id="recadoT">' + esc(this.TEXTO) + '</p>'
       + '<button class="recado-ok" type="button" onclick="Recado.cerrar()">Vale</button>';
@@ -4694,6 +4715,22 @@ const Recado = {
     el.hidden = true;
     if(this._foco) try{ this._foco.focus(); }catch(e){}
     this._foco = null;
+  },
+
+  /* Las otras dos puertas de entrada, además del arranque. Se registran una
+     sola vez, desde `vigilar()`. */
+  vigilar: function(){
+    const yo = this;
+    /* Volver con el botón atrás: el navegador restaura la página tal cual y
+       NO vuelve a ejecutar el arranque, así que sin esto no saldría. */
+    window.addEventListener('pageshow', function(e){
+      if(e.persisted) yo.abrir();
+    });
+    /* Volver a la web desde otra app, o desbloquear el móvil con la pestaña
+       abierta. Es la forma de "entrar" más común en el móvil. */
+    document.addEventListener('visibilitychange', function(){
+      if(document.visibilityState === 'visible') yo.abrir();
+    });
   }
 };
 
@@ -4929,8 +4966,11 @@ iniciarMapa();
 registrarSW();
 vigilarRed();
 diagnostico();
-/* El aviso del grupo, lo último: así sale por encima de todo lo ya pintado. */
+/* El recado del grupo, lo último: así sale por encima de todo lo ya pintado.
+   `vigilar()` deja además puestas las otras dos puertas de entrada (volver
+   con el botón atrás y volver desde otra app). */
 Recado.abrir();
+Recado.vigilar();
 
 /* Diagnóstico en pantalla, SOLO si la URL lleva ?debug. Pensado para poder
    depurar el mapa desde el propio móvil, sin Mac ni consola: muestra la
