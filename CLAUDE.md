@@ -185,7 +185,7 @@ apartado 9 de `npm test` ejecuta el service worker de verdad y lo comprueba.**
 
 **Hay DOS versiones que subir, y no son lo mismo.**
 
-- **`VERSION` en `sw.js`** (ahora `camino-v33`): súbela **siempre que cambies
+- **`VERSION` en `sw.js`** (ahora `camino-v34`): súbela **siempre que cambies
   `index.html`**. Nombra el caché de la página; si no la subes, los móviles que
   ya tengan la web guardada pueden seguir con la vieja. **No nombra el de los
   mapas** (ver arriba).
@@ -297,7 +297,9 @@ El orden importa: `TRAZAS` antes que `ETAPAS`, y ambos antes que la lógica.
   encima tapando el saludo. Si tocas el `keydown`, acuérdate de que ahora
   intercepta **tres** diálogos, no uno (el tercero es `Recado`).
 - **`Recado`** — la ventana que sale **al abrir la web, cada vez**. Es el recado
-  del grupo, y hoy dice que Pablo se ha olvidado los zapatos. Todo lo que hay
+  del grupo, y hoy dice que Pablo se ha olvidado los zapatos de caminar (los
+  zapatos **para caminar**, no unos zapatos cualesquiera: el matiz es del
+  grupo y hay prueba que fija la frase entera). Todo lo que hay
   que tocar está en el propio módulo: `TEXTO` (el recado) e `ICONO` (el emoji).
   **Con `TEXTO` vacío no sale nada**, y esa es la forma de quitarlo: no hay que
   borrar el HTML ni la llamada del arranque. A propósito **no** se recuerda que
