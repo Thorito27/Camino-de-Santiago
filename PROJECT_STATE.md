@@ -93,6 +93,26 @@ en modo avión. Es justo la primera fila de la tabla.
 
 ---
 
+## 2026-08-16 — El matiz: los zapatos **para caminar**
+
+El recado pasa a decir «Pablo se ha olvidado los zapatos para caminar!!». El
+matiz lo puso el grupo y cambia lo que se entiende: no son unos zapatos
+cualesquiera, son los de andar el Camino.
+
+Un cambio de una línea (`Recado.TEXTO`), pero con dos comprobaciones que sí
+tocaba hacer:
+
+- La prueba que fija la frase se actualizó **a la frase entera**, no a un
+  trozo. Si alguien la reescribe, salta.
+- La frase es más larga y podía descuadrar la ventana en una pantalla pequeña.
+  Comprobado en Chromium a **320 px** (iPhone SE, la más estrecha que es
+  probable que haya en el grupo): tres líneas, caja de 288×230 y la ventana
+  entera dentro de la pantalla.
+
+`npm test`: 461 comprobaciones, 0 fallos. `VERSION` → `camino-v34`.
+
+---
+
 ## 2026-08-16 — «Cada vez que se entra» son tres puertas, no una
 
 Pedido: que el recado salte **cada vez que se entra a la web**. Antes de tocar

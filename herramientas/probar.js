@@ -769,7 +769,7 @@ console.log('6 bis. Recado del grupo');
   comprobar('el recado sale solo al abrir la web', s.w.eval('Recado.abierto()'));
   const cuerpo = s.d.getElementById('recadoCuerpo').innerHTML;
   comprobar('dice lo de los zapatos de Pablo',
-    cuerpo.indexOf('Pablo se ha olvidado los zapatos!!') >= 0);
+    cuerpo.indexOf('Pablo se ha olvidado los zapatos para caminar!!') >= 0);
   comprobar('el texto pintado es el de Recado.TEXTO',
     cuerpo.indexOf(s.w.eval('Recado.TEXTO')) >= 0);
   comprobar('lleva botón de cerrar', !!s.d.querySelector('#recado .recado-ok'));
