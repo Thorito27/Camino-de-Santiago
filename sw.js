@@ -32,7 +32,7 @@
    caducan con la web: son teselas del terreno.
    ============================================================ */
 
-const VERSION      = 'camino-v30';
+const VERSION      = 'camino-v31';
 const CACHE_APP    = VERSION + '-app';
 const CACHE_TILES  = 'camino-tiles-v1';   /* SIN VERSION: sobrevive a los despliegues */
 const CACHE_METEO  = 'camino-meteo-v1';   /* SIN VERSION: es solo respaldo, no estorba */
