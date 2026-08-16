@@ -93,6 +93,42 @@ en modo avión. Es justo la primera fila de la tabla.
 
 ---
 
+## 2026-08-15 — El aviso del grupo: Pablo y los zapatos
+
+**Rama:** `claude/mapas-no-guardan-7dwumy`.
+
+Pedido tal cual: una ventana emergente **cada vez que alguien abre la web** con
+«Pablo se ha olvidado los zapatos!! 🤦🏼‍♂️». Hecho así, literal: no se recuerda
+que ya la viste, sale en cada carga. Sale también entrando por `?etapa=N`,
+`?retos=1` o `?equipaje=1`, no solo en la portada.
+
+Módulo **`Aviso`**, con la misma mecánica que las otras dos ventanas
+(`Queda` y `Persona`): `Esc` cierra, el fondo cierra, el foco vuelve donde
+estaba y **las flechas no navegan por detrás**. Ese último detalle rompió cinco
+comprobaciones del apartado 6 en cuanto se añadió —las flechas dejaron de
+responder porque había un diálogo abierto—, que es exactamente lo que tenía que
+pasar; la prueba ahora cierra el aviso antes de probar el teclado. El `keydown`
+intercepta ya **tres** diálogos.
+
+Para cambiarlo o quitarlo solo se toca el módulo: `TEXTO` es el recado e
+`ICONO` el emoji, y **con `TEXTO` vacío no sale nada** — no hay que borrar el
+HTML ni la llamada del arranque. Hay prueba de las dos cosas. El texto pasa por
+`esc()`, así que puede llevar comillas sin romper la página.
+
+Apartado nuevo **6 bis** en `probar.js`: que sale solo, que dice lo de Pablo,
+que lo pintado es lo que hay en `Aviso.TEXTO`, que con el aviso abierto las
+flechas no cambian de vista, que `Esc` lo cierra y después sí navegan, que sale
+también con `?etapa=3` y que con `TEXTO` vacío no aparece.
+
+De paso, la prueba del service worker leía `'camino-v30-app'` a mano y se
+habría roto en esta misma subida de versión. Ahora lee la `VERSION` del propio
+`sw.js`.
+
+`npm test`: **447 comprobaciones, 0 fallos** (eran 435). `VERSION` →
+`camino-v31`; `APP_VERSION` se queda en `map-10`, que el mapa no se ha tocado.
+
+---
+
 ## 2026-08-13 — Los mapas guardados se borraban en cada despliegue
 
 **Rama:** `claude/mapas-no-guardan-7dwumy`.

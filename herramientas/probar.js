@@ -738,6 +738,9 @@ console.log('5 ter. ¿Cuánto queda?');
 console.log('6. Flechas del teclado');
 {
   const s = abrir();
+  /* El aviso del grupo sale al arrancar y, como las otras dos ventanas,
+     bloquea las flechas a propósito. Se cierra antes de probar el teclado. */
+  s.w.eval('Aviso.cerrar()');
   s.w.irA(0);
   function flecha(k){
     const e = new s.w.KeyboardEvent('keydown', {key:k, bubbles:true});
@@ -757,6 +760,46 @@ console.log('6. Flechas del teclado');
   comprobar('izquierda no baja del índice', s.w.eval('vistaEtapa') === 0);
   comprobar('teclado sin errores', s.errores.length === 0);
   s.dom.window.close();
+}
+
+/* ---------- 6 bis. El aviso del grupo ---------- */
+console.log('6 bis. Aviso del grupo');
+{
+  const s = abrir();
+  comprobar('el aviso sale solo al abrir la web', s.w.eval('Aviso.abierto()'));
+  const cuerpo = s.d.getElementById('avisoCuerpo').innerHTML;
+  comprobar('dice lo de los zapatos de Pablo',
+    cuerpo.indexOf('Pablo se ha olvidado los zapatos!!') >= 0);
+  comprobar('el texto pintado es el de Aviso.TEXTO',
+    cuerpo.indexOf(s.w.eval('Aviso.TEXTO')) >= 0);
+  comprobar('lleva botón de cerrar', !!s.d.querySelector('#aviso .aviso-ok'));
+
+  /* Con el aviso abierto, las flechas NO deben navegar por detrás */
+  const antes = s.w.eval('vistaEtapa');
+  s.d.dispatchEvent(new s.w.KeyboardEvent('keydown', {key:'ArrowRight', bubbles:true}));
+  comprobar('con el aviso abierto las flechas no cambian de vista',
+    s.w.eval('vistaEtapa') === antes);
+
+  /* Esc lo cierra, y entonces sí se navega */
+  s.d.dispatchEvent(new s.w.KeyboardEvent('keydown', {key:'Escape', bubbles:true}));
+  comprobar('Esc cierra el aviso', !s.w.eval('Aviso.abierto()'));
+  s.d.dispatchEvent(new s.w.KeyboardEvent('keydown', {key:'ArrowRight', bubbles:true}));
+  comprobar('cerrado el aviso, las flechas vuelven a funcionar',
+    s.w.eval('vistaEtapa') !== antes);
+  comprobar('el aviso no deja errores', s.errores.length === 0);
+  s.dom.window.close();
+
+  /* Sale también entrando directo a una etapa, no solo en la portada */
+  const e = abrir('https://ejemplo.org/?etapa=3');
+  comprobar('el aviso sale también con ?etapa=3', e.w.eval('Aviso.abierto()'));
+  comprobar('y la etapa de debajo se ha pintado igual', largo(e) > 400);
+  e.dom.window.close();
+
+  /* Sin recado (TEXTO vacío) no debe salir nada: es la forma de quitarlo */
+  const v = abrir();
+  v.w.eval('Aviso.cerrar(); Aviso.TEXTO = ""; Aviso.abrir();');
+  comprobar('con Aviso.TEXTO vacío no sale la ventana', !v.w.eval('Aviso.abierto()'));
+  v.dom.window.close();
 }
 
 /* ---------- 7. Entrar por URL ---------- */
@@ -891,6 +934,11 @@ function pruebaSW(){
   comprobar('CACHE_TILES no lleva VERSION dentro (si la lleva, cada despliegue '
           + 'borra los mapas)', lineaTiles.indexOf('VERSION') < 0);
 
+  /* La VERSION se lee del propio sw.js: si se pusiera aquí a mano, la prueba
+     se rompería en la siguiente subida de versión, que son muchas. */
+  const VERSION = (fuente.match(/const\s+VERSION\s*=\s*'([^']+)'/) || [,''])[1];
+  comprobar('se puede leer la VERSION de sw.js', !!VERSION);
+
   /* Un móvil que ya tenía mapas guardados con el esquema viejo */
   const almacen = {
     'camino-v29-app':   new Map([['./index.html', {cuerpo:'pagina vieja'}]]),
@@ -915,7 +963,7 @@ function pruebaSW(){
       !almacen['camino-v29-tiles']);
     comprobar('el caché de la página vieja sí se borra', !almacen['camino-v29-app']);
     comprobar('la página nueva se guarda al activar',
-      !!almacen['camino-v30-app'] && almacen['camino-v30-app'].size > 0);
+      !!almacen[VERSION+'-app'] && almacen[VERSION+'-app'].size > 0);
 
     /* Y ahora un segundo despliegue: es donde antes se perdían */
     const disparar2 = cargarSW(almacen);

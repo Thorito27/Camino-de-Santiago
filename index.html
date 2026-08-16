@@ -491,6 +491,14 @@ h2::after{content:'';flex:1;height:1px;background:#DED8C9}
 .modal-x:hover{color:var(--tinta)}
 .modal-x:focus-visible{outline:2px solid var(--musgo);outline-offset:1px}
 
+/* Aviso del grupo (el que sale al abrir la web) */
+.aviso-ico{font-size:2.6rem;line-height:1;text-align:center;margin:.2rem 0 .5rem}
+.aviso-t{font-size:1.25rem;line-height:1.35;text-align:center;margin:0 0 1rem;
+  font-weight:700;color:var(--tinta)}
+.aviso-ok{display:block;width:100%;background:var(--concha);color:#1B2A23;border:none;
+  padding:.7rem 1.4rem;border-radius:var(--radio);font:inherit;font-weight:600;cursor:pointer}
+.aviso-ok:focus-visible{outline:2px solid var(--musgo);outline-offset:2px}
+
 .q-cab{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.11em;
   text-transform:uppercase;color:var(--musgo);font-weight:600}
 .q-tit{font-family:'Fraunces',serif;font-weight:600;font-size:1.3rem;line-height:1.15;
@@ -671,6 +679,17 @@ body.offline #sinRed{display:block}
     <button class="modal-x" id="quienX" type="button" onclick="Persona.cerrarDialogo()"
       aria-label="Cerrar">&times;</button>
     <div id="quienCuerpo"></div>
+  </div>
+</div>
+
+<!-- Aviso del grupo: sale al abrir la web, cada vez. Lo pinta Aviso; el texto
+     está en Aviso.TEXTO, y ahí se cambia o se quita. -->
+<div id="aviso" class="modal" hidden>
+  <div class="modal-fondo" onclick="Aviso.cerrar()"></div>
+  <div class="modal-caja" role="dialog" aria-modal="true" aria-labelledby="avisoT">
+    <button class="modal-x" id="avisoX" type="button" onclick="Aviso.cerrar()"
+      aria-label="Cerrar">&times;</button>
+    <div id="avisoCuerpo"></div>
   </div>
 </div>
 <script>
@@ -4617,6 +4636,53 @@ function metaSantiago(){
   return new Date(f[0], f[1]-1, f[2], hm[0] || 0, hm[1] || 0, 0, 0);
 }
 
+/* ============================================================
+   AVISO DEL GRUPO
+   Ventana que sale al abrir la web, CADA VEZ (no se recuerda que ya la
+   viste: es un recado corto y se quiere que lo lea todo el mundo). Misma
+   mecánica que las otras dos ventanas: Esc cierra, el fondo cierra y las
+   flechas no navegan por detrás.
+
+   PARA CAMBIARLO O QUITARLO, solo hay que tocar aquí:
+   - cambiar el recado → cambia TEXTO (y el emoji de ICONO si quieres).
+   - quitarlo del todo  → pon TEXTO a '' y deja de salir; no hay que borrar
+     nada más, ni el HTML ni el arranque.
+   El texto se escapa con esc(), así que puede llevar comillas o < sin
+   romper la página.
+   ============================================================ */
+const Aviso = {
+  /* 🤦🏼‍♂️ = persona con la mano en la cara */
+  TEXTO: 'Pablo se ha olvidado los zapatos!!',
+  ICONO: '🤦🏼‍♂️',
+  _foco: null,
+
+  hayRecado: function(){ return !!(this.TEXTO && this.TEXTO.trim()); },
+  abierto: function(){
+    const el = document.getElementById('aviso');
+    return !!(el && !el.hidden);
+  },
+  abrir: function(){
+    if(!this.hayRecado()) return;
+    const el = document.getElementById('aviso');
+    const c  = document.getElementById('avisoCuerpo');
+    if(!el || !c) return;
+    c.innerHTML = '<div class="aviso-ico" aria-hidden="true">' + this.ICONO + '</div>'
+      + '<p class="aviso-t" id="avisoT">' + esc(this.TEXTO) + '</p>'
+      + '<button class="aviso-ok" type="button" onclick="Aviso.cerrar()">Vale</button>';
+    this._foco = document.activeElement;
+    el.hidden = false;
+    const b = c.querySelector('.aviso-ok');
+    if(b) try{ b.focus(); }catch(e){}
+  },
+  cerrar: function(){
+    const el = document.getElementById('aviso');
+    if(!el) return;
+    el.hidden = true;
+    if(this._foco) try{ this._foco.focus(); }catch(e){}
+    this._foco = null;
+  }
+};
+
 /* Flechas del teclado para cambiar de etapa */
 document.addEventListener('keydown', function(e){
   if(e.target && e.target.tagName === 'INPUT') return;
@@ -4630,6 +4696,12 @@ document.addEventListener('keydown', function(e){
      diálogo y al cerrarlo has cambiado de etapa sin querer. */
   if(typeof Persona !== 'undefined' && Persona.dialogoAbierto()){
     if(e.key === 'Escape') Persona.cerrarDialogo();
+    return;
+  }
+  /* Y con el aviso del grupo, igual. Van ya TRES ventanas que interceptan
+     el teclado; si añades otra, acuérdate de este bloque. */
+  if(typeof Aviso !== 'undefined' && Aviso.abierto()){
+    if(e.key === 'Escape') Aviso.cerrar();
     return;
   }
   if(e.key === 'ArrowRight' && vistaEtapa < 8) irA(vistaEtapa+1);
@@ -4843,6 +4915,8 @@ iniciarMapa();
 registrarSW();
 vigilarRed();
 diagnostico();
+/* El aviso del grupo, lo último: así sale por encima de todo lo ya pintado. */
+Aviso.abrir();
 
 /* Diagnóstico en pantalla, SOLO si la URL lleva ?debug. Pensado para poder
    depurar el mapa desde el propio móvil, sin Mac ni consola: muestra la
