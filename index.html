@@ -491,13 +491,13 @@ h2::after{content:'';flex:1;height:1px;background:#DED8C9}
 .modal-x:hover{color:var(--tinta)}
 .modal-x:focus-visible{outline:2px solid var(--musgo);outline-offset:1px}
 
-/* Aviso del grupo (el que sale al abrir la web) */
-.aviso-ico{font-size:2.6rem;line-height:1;text-align:center;margin:.2rem 0 .5rem}
-.aviso-t{font-size:1.25rem;line-height:1.35;text-align:center;margin:0 0 1rem;
+/* Recado del grupo (la ventana que sale al abrir la web) */
+.recado-ico{font-size:2.6rem;line-height:1;text-align:center;margin:.2rem 0 .5rem}
+.recado-t{font-size:1.25rem;line-height:1.35;text-align:center;margin:0 0 1rem;
   font-weight:700;color:var(--tinta)}
-.aviso-ok{display:block;width:100%;background:var(--concha);color:#1B2A23;border:none;
+.recado-ok{display:block;width:100%;background:var(--concha);color:#1B2A23;border:none;
   padding:.7rem 1.4rem;border-radius:var(--radio);font:inherit;font-weight:600;cursor:pointer}
-.aviso-ok:focus-visible{outline:2px solid var(--musgo);outline-offset:2px}
+.recado-ok:focus-visible{outline:2px solid var(--musgo);outline-offset:2px}
 
 .q-cab{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.11em;
   text-transform:uppercase;color:var(--musgo);font-weight:600}
@@ -682,14 +682,17 @@ body.offline #sinRed{display:block}
   </div>
 </div>
 
-<!-- Aviso del grupo: sale al abrir la web, cada vez. Lo pinta Aviso; el texto
-     está en Aviso.TEXTO, y ahí se cambia o se quita. -->
-<div id="aviso" class="modal" hidden>
-  <div class="modal-fondo" onclick="Aviso.cerrar()"></div>
-  <div class="modal-caja" role="dialog" aria-modal="true" aria-labelledby="avisoT">
-    <button class="modal-x" id="avisoX" type="button" onclick="Aviso.cerrar()"
+<!-- Recado del grupo: sale al abrir la web, cada vez. Lo pinta Recado; el
+     texto está en Recado.TEXTO, y ahí se cambia o se quita. OJO: el id es
+     `recado`, NO `aviso`: ese ya es el de los mensajitos flotantes de
+     avisar(), que llevan opacity:0 en el CSS y dejaban esta ventana
+     invisible. -->
+<div id="recado" class="modal" hidden>
+  <div class="modal-fondo" onclick="Recado.cerrar()"></div>
+  <div class="modal-caja" role="dialog" aria-modal="true" aria-labelledby="recadoT">
+    <button class="modal-x" id="recadoX" type="button" onclick="Recado.cerrar()"
       aria-label="Cerrar">&times;</button>
-    <div id="avisoCuerpo"></div>
+    <div id="recadoCuerpo"></div>
   </div>
 </div>
 <script>
@@ -3591,6 +3594,10 @@ const Sellos = {
 
 /* ============================================================
    AVISOS BREVES
+   Los mensajitos flotantes de abajo. Su elemento es `#aviso`, y NO tiene
+   nada que ver con `Recado` (la ventana que sale al abrir la web, que es
+   `#recado`). Llegaron a llamarse igual y el CSS de este —`opacity:0`
+   hasta que se le pone `.visible`— dejaba la ventana invisible.
    ============================================================ */
 let avisoTimer = null;
 function avisar(texto){
@@ -4637,11 +4644,18 @@ function metaSantiago(){
 }
 
 /* ============================================================
-   AVISO DEL GRUPO
+   RECADO DEL GRUPO
    Ventana que sale al abrir la web, CADA VEZ (no se recuerda que ya la
    viste: es un recado corto y se quiere que lo lea todo el mundo). Misma
    mecánica que las otras dos ventanas: Esc cierra, el fondo cierra y las
    flechas no navegan por detrás.
+
+   Se llama `Recado` y su elemento es `#recado` A PROPÓSITO. Nació como
+   `#aviso` y no se veía: ese id ya era el de los mensajitos flotantes de
+   `avisar()`, cuyo CSS lleva `opacity:0` hasta que se le añade `.visible`.
+   Como un `#id` pesa más que una clase, la ventana salía abierta y
+   totalmente transparente; y además `avisar()` la habría machacado con un
+   `textContent`. jsdom no calcula estilos y no lo cazó: lo vio un Chromium.
 
    PARA CAMBIARLO O QUITARLO, solo hay que tocar aquí:
    - cambiar el recado → cambia TEXTO (y el emoji de ICONO si quieres).
@@ -4650,7 +4664,7 @@ function metaSantiago(){
    El texto se escapa con esc(), así que puede llevar comillas o < sin
    romper la página.
    ============================================================ */
-const Aviso = {
+const Recado = {
   /* 🤦🏼‍♂️ = persona con la mano en la cara */
   TEXTO: 'Pablo se ha olvidado los zapatos!!',
   ICONO: '🤦🏼‍♂️',
@@ -4658,24 +4672,24 @@ const Aviso = {
 
   hayRecado: function(){ return !!(this.TEXTO && this.TEXTO.trim()); },
   abierto: function(){
-    const el = document.getElementById('aviso');
+    const el = document.getElementById('recado');
     return !!(el && !el.hidden);
   },
   abrir: function(){
     if(!this.hayRecado()) return;
-    const el = document.getElementById('aviso');
-    const c  = document.getElementById('avisoCuerpo');
+    const el = document.getElementById('recado');
+    const c  = document.getElementById('recadoCuerpo');
     if(!el || !c) return;
-    c.innerHTML = '<div class="aviso-ico" aria-hidden="true">' + this.ICONO + '</div>'
-      + '<p class="aviso-t" id="avisoT">' + esc(this.TEXTO) + '</p>'
-      + '<button class="aviso-ok" type="button" onclick="Aviso.cerrar()">Vale</button>';
+    c.innerHTML = '<div class="recado-ico" aria-hidden="true">' + this.ICONO + '</div>'
+      + '<p class="recado-t" id="recadoT">' + esc(this.TEXTO) + '</p>'
+      + '<button class="recado-ok" type="button" onclick="Recado.cerrar()">Vale</button>';
     this._foco = document.activeElement;
     el.hidden = false;
-    const b = c.querySelector('.aviso-ok');
+    const b = c.querySelector('.recado-ok');
     if(b) try{ b.focus(); }catch(e){}
   },
   cerrar: function(){
-    const el = document.getElementById('aviso');
+    const el = document.getElementById('recado');
     if(!el) return;
     el.hidden = true;
     if(this._foco) try{ this._foco.focus(); }catch(e){}
@@ -4700,8 +4714,8 @@ document.addEventListener('keydown', function(e){
   }
   /* Y con el aviso del grupo, igual. Van ya TRES ventanas que interceptan
      el teclado; si añades otra, acuérdate de este bloque. */
-  if(typeof Aviso !== 'undefined' && Aviso.abierto()){
-    if(e.key === 'Escape') Aviso.cerrar();
+  if(typeof Recado !== 'undefined' && Recado.abierto()){
+    if(e.key === 'Escape') Recado.cerrar();
     return;
   }
   if(e.key === 'ArrowRight' && vistaEtapa < 8) irA(vistaEtapa+1);
@@ -4916,7 +4930,7 @@ registrarSW();
 vigilarRed();
 diagnostico();
 /* El aviso del grupo, lo último: así sale por encima de todo lo ya pintado. */
-Aviso.abrir();
+Recado.abrir();
 
 /* Diagnóstico en pantalla, SOLO si la URL lleva ?debug. Pensado para poder
    depurar el mapa desde el propio móvil, sin Mac ni consola: muestra la

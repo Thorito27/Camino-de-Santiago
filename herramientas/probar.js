@@ -738,9 +738,9 @@ console.log('5 ter. ¿Cuánto queda?');
 console.log('6. Flechas del teclado');
 {
   const s = abrir();
-  /* El aviso del grupo sale al arrancar y, como las otras dos ventanas,
+  /* El recado del grupo sale al arrancar y, como las otras dos ventanas,
      bloquea las flechas a propósito. Se cierra antes de probar el teclado. */
-  s.w.eval('Aviso.cerrar()');
+  s.w.eval('Recado.cerrar()');
   s.w.irA(0);
   function flecha(k){
     const e = new s.w.KeyboardEvent('keydown', {key:k, bubbles:true});
@@ -762,44 +762,96 @@ console.log('6. Flechas del teclado');
   s.dom.window.close();
 }
 
-/* ---------- 6 bis. El aviso del grupo ---------- */
-console.log('6 bis. Aviso del grupo');
+/* ---------- 6 bis. El recado del grupo ---------- */
+console.log('6 bis. Recado del grupo');
 {
   const s = abrir();
-  comprobar('el aviso sale solo al abrir la web', s.w.eval('Aviso.abierto()'));
-  const cuerpo = s.d.getElementById('avisoCuerpo').innerHTML;
+  comprobar('el recado sale solo al abrir la web', s.w.eval('Recado.abierto()'));
+  const cuerpo = s.d.getElementById('recadoCuerpo').innerHTML;
   comprobar('dice lo de los zapatos de Pablo',
     cuerpo.indexOf('Pablo se ha olvidado los zapatos!!') >= 0);
-  comprobar('el texto pintado es el de Aviso.TEXTO',
-    cuerpo.indexOf(s.w.eval('Aviso.TEXTO')) >= 0);
-  comprobar('lleva botón de cerrar', !!s.d.querySelector('#aviso .aviso-ok'));
+  comprobar('el texto pintado es el de Recado.TEXTO',
+    cuerpo.indexOf(s.w.eval('Recado.TEXTO')) >= 0);
+  comprobar('lleva botón de cerrar', !!s.d.querySelector('#recado .recado-ok'));
 
-  /* Con el aviso abierto, las flechas NO deben navegar por detrás */
+  /* El id tiene que ser `recado`, no `aviso`: nació con `aviso`, que ya era
+     el de los mensajitos flotantes de avisar(), y su CSS (`opacity:0` hasta
+     que se le pone `.visible`) dejaba esta ventana abierta pero INVISIBLE.
+     jsdom no calcula estilos, así que esto se comprueba por el id. */
+  comprobar('la ventana NO usa el id `aviso`, que ya es del toast',
+    !!s.d.querySelector('#recado.modal') && !s.d.querySelector('#aviso.modal'));
+
+  /* Con el recado abierto, las flechas NO deben navegar por detrás */
   const antes = s.w.eval('vistaEtapa');
   s.d.dispatchEvent(new s.w.KeyboardEvent('keydown', {key:'ArrowRight', bubbles:true}));
-  comprobar('con el aviso abierto las flechas no cambian de vista',
+  comprobar('con el recado abierto las flechas no cambian de vista',
     s.w.eval('vistaEtapa') === antes);
 
   /* Esc lo cierra, y entonces sí se navega */
   s.d.dispatchEvent(new s.w.KeyboardEvent('keydown', {key:'Escape', bubbles:true}));
-  comprobar('Esc cierra el aviso', !s.w.eval('Aviso.abierto()'));
+  comprobar('Esc cierra el recado', !s.w.eval('Recado.abierto()'));
   s.d.dispatchEvent(new s.w.KeyboardEvent('keydown', {key:'ArrowRight', bubbles:true}));
-  comprobar('cerrado el aviso, las flechas vuelven a funcionar',
+  comprobar('cerrado el recado, las flechas vuelven a funcionar',
     s.w.eval('vistaEtapa') !== antes);
-  comprobar('el aviso no deja errores', s.errores.length === 0);
+  comprobar('el recado no deja errores', s.errores.length === 0);
   s.dom.window.close();
 
   /* Sale también entrando directo a una etapa, no solo en la portada */
   const e = abrir('https://ejemplo.org/?etapa=3');
-  comprobar('el aviso sale también con ?etapa=3', e.w.eval('Aviso.abierto()'));
+  comprobar('el recado sale también con ?etapa=3', e.w.eval('Recado.abierto()'));
   comprobar('y la etapa de debajo se ha pintado igual', largo(e) > 400);
   e.dom.window.close();
 
   /* Sin recado (TEXTO vacío) no debe salir nada: es la forma de quitarlo */
   const v = abrir();
-  v.w.eval('Aviso.cerrar(); Aviso.TEXTO = ""; Aviso.abrir();');
-  comprobar('con Aviso.TEXTO vacío no sale la ventana', !v.w.eval('Aviso.abierto()'));
+  v.w.eval('Recado.cerrar(); Recado.TEXTO = ""; Recado.abrir();');
+  comprobar('con Recado.TEXTO vacío no sale la ventana', !v.w.eval('Recado.abierto()'));
   v.dom.window.close();
+}
+
+/* ---------- 6 ter. Ids sin chocar ---------- */
+/* La regresión de arriba, generalizada. Un id repetido no da ningún error:
+   `getElementById` devuelve el primero y el CSS del otro se aplica igual,
+   así que el fallo sale en pantalla y en ningún log. Aquí se comprueba a la
+   vez el DOM vivo (dos elementos con el mismo id) y los ids que el código
+   asigna a mano (`el.id = '...'`), que son los que chocan sin verse. */
+console.log('6 ter. Ids sin chocar');
+{
+  const s = abrir();
+
+  function repetidos(){
+    const cuenta = {};
+    s.d.querySelectorAll('[id]').forEach(function(el){
+      cuenta[el.id] = (cuenta[el.id] || 0) + 1;
+    });
+    return Object.keys(cuenta).filter(function(k){ return cuenta[k] > 1; });
+  }
+
+  /* Se recorren las vistas: cada una pinta ids distintos en el panel */
+  const vistas = [-1, 0, 1, 7, 8];
+  vistas.forEach(function(v){
+    s.w.irA(v);
+    const rep = repetidos();
+    comprobar('vista ' + v + ' sin ids repetidos'
+      + (rep.length ? ' (repetidos: ' + rep.join(', ') + ')' : ''), rep.length === 0);
+  });
+
+  /* Y los ids que el código crea a mano no pueden existir ya en el HTML con
+     otro significado: es justo lo que pasó con `aviso`. */
+  const fuente = fs.readFileSync(path.join(raiz,'index.html'),'utf8');
+  const aMano = [];
+  fuente.replace(/\.id\s*=\s*'([^']+)'/g, function(_, id){ aMano.push(id); return _; });
+  comprobar('hay ids asignados por código (si no, esta prueba no vale)', aMano.length > 0);
+  aMano.forEach(function(id){
+    /* El elemento con ese id NO debe existir ya pintado: si existe, el
+       `document.createElement` de turno se lo va a encontrar y lo va a
+       reutilizar (o el CSS del uno pisará al otro). */
+    s.w.irA(0);
+    const ya = s.d.getElementById(id);
+    comprobar('el id «' + id + '», que se asigna por código, no choca con uno del HTML',
+      !ya || ya.id === id && !ya.classList.contains('modal'));
+  });
+  s.dom.window.close();
 }
 
 /* ---------- 7. Entrar por URL ---------- */
