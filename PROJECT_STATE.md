@@ -93,6 +93,60 @@ en modo avión. Es justo la primera fila de la tabla.
 
 ---
 
+## 2026-08-16 — El recado no se veía: un `id` repetido
+
+Aviso desde el móvil: «no me salta el mensaje emergente». Y no era la caché ni
+el despliegue —Pages había publicado bien el merge de la PR #40—, era un fallo
+de verdad, y de los que no dan la cara.
+
+### La causa
+
+La ventana se añadió con `id="aviso"`. **Ese id ya existía**: es el de los
+mensajitos flotantes de `avisar()`, y su CSS dice:
+
+```css
+#aviso{ … opacity:0; pointer-events:none; z-index:60 }
+#aviso.visible{opacity:1}
+```
+
+Como un `#id` pesa más que una clase, esa regla ganaba a `.modal` y la ventana
+salía **abierta y completamente transparente**. El DOM decía `hidden:false`,
+`Aviso.abierto() === true`, y en la pantalla no había nada. De propina, el
+primer `avisar()` la habría machacado con un `textContent`.
+
+### Por qué las pruebas dijeron que todo bien
+
+Porque **jsdom no calcula estilos**. Las nueve comprobaciones del recado
+pasaban: el elemento existía, no estaba `hidden`, tenía el texto correcto. Todas
+ciertas, y aun así en el móvil no se veía nada.
+
+Se encontró abriendo la página **en un Chromium de verdad** (Playwright, que ya
+está instalado en el entorno) contra un `python3 -m http.server`: el DOM decía
+que la ventana estaba abierta y la captura de pantalla no la enseñaba. Ahí se
+vio `opacity: 0` y `z-index: 60` donde tenía que haber `1` y `2000`, y la caja
+midiendo 160 px en vez de 358.
+
+**Lección:** cuando algo «no se ve» pero las pruebas pasan, sospechar del CSS
+antes que del JavaScript; y para lo visual, un navegador de verdad, aunque sea
+una vez.
+
+### Arreglado
+
+- La ventana pasa a llamarse **`Recado`** y su elemento a `#recado`
+  (`recadoCuerpo`, `recadoX`, `.recado-ico/-t/-ok`). `avisar()` se queda con
+  `#aviso`, que era suyo desde el principio.
+- Comprobado en Chromium a 390×844: la caja mide 358 px, sale centrada sobre el
+  velo oscuro, con el emoji, el texto y el botón «Vale».
+- Apartado nuevo **6 ter, «Ids sin chocar»**: que ninguna vista tenga dos
+  elementos con el mismo id, y que los ids que el código asigna a mano
+  (`el.id = '…'`) no choquen con los del HTML. Verificado que caza la
+  regresión: volviendo a poner `id="aviso"` saltan **3** comprobaciones.
+
+`npm test`: **455 comprobaciones, 0 fallos** (eran 447). `VERSION` →
+`camino-v32`.
+
+---
+
 ## 2026-08-15 — El aviso del grupo: Pablo y los zapatos
 
 **Rama:** `claude/mapas-no-guardan-7dwumy`.

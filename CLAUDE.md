@@ -154,6 +154,19 @@ verdad con un botón de reintentar, y `activate` reintenta guardar los
 `ESENCIALES` tras la purga. Si tocas el `fetch` del service worker, comprueba
 que todas las ramas devuelven una `Response`.
 
+**Un `id` repetido no da ningún error: se ve en pantalla y en ningún log.**
+La ventana del recado del grupo nació como `id="aviso"`, y ese id ya era el de
+los mensajitos flotantes de `avisar()`, cuyo CSS lleva `opacity:0` hasta que se
+le añade `.visible`. Como un `#id` pesa más que una clase, la ventana salía
+**abierta y completamente transparente**: el DOM decía que estaba ahí y en el
+móvil no se veía nada. De propina, `avisar()` la habría machacado con un
+`textContent`. **`npm test` con jsdom lo dio por bueno**, porque jsdom no
+calcula estilos; se vio abriendo la página en un Chromium de verdad. Ahora la
+ventana es `#recado` y el apartado **6 ter** comprueba que no hay ids repetidos
+en ninguna vista y que los ids que el código asigna a mano (`el.id = '…'`) no
+chocan con los del HTML. Cuando algo «no se ve» pero las pruebas pasan,
+sospecha del CSS antes que del JavaScript.
+
 **El service worker no puede ir dentro del HTML.** El navegador exige un
 `.js` servido desde el mismo origen. Por eso `sw.js` va suelto. Y solo
 funciona publicado en Pages, no abriendo el archivo local.
@@ -172,7 +185,7 @@ apartado 9 de `npm test` ejecuta el service worker de verdad y lo comprueba.**
 
 **Hay DOS versiones que subir, y no son lo mismo.**
 
-- **`VERSION` en `sw.js`** (ahora `camino-v31`): súbela **siempre que cambies
+- **`VERSION` en `sw.js`** (ahora `camino-v32`): súbela **siempre que cambies
   `index.html`**. Nombra el caché de la página; si no la subes, los móviles que
   ya tengan la web guardada pueden seguir con la vieja. **No nombra el de los
   mapas** (ver arriba).
@@ -282,8 +295,8 @@ El orden importa: `TRAZAS` antes que `ETAPAS`, y ambos antes que la lógica.
   entero, porque allí es la primera pantalla y taparla con un diálogo no
   aporta. `elegir()` cierra la ventana si estaba abierta, si no se queda
   encima tapando el saludo. Si tocas el `keydown`, acuérdate de que ahora
-  intercepta **tres** diálogos, no uno (el tercero es `Aviso`).
-- **`Aviso`** — la ventana que sale **al abrir la web, cada vez**. Es el recado
+  intercepta **tres** diálogos, no uno (el tercero es `Recado`).
+- **`Recado`** — la ventana que sale **al abrir la web, cada vez**. Es el recado
   del grupo, y hoy dice que Pablo se ha olvidado los zapatos. Todo lo que hay
   que tocar está en el propio módulo: `TEXTO` (el recado) e `ICONO` (el emoji).
   **Con `TEXTO` vacío no sale nada**, y esa es la forma de quitarlo: no hay que
