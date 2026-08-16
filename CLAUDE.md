@@ -185,7 +185,7 @@ apartado 9 de `npm test` ejecuta el service worker de verdad y lo comprueba.**
 
 **Hay DOS versiones que subir, y no son lo mismo.**
 
-- **`VERSION` en `sw.js`** (ahora `camino-v32`): súbela **siempre que cambies
+- **`VERSION` en `sw.js`** (ahora `camino-v33`): súbela **siempre que cambies
   `index.html`**. Nombra el caché de la página; si no la subes, los móviles que
   ya tengan la web guardada pueden seguir con la vieja. **No nombra el de los
   mapas** (ver arriba).
@@ -301,10 +301,17 @@ El orden importa: `TRAZAS` antes que `ETAPAS`, y ambos antes que la lógica.
   que tocar está en el propio módulo: `TEXTO` (el recado) e `ICONO` (el emoji).
   **Con `TEXTO` vacío no sale nada**, y esa es la forma de quitarlo: no hay que
   borrar el HTML ni la llamada del arranque. A propósito **no** se recuerda que
-  ya lo viste: sale en cada carga, que es lo que se pidió. Si algún día molesta,
-  lo suyo es guardar en localStorage una marca con el texto ya leído. Igual que
-  las otras ventanas, `Esc` cierra y las flechas no navegan por detrás — por eso
-  `probar.js` lo cierra antes de probar el teclado.
+  ya lo viste. Igual que las otras ventanas, `Esc` cierra y las flechas no
+  navegan por detrás — por eso `probar.js` lo cierra antes de probar el teclado.
+  **«Entrar a la web» son TRES puertas, no una**: el arranque, `pageshow`
+  (volver con el botón atrás, que restaura la página sin reejecutar el
+  arranque) y `visibilitychange` (volver desde otra app o desbloquear el móvil,
+  que es como se entra de verdad en el móvil, donde la pestaña se queda abierta
+  días). Las registra `Recado.vigilar()`. Moverse por las pestañas de la propia
+  web **no** cuenta: no se ha vuelto a entrar. Si sale demasiado, **no hay que
+  tocar código**: sube `MINUTOS_DESCANSO` (en 0, que es lo pedido, sale cada
+  vez; a 30, como mucho una vez cada media hora). La primera aparición no la
+  frena el descanso.
 - **`Retos`** — cuestionario en localStorage (`lolitas2026-retos`). **Guarda un
   registro por respuesta**: `{id, opcion, acierto, ts}`, más `v` (versión de
   formato) y `persona`. Está pensado así a propósito: si algún día se

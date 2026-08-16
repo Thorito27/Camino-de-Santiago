@@ -796,6 +796,39 @@ console.log('6 bis. Recado del grupo');
   comprobar('el recado no deja errores', s.errores.length === 0);
   s.dom.window.close();
 
+  /* --- "Entrar a la web" no es solo cargarla --- */
+  /* En el móvil la pestaña se queda abierta días: volver desde otra app
+     también es entrar. Se simula el ciclo oculto → visible. */
+  function irYVolver(s){
+    Object.defineProperty(s.d, 'visibilityState', {get:()=>'hidden', configurable:true});
+    s.d.dispatchEvent(new s.w.Event('visibilitychange'));
+    Object.defineProperty(s.d, 'visibilityState', {get:()=>'visible', configurable:true});
+    s.d.dispatchEvent(new s.w.Event('visibilitychange'));
+  }
+  const v = abrir();
+  v.w.eval('Recado.cerrar()');
+  comprobar('cerrado, se queda cerrado mientras navegas', !v.w.eval('Recado.abierto()'));
+  v.w.irA(2);
+  comprobar('moverse por la web NO lo saca otra vez', !v.w.eval('Recado.abierto()'));
+  irYVolver(v);
+  comprobar('volver desde otra app SÍ lo saca otra vez', v.w.eval('Recado.abierto()'));
+
+  /* Volver con el botón atrás: el navegador restaura la página sin repetir
+     el arranque, así que hace falta `pageshow` con persisted. */
+  v.w.eval('Recado.cerrar()');
+  const ps = new v.w.Event('pageshow');
+  Object.defineProperty(ps, 'persisted', {get:()=>true});
+  v.w.dispatchEvent(ps);
+  comprobar('volver con el botón atrás también lo saca', v.w.eval('Recado.abierto()'));
+
+  /* Y con MINUTOS_DESCANSO puesto, no se repite dentro de ese rato */
+  v.w.eval('Recado.cerrar(); Recado.MINUTOS_DESCANSO = 30;');
+  irYVolver(v);
+  comprobar('con MINUTOS_DESCANSO no se repite antes de tiempo',
+    !v.w.eval('Recado.abierto()'));
+  v.w.eval('Recado.MINUTOS_DESCANSO = 0;');
+  v.dom.window.close();
+
   /* Sale también entrando directo a una etapa, no solo en la portada */
   const e = abrir('https://ejemplo.org/?etapa=3');
   comprobar('el recado sale también con ?etapa=3', e.w.eval('Recado.abierto()'));
@@ -803,10 +836,13 @@ console.log('6 bis. Recado del grupo');
   e.dom.window.close();
 
   /* Sin recado (TEXTO vacío) no debe salir nada: es la forma de quitarlo */
-  const v = abrir();
-  v.w.eval('Recado.cerrar(); Recado.TEXTO = ""; Recado.abrir();');
-  comprobar('con Recado.TEXTO vacío no sale la ventana', !v.w.eval('Recado.abierto()'));
-  v.dom.window.close();
+  const q = abrir();
+  q.w.eval('Recado.cerrar(); Recado.TEXTO = ""; Recado.abrir();');
+  comprobar('con Recado.TEXTO vacío no sale la ventana', !q.w.eval('Recado.abierto()'));
+  /* Y tampoco al volver de otra app: si no, el "quitarlo" sería mentira */
+  irYVolver(q);
+  comprobar('sin recado, volver de otra app tampoco lo saca', !q.w.eval('Recado.abierto()'));
+  q.dom.window.close();
 }
 
 /* ---------- 6 ter. Ids sin chocar ---------- */
