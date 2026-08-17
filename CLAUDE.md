@@ -471,26 +471,29 @@ pruebas que lo fijan: que están **Daniel, Pepe y Fidel** (el recuerdo es
 intencionado y la frase es literalmente «Nos acordamos de…», sin adornos), y
 que la guía se atribuye a **la tita Lucila con aportes de Juan Martínez**.
 
-**Lo de los coches NO está decidido.** Se escribió una vez como si lo
-estuviera —«la idea, cada día», en lista numerada— y era falso: hay varias
-opciones sobre la mesa. Ahora va en `<ul>` (alternativas, no pasos), dice
-«todavía sin decidir» y vive además en `DECISIONES` con su botón de WhatsApp.
-Hay pruebas que comprueban las tres cosas, **incluida que no vuelva a ser un
-`<ol>`**. La primera opción se apoya en que el destino de cada etapa es la
-salida de la siguiente: también hay prueba, porque si algún día deja de
-encadenar, esa opción deja de tener sentido.
+**Lo de los coches ya está decidido (17 de agosto de 2026).** Durante semanas
+estuvo sin decidir, con tres opciones sobre la mesa (`dejar-dos`, `todos-taxi`,
+`ninguno`), pintadas en un `<ul data-opcion>` en la portada y con pruebas que
+comprobaban que seguían sin decidir. El grupo eligió: uno de los tres coches se
+dejó en el aeropuerto de Santiago, así que solo se usan **dos**; no se mueven
+por la mañana (se quedan en el punto de partida de cada etapa) y, si la abuela
+se cansa a media etapa, **dos personas** cogen un taxi con ella hasta donde
+están los coches y siguen hasta el destino en ellos. Es, en esencia, la
+opción `ninguno` de antes, simplificada porque con dos coches ya no hace falta
+volver a por un tercero. La portada ya no tiene la lista de alternativas: es
+un párrafo que dice «Decidido», y la respuesta vive en `DECISIONES` (`id:
+'coches'`, `estado:'resuelto'`). Las pruebas de la portada ahora fijan la
+versión resuelta, no la de las tres opciones; si esto cambia otra vez (por
+ejemplo si se recupera un tercer coche), hay que volver a tocar la portada, el
+`DECISIONES` y `probar.js` a la vez, que es justo lo que se les olvidó
+sincronizar la primera vez que se escribió esta sección.
 
-**Cada alternativa lleva su `data-opcion`** (`dejar-dos`, `todos-taxi`,
-`ninguno`) y las pruebas se agarran a eso, no a frases del texto: antes había
-que perseguirlas cada vez que se retocaba una redacción. Si añades una opción,
-añádela a `OPCIONES` en `probar.js`.
-
-**Lo de la abuela NO es una cuarta opción**, y llegó a estar pintado como tal:
-una viñeta suelta al final que parecía una alternativa más cuando en realidad
-es una **consecuencia** de las opciones que dejan un coche en el inicio. Va
-dentro de `dejar-dos`, y `ninguno` ya nace de ese caso. `todos-taxi` avisa de
-que con ella no queda coche en el inicio. Hay prueba de que no vuelva a
-aparecer una viñeta `abuela` suelta.
+**Si tocas «los coches», mira también el `timing` de las seis etapas.**
+Durante un tiempo cada etapa abría su itinerario con un hito del tipo «Coche a
+[destino]. N minutos», que asumía que alguien llevaba un coche al destino a
+primera hora. Con el «no mover ninguno» decidido, esos hitos ya no describen
+nada real y se quitaron: no vuelvas a añadirlos sin comprobar antes qué dice
+`DECISIONES.coches`.
 
 **Cada cosa en una sola pestaña.** Itinerario es el día (horario, cama y
 comida reservada); Paradas es lo que hay por el camino (escapes, bares y qué
@@ -518,28 +521,26 @@ avisos derivados (calor, lluvia, frío de mañana, viento), sellos, retos,
 checklist del equipaje, teléfonos, modo sin cobertura, compartir y vista previa
 propia por etapa en WhatsApp.
 
-**Pendiente del viaje** (no del código). Estas cinco viven en la constante
+**Pendiente del viaje** (no del código). Estas seis viven en la constante
 `DECISIONES` de `datos.js` y se ven en el apartado «Decisiones del grupo» del
 índice. El `estado` (`pendiente` | `encurso` | `resuelto`) se edita a mano en
 `datos.js` cuando algo se cierra de verdad (no en localStorage: sería solo para
-quien lo marca). Al día del **11 de agosto de 2026**:
+quien lo marca). Al día del **17 de agosto de 2026**:
 
 - ~~Villa Xardín, 22 de agosto: 10 plazas para 11 personas.~~ **Resuelto**:
   reservada una cama supletoria.
 - ~~La cena de Cerceda sin confirmar.~~ **Resuelto**: se cae O Ceadoiro, esa
   noche se cena en el alojamiento.
+- ~~Cómo se mueven los coches de una etapa a otra.~~ **Resuelto**: uno de los
+  tres se dejó en el aeropuerto de Santiago, quedan dos; no se mueven por la
+  mañana y, si la abuela se cansa, dos personas cogen un taxi con ella hasta
+  donde están los coches y siguen hasta el destino en ellos.
 - Casa Nené: dos reservas de 8 + 4 cuando ya sois 11. **En curso**, quedó el
   padre en llamar; sin unificar todavía.
 - El 23: la misa de 19:30 y la cena de 20:30 no caben las dos. **En curso**: se
   va a la misa y se retrasa la cena, falta que Milongas confirme la hora.
 - Antes del 12 de agosto: comunicar el menú a Mesón A Lareira. **Pendiente, y
   es la que corre.**
-- Cómo se mueven los tres coches de una etapa a otra. **Pendiente**, con tres
-  opciones: dejar dos en el destino y volver en el tercero; llevarlos todos y
-  volver en un taxi; o no mover ninguno por la mañana y moverlos cuando la
-  abuela se canse. Va atado a que ella pueda cortar a media etapa, que solo
-  cabe si queda algún coche en el inicio (con la primera y la tercera, no con
-  la segunda). En todas mueve los coches un grupo pequeño, **no los doce**.
 
 Cuando una decisión recibe respuesta, se guarda en el campo `respuesta`:
 `texto` (la frase **literal**, sin reescribir), `quien`, `cuando` y un `aclara`

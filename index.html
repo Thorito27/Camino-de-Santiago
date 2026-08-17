@@ -806,7 +806,6 @@ const ETAPAS = [
     {nombre:"Portomarín", lat:42.807320, lon:-7.615850, km:23.46, ele:344, kmGuia:22.4, tipo:'fin', fiable:true, desviacion_m:12}
   ],
   timing:[
-    {hora:'7:00', texto:'Coche a Portomarín. Dos personas llevan los dos coches y regresan con uno.'},
     {hora:'8:00', texto:'Salida tras café. El hotel en Sarria (Baixo a Lua) está junto al camino.'},
     {hora:'9:00', texto:'Llegada a Barbadelo (4,2 km). Dificultad ALTA. Quien prefiera saltárselo puede ir directamente en coche hasta la Iglesia de Barbadelo y esperar allí al grupo.'},
     {hora:'9:00-12:00', texto:'Barbadelo-Ferreiros (9,1 km). Dificultad BAJA. El mejor tramo: sombreado, pendientes moderadas, incluye el km 100. Parada para desayunar a mitad de tramo, en Mercado da Serra o Peruscallo.', destacado:true, dudoso:'La guía dice "dos horas andando, más media hora de parada" (2,5 h) dentro de una ventana de 9:00 a 12:00 (3 h); no cuadra del todo.'},
@@ -860,7 +859,6 @@ const ETAPAS = [
     {nombre:"Palas de Rei", lat:42.873250, lon:-7.868800, km:27.52, ele:557, kmGuia:25, tipo:'fin', fiable:true, desviacion_m:24}
   ],
   timing:[
-    {hora:'6:30', texto:'Coche a Palas de Rei.'},
     {hora:'7:30', texto:'Salida tras desayuno importante. Cruzar el puente sobre el Miño al amanecer es bonito.'},
     {hora:'9:30', texto:'Llegada a Gonzar / Castromaior (8,2 / 9,5 km). Dificultad MEDIA-ALTA, lo más duro del día.'},
     {hora:'9:15-13:00', texto:'Gonzar/Castromaior-Ligonde (8,5 / 7,2 km). El tramo más interesante del día.',
@@ -904,7 +902,6 @@ const ETAPAS = [
     {nombre:"Melide", lat:42.914640, lon:-8.017500, km:15.63, ele:453, kmGuia:14.5, tipo:'fin', fiable:false, ajustado:620, desviacion_m:0}
   ],
   timing:[
-    {hora:'8:30', texto:'Coche a Melide.'},
     {hora:'9:30', texto:'Salida de Palas de Rei.'},
     {hora:'10:15-10:45', texto:'Desayuno en San Julián de Camiño (3,5 km).'},
     {hora:'12:30', texto:'Llegada a Leboreiro (5,7 km más). Acumulado: 9,2 km.'},
@@ -951,7 +948,6 @@ const ETAPAS = [
     {nombre:"Arzúa", lat:42.927770, lon:-8.159420, km:14.73, ele:390, kmGuia:14.1, tipo:'fin', fiable:true, desviacion_m:240}
   ],
   timing:[
-    {hora:'8:00', texto:'Coche a Arzúa. Carretera paralela al camino, 16 minutos.'},
     {hora:'9:00', texto:'Salida de Melide.'},
     {hora:'10:30', texto:'Llegada a Boente (5,8 km).'},
     {hora:'10:30-11:00', texto:'Desayuno. Iglesia de Santiago.'},
@@ -1002,7 +998,6 @@ const ETAPAS = [
     {nombre:"O Pedrouzo", lat:42.909180, lon:-8.359000, km:19.30, ele:270, kmGuia:19.1, tipo:'fin', fiable:false, ajustado:589, desviacion_m:0}
   ],
   timing:[
-    {hora:'7:30', texto:'Coche a O Pedrouzo. 19 minutos.'},
     {hora:'8:30', texto:'Salida de Arzúa.'},
     {hora:'10:45', texto:'Llegada a A Calzada (10 km).'},
     {hora:'10:45-11:15', texto:'Descanso en Bar Casa Calzada. Punto de encuentro con el taxi desde Arzúa.'},
@@ -1050,7 +1045,6 @@ const ETAPAS = [
     {nombre:"Catedral de Santiago", lat:42.881140, lon:-8.544480, km:20.43, ele:275, kmGuia:20, tipo:'fin', fiable:true, ficha:"Entrada por la Puerta del Camino, Plaza de Cervantes, Plaza del Obradoiro. Misa del peregrino 19:30. Abierta 7:00-21:00.", desviacion_m:0}
   ],
   timing:[
-    {hora:'6:30', texto:'Coche a Santiago. 19 minutos.'},
     {hora:'7:15', texto:'Salida de O Pedrouzo. Conviene salir temprano: se ve amanecer y no se llega tarde.'},
     {hora:'9:45', texto:'Llegada a Lavacolla (10 km). Punto de encuentro, más o menos la mitad.'},
     {hora:'9:45-10:15', texto:'Descanso y desayuno.'},
@@ -1072,7 +1066,7 @@ const ETAPAS = [
     {donde:'destino', texto:'Catedral de Santiago, en la Praza do Obradoiro. Abierta 7:00-21:00.'}],
   avisos:['La sección "Pueblos" de esta etapa está vacía en la guía: solo pone "Concello de O Pino" sin texto.',
     'Las comidas de San Paio, Lavacolla y Monte do Gozo aparecen sin ningún establecimiento asociado.',
-    'Los dos coches quedan en Santiago. Confirmar si hace falta traslado de vuelta a Sarria.']
+    'Los dos coches del viaje quedan en Santiago, junto al tercero que ya se dejó en el aeropuerto. Confirmar si hace falta traslado de vuelta a Sarria.']
 }
 ];
 
@@ -1162,9 +1156,12 @@ const DECISIONES = [
   {
     id:'coches', titulo:'Cómo se mueven los coches',
     lugar:'Todas las etapas', fecha:'2026-08-18', cuando:'Cada día del viaje',
-    que:'Sois doce y hay tres coches, y cada etapa acaba lejos de donde empieza. En todas las opciones mueve los coches un grupo pequeño y el resto espera en el punto de partida. A: tres personas llevan los tres al destino a primera hora, dejan dos y vuelven las tres en el tercero; al acabar la etapa se coge uno de los dos para ir a por el que quedó en el origen, y si la abuela se cansa a media etapa se puede coger un taxi con ella hasta el inicio y seguir en ese coche. B: igual, pero esas tres se vuelven en un solo taxi (caben cuatro), así no hay que mover nada al acabar, aunque no queda ningún coche en el inicio. C: no mover ninguno por la mañana; cuando la abuela se canse, dos personas van con ella al inicio, llevan dos coches al destino y vuelven esas dos a por el tercero.',
-    estado:'pendiente',
-    wa:'Los coches: somos doce y hay tres, y los mueve siempre un grupo pequeño mientras el resto espera en el inicio. Tres opciones: (A) llevar los tres al destino, dejar dos y volver en el tercero; (B) llevar los tres y volver en un taxi; (C) no mover ninguno por la mañana y, cuando la abuela se canse, que dos vayan con ella al inicio, lleven dos coches al destino y vuelvan a por el tercero. ¿Cuál veis?'
+    que:'Sois doce y había tres coches, y cada etapa acaba lejos de donde empieza. Había que decidir cómo moverlos entre el punto de partida y el destino de cada día.',
+    estado:'resuelto',
+    respuesta:{ texto:'Hemos dejado un coche en el aeropuerto de Santiago por lo que solo vamos con dos. Los dejaremos al inicio de cada etapa y cuando la abuela se canse, cogemos taxi 2 personas con ella al coche',
+      quien:'el grupo', cuando:'17 de agosto',
+      aclara:'Uno de los tres coches se queda ya en el aeropuerto de Santiago: quedan dos para el viaje, y no se mueven por la mañana. Si la abuela se cansa a media etapa, dos personas cogen un taxi con ella hasta donde están los coches y siguen hasta el destino en ellos. Es la opción de «no mover ninguno», simplificada porque con dos coches ya no hace falta volver a por un tercero.' },
+    wa:'Los coches: éramos doce y teníamos tres coches; se decidió no moverlos por la mañana y, si la abuela se cansa a media etapa, que dos vayan con ella en taxi hasta donde están los coches y sigan hasta el destino en ellos. Uno de los tres se dejó en el aeropuerto de Santiago, así que solo se usan dos.'
   }
 ];
 
@@ -2348,29 +2345,14 @@ function panelPortada(){
     + 'camináis doce y las <strong>tres últimas</strong>, once.</p>'
 
     + '<h2>Los coches</h2>'
-    + '<p><strong>Todavía sin decidir.</strong> Sois doce y hay <strong>tres coches</strong>, y '
-    + 'cada etapa acaba en un sitio distinto del que empieza, así que hay que llevarlos de una '
-    + 'punta a otra cada día. Lo que hay sobre la mesa:</p>'
-    + '<ul class="coches">'
-    + '<li data-opcion="dejar-dos"><strong>Dejar dos coches en el destino.</strong> A primera '
-    + 'hora, <strong>tres personas</strong> llevan los tres coches al destino de la etapa, dejan '
-    + 'dos allí y vuelven las tres en el tercero. El resto espera en el punto de partida. Al '
-    + 'llegar andando se coge uno de los dos coches para volver al origen a por el que quedó. '
-    + 'Y <strong>si la abuela se cansa a media etapa</strong>, que alguien coja un taxi con ella '
-    + 'hasta el inicio y sigan desde allí en el coche que se quedó.</li>'
-    + '<li data-opcion="todos-taxi"><strong>Llevarlos todos y volver en taxi.</strong> Lo mismo, '
-    + 'pero esas <strong>tres personas</strong> se vuelven al punto de partida en <strong>un solo '
-    + 'taxi</strong> —caben cuatro— en vez de en coche. Van los tres coches al destino y ya no hay '
-    + 'que mover nada al acabar la etapa, pero no queda ningún coche en el inicio. El resto sigue '
-    + 'esperando en el punto de partida.</li>'
-    + '<li data-opcion="ninguno"><strong>No mover ninguno por la mañana.</strong> Los tres coches '
-    + 'se quedan en el punto de partida y no se toca nada hasta que haga falta. Cuando la abuela '
-    + 'se canse, <strong>dos personas</strong> van con ella al inicio de la etapa, llevan dos '
-    + 'coches al destino y luego vuelven esas dos a por el tercero.</li>'
-    + '</ul>'
-    + '<div class="nota">Está sin cerrar, en '
-    + '<a href="#" onclick="irA(0);return false;">Decisiones del grupo</a>, con su botón para '
-    + 'preguntarlo por WhatsApp. Los teléfonos de taxi de cada etapa están en sus '
+    + '<p><strong>Decidido.</strong> Uno de los tres coches se ha dejado ya en el aeropuerto '
+    + 'de Santiago, así que quedan <strong>dos</strong> para moveros entre etapas. No se '
+    + 'tocan por la mañana: se quedan en el punto de partida de cada etapa. Y '
+    + '<strong>si la abuela se cansa a media etapa</strong>, <strong>dos personas</strong> cogen '
+    + 'un taxi con ella hasta donde están los coches y siguen hasta el destino en ellos.</p>'
+    + '<div class="nota">Queda anotado en '
+    + '<a href="#" onclick="irA(0);return false;">Decisiones del grupo</a>. Los teléfonos de '
+    + 'taxi de cada etapa están en sus '
     + '<a href="#" onclick="irA(1);irASeccion(\'paradas\');return false;">puntos de escape</a>.</div>'
 
     + '<button class="portada-cta" onclick="irA(0)">Entrar al índice →</button>'

@@ -93,6 +93,84 @@ en modo avión. Es justo la primera fila de la tabla.
 
 ---
 
+## 2026-08-17 — Los coches: decidido, con dos y no con tres
+
+El grupo lo cerró por chat: uno de los tres coches se ha dejado ya en el
+aeropuerto de Santiago, así que el viaje se hace con **dos**. No se mueven por
+la mañana; si la abuela se cansa a media etapa, **dos personas** cogen un taxi
+con ella hasta donde están los coches y siguen hasta el destino en ellos. Es,
+en esencia, la opción «no mover ninguno» de las tres que llevaba semanas sobre
+la mesa, simplificada porque con dos coches ya no hace falta volver a por un
+tercero.
+
+Como no se sabía a nombre de quién anotar la respuesta (no era una cita de la
+tita Lucila, sino la propia persona escribiendo), se preguntó y se contestó
+«sin nombre, "el grupo"»: así queda en `respuesta.quien`.
+
+Tocaba en varios sitios a la vez, y todos se movieron juntos para no dejar la
+web contando dos historias distintas:
+
+- **`DECISIONES`** (`datos.js`): `coches` pasa a `estado:'resuelto'`, con su
+  `respuesta` (texto literal, quien, cuando, aclara).
+- **Portada** (`index.html`): la sección «Los coches» ya no lista tres
+  alternativas en un `<ul data-opcion>` diciendo «todavía sin decidir»; ahora
+  es un párrafo que dice «Decidido» con el plan cerrado.
+- **`herramientas/probar.js`**: el bloque de pruebas que fijaba las tres
+  opciones y el «sin decidir» se reescribió para fijar la versión resuelta
+  (decidido, dos coches, aeropuerto, sin lista de opciones).
+- **`timing` de las seis etapas** (`datos.js`): se quitó el hito «Coche a
+  [destino]. N minutos» que abría cada itinerario, porque asumía que alguien
+  llevaba un coche al destino a primera hora — ya no es así con «no mover
+  ninguno». El de la etapa 1 además decía literalmente «dos coches», que ya
+  apuntaba a esta cifra antes de que se confirmara por chat.
+- **Etapa 6**, aviso: pasa de «los dos coches quedan en Santiago» a aclarar
+  que es el tercero, el del aeropuerto, el que ya estaba allí.
+- **`CLAUDE.md`**: se reescribió la sección «Lo de los coches» (ya no es una
+  trampa de "no está decidido", sino el registro de qué se decidió y qué
+  tocar si se decide otra cosa) y la lista de «Pendiente del viaje» pasa de
+  cinco a **seis** decisiones contadas correctamente, con los coches tachados
+  como resueltos.
+- **`sw.js`**: `VERSION` sube a `camino-v35`. Se detectó de paso que la
+  sesión anterior (actualización de la etapa 1 con el PDF de la guía) había
+  tocado `index.html` sin subir `VERSION` — queda corregido aquí, cubriendo
+  los dos cambios.
+
+`npm test`: 455 comprobaciones, 0 fallos (antes 461; el bloque de los coches
+tenía más pruebas atadas a las tres opciones que a la versión resuelta, que
+necesita menos).
+
+---
+
+## 2026-08-17 — Etapa 1: al día con el PDF de la guía
+
+Se comparó `datos.js` con `Etapa 1.pdf` (Sarria-Portomarín) recién subido por
+el grupo. Cambios: Barbadelo gana la opción de desayunar en la Pensión-Albergue
+Casa Barbadelo o ir directo en coche hasta la iglesia; el teléfono de taxi
+(Alberto, David) se mueve de Barbadelo a Ferreiros/Mirallos, que es donde la
+guía lo sitúa; Mirallos gana la distancia desde Sarria (14 km, con lo que se
+resuelve un aviso que decía que faltaba el número) y el dato de que es en
+realidad la iglesia de Ferreiros, trasladada piedra a piedra hacia 1790; el
+timing gana un hito a las 12:10 en Mirallos y el detalle del tramo final
+Ferreiros-Portomarín; las comidas ganan horarios y la recomendación de la
+dueña de la casa, más la tarta de almendras; la cultura gana el mirador del
+Embalse de Belesar, que la guía trae ahora en una sección «Miradores y vistas»
+nueva para esta etapa.
+
+Dos avisos nuevos, en vez de corregir en silencio: la guía dice literalmente
+«un taxi hasta Barbedelo» en el hito de las 12:10, que parece una errata
+(¿Portomarín?) sin confirmar; y el perfil de la etapa trae más cotas por
+pueblo, pero las etiquetas se solapan en el gráfico del PDF y no se pueden
+leer con fiabilidad en el orden correcto, así que no se tocaron las
+altitudes existentes por esto.
+
+**Pendiente de esta sesión, detectado después:** se me olvidó subir `VERSION`
+en `sw.js` al tocar `index.html`. Corregido en la entrada de arriba, junto con
+el cambio de los coches.
+
+`npm test`: 461 comprobaciones, 0 fallos.
+
+---
+
 ## 2026-08-16 — El matiz: los zapatos **para caminar**
 
 El recado pasa a decir «Pablo se ha olvidado los zapatos para caminar!!». El
