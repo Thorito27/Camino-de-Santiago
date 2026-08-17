@@ -84,61 +84,30 @@ console.log('\n1. Portada');
   comprobar('la portada reconoce los aportes de Juan Martínez',
     /aportes de <strong>Juan Mart/.test(hp));
 
-  /* Los coches NO están decididos. Se llegó a escribir en la portada como si
-     lo estuvieran («la idea, cada día») y no era cierto: hay varias opciones
-     sobre la mesa. Estas comprobaciones evitan que vuelva a darse por hecho. */
-  /* Cada alternativa lleva su `data-opcion`. Antes esto se comprobaba
-     buscando frases sueltas dentro del texto, y cada vez que se retocaba una
-     redacción había que perseguir la prueba. */
-  /* Devuelve un hueco en vez de null: si falta una opción quiero que lo
-     canten las comprobaciones de abajo, no que reviente el proceso y se
-     queden sin ejecutar las demás. */
-  const op = id => s.d.querySelector('.portada ul.coches li[data-opcion="'+id+'"]')
-    || {textContent:''};
-  const OPCIONES = ['dejar-dos','todos-taxi','ninguno'];
-  comprobar('la portada da las opciones de los coches',
-    s.d.querySelectorAll('.portada ul.coches li').length === OPCIONES.length);
-  /* Ojo: aquí se pregunta al DOM directamente, NO por `op()`, que devuelve un
-     hueco cuando falta y haría pasar siempre esta comprobación. */
-  OPCIONES.forEach(id => comprobar('está la opción «'+id+'»',
-    !!s.d.querySelector('.portada ul.coches li[data-opcion="'+id+'"]')));
-  comprobar('la portada dice que los coches están sin decidir', /sin decidir/i.test(hp));
-  comprobar('las opciones NO se pintan como pasos numerados',
-    s.d.querySelectorAll('.portada ol.coches li').length === 0);
+  /* Los coches SÍ están decididos (17 de agosto de 2026): uno de los tres se
+     dejó en el aeropuerto de Santiago, así que solo se usan dos; no se mueven
+     por la mañana y, si la abuela se cansa, dos personas cogen un taxi con
+     ella hasta donde están. Antes hubo tres opciones sobre la mesa en un
+     <ul data-opcion>; ya no, así que estas comprobaciones fijan la versión
+     resuelta y evitan que vuelva a pintarse como pendiente. */
+  comprobar('la portada dice que los coches están decididos', /decidido/i.test(hp));
+  comprobar('la portada ya NO dice que estén sin decidir', !/sin decidir/i.test(hp));
+  comprobar('la portada dice que uno de los tres se dejó en el aeropuerto',
+    /aeropuerto/i.test(hp) && /tres coches/.test(hp));
+  comprobar('la portada dice que quedan dos coches', /<strong>dos<\/strong> para/.test(hp));
+  comprobar('la portada dice que no se tocan por la mañana',
+    /no se tocan por la mañana/i.test(hp));
+  comprobar('la portada dice que van dos personas a por la abuela',
+    /abuela/.test(hp) && /dos personas/i.test(hp) && /taxi/i.test(hp));
+  comprobar('ya no hay una lista de opciones de coches en la portada',
+    s.d.querySelectorAll('.portada ul.coches li, .portada ol.coches li').length === 0);
 
-  /* Quién mueve los coches: un grupo pequeño, NO los doce. Se llegó a
-     escribir que iban todos y volvían en tres taxis, y no era eso. Cada
-     opción dice cuántos van, y las de la mañana que el resto espera. */
-  comprobar('con «dejar dos» y con «todos en taxi» van tres personas',
-    ['dejar-dos','todos-taxi'].every(id => /tres personas/.test(op(id).textContent)));
-  comprobar('esas dos dicen que el resto espera en el punto de partida',
-    ['dejar-dos','todos-taxi'].every(id =>
-      /resto/.test(op(id).textContent) && /punto de partida/.test(op(id).textContent)));
-  comprobar('con «no mover ninguno» van dos personas',
-    /dos personas/.test(op('ninguno').textContent));
-  comprobar('«todos en taxi» es un solo taxi', /un solo taxi/.test(op('todos-taxi').textContent));
-  comprobar('no se dice que hagan falta tres taxis para el grupo',
-    !/tres taxis/.test(hp) && !/harían falta tres/.test(hp));
+  /* Y tiene que estar reflejado en las decisiones del grupo, ya resuelto. */
+  comprobar('los coches están resueltos en las decisiones del grupo',
+    s.w.eval("DECISIONES.some(d=>d.id==='coches' && d.estado==='resuelto' && !!d.respuesta)"));
 
-  /* Lo de la abuela va DENTRO de las opciones que dejan un coche en el
-     inicio, no en una viñeta suelta al final: era una cuarta alternativa
-     aparente cuando en realidad es una consecuencia de dos de las tres.
-     «Dejar dos» lo dice explícitamente; «no mover ninguno» ya nace de ahí. */
-  comprobar('lo de la abuela va dentro de «dejar dos»',
-    /abuela/.test(op('dejar-dos').textContent) && /taxi/.test(op('dejar-dos').textContent));
-  comprobar('«no mover ninguno» también contempla a la abuela',
-    /abuela/.test(op('ninguno').textContent));
-  comprobar('«todos en taxi» avisa de que no deja coche en el inicio',
-    /no queda ningún coche/.test(op('todos-taxi').textContent));
-  comprobar('ya no hay una viñeta suelta para la abuela',
-    !s.d.querySelector('.portada ul.coches li[data-opcion="abuela"]'));
-  /* Y tiene que estar en las decisiones del grupo, no solo contado en la
-     portada: es lo que hay que cerrar. */
-  comprobar('los coches están en las decisiones del grupo, sin cerrar',
-    s.w.eval("DECISIONES.some(d=>d.id==='coches' && d.estado!=='resuelto')"));
-
-  /* La primera opción se apoya en que el destino de cada etapa es la salida
-     de la siguiente. Si algún día deja de encadenar, deja de valer. */
+  /* El plan de los coches se apoya en que el destino de cada etapa es la
+     salida de la siguiente. Si algún día deja de encadenar, deja de valer. */
   const ETS = s.w.eval('ETAPAS');
   comprobar('el destino de cada etapa es la salida de la siguiente',
     ETS.slice(0,-1).every((e,i) => e.destino === ETS[i+1].origen));
