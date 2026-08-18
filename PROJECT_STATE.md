@@ -93,6 +93,40 @@ en modo avión. Es justo la primera fila de la tabla.
 
 ---
 
+## 2026-08-18 — Se quita el recado de los zapatos de Pablo
+
+Pedido: borrar el aviso emergente sobre Pablo y sus zapatos. Se ha ido usando
+un mes; ya no hace falta. Se sigue al pie de la letra lo que deja dicho
+`CLAUDE.md`: `Recado.TEXTO` pasa a `''`, sin tocar el HTML ni la llamada del
+arranque (`Recado.abrir()`/`Recado.vigilar()` en el arranque se quedan, y con
+`TEXTO` vacío no hacen nada — es justo el mecanismo que ya existía para
+"quitarlo").
+
+El bloque de pruebas "6 bis" daba por hecho que había recado por defecto
+(comprobaba literalmente la frase de los zapatos), así que había que
+reescribirlo, no solo borrar una prueba:
+
+- Nueva comprobación primero: con `TEXTO` vacío, el recado no sale al abrir ni
+  volviendo de otra app, en ninguna de las tres puertas de entrada.
+- El mecanismo en sí (contenido pintado, botón de cerrar, bloqueo de flechas,
+  Esc, las tres puertas, `MINUTOS_DESCANSO`) se sigue probando forzando un
+  `Recado.TEXTO` de prueba después de cargar la página: `abrir()` relee
+  `TEXTO` en cada llamada, así que no hace falta tocar el HTML para probarlo.
+
+**Nota sobre `npm test`:** salieron dos fallos que no tienen nada que ver con
+este cambio — "Retos" y "¿Cuánto queda?" dan por hecho que la fecha real está
+fuera de las del viaje, y hoy 18 de agosto ya es la fecha de la etapa 1. Se
+comprobó comparando contra `main` sin este commit (mismos dos fallos), así que
+es la fragilidad ya conocida ("la cuenta atrás y el desbloqueo de Retos usan
+la hora del dispositivo") estrenándose de verdad, no una regresión. No se ha
+tocado: arreglarlo de raíz pide simular la fecha en las pruebas, que es más
+que lo que se pidió aquí.
+
+`sw.js`: `VERSION` sube a `camino-v36`. `npm test`: 455 comprobaciones, 2
+fallos (los de arriba, preexistentes).
+
+---
+
 ## 2026-08-17 — Los coches: decidido, con dos y no con tres
 
 El grupo lo cerró por chat: uno de los tres coches se ha dejado ya en el
