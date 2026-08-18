@@ -707,8 +707,9 @@ console.log('5 ter. ¿Cuánto queda?');
 console.log('6. Flechas del teclado');
 {
   const s = abrir();
-  /* El recado del grupo sale al arrancar y, como las otras dos ventanas,
-     bloquea las flechas a propósito. Se cierra antes de probar el teclado. */
+  /* Por si algún día vuelve a haber recado (sale al arrancar y, como las
+     otras dos ventanas, bloquea las flechas a propósito), se cierra antes
+     de probar el teclado. Con TEXTO vacío esto no hace nada. */
   s.w.eval('Recado.cerrar()');
   s.w.irA(0);
   function flecha(k){
@@ -734,11 +735,22 @@ console.log('6. Flechas del teclado');
 /* ---------- 6 bis. El recado del grupo ---------- */
 console.log('6 bis. Recado del grupo');
 {
+  /* Por defecto TEXTO está vacío (ya no hay nada que avisar: se quitó el de
+     los zapatos de Pablo). Vacío es la forma de "no hay recado" que documenta
+     CLAUDE.md, así que por defecto no debe salir nada. */
+  const s0 = abrir();
+  comprobar('sin TEXTO, el recado no sale al abrir la web', !s0.w.eval('Recado.abierto()'));
+  comprobar('sin TEXTO, hayRecado() es falso', !s0.w.eval('Recado.hayRecado()'));
+  s0.dom.window.close();
+
+  /* El mecanismo (abrir/cerrar, bloqueo de flechas, Esc) se sigue probando
+     con un texto de prueba: es lo que se reactivará el día que haga falta
+     avisar de algo otra vez. `abrir()` relee `this.TEXTO` en cada llamada,
+     así que ponerlo después de cargar la página basta. */
   const s = abrir();
-  comprobar('el recado sale solo al abrir la web', s.w.eval('Recado.abierto()'));
+  s.w.eval("Recado.TEXTO = 'Aviso de prueba'; Recado.abrir();");
+  comprobar('con TEXTO puesto, Recado.abrir() sí abre la ventana', s.w.eval('Recado.abierto()'));
   const cuerpo = s.d.getElementById('recadoCuerpo').innerHTML;
-  comprobar('dice lo de los zapatos de Pablo',
-    cuerpo.indexOf('Pablo se ha olvidado los zapatos para caminar!!') >= 0);
   comprobar('el texto pintado es el de Recado.TEXTO',
     cuerpo.indexOf(s.w.eval('Recado.TEXTO')) >= 0);
   comprobar('lleva botón de cerrar', !!s.d.querySelector('#recado .recado-ok'));
@@ -767,7 +779,10 @@ console.log('6 bis. Recado del grupo');
 
   /* --- "Entrar a la web" no es solo cargarla --- */
   /* En el móvil la pestaña se queda abierta días: volver desde otra app
-     también es entrar. Se simula el ciclo oculto → visible. */
+     también es entrar. Se simula el ciclo oculto → visible. Se prueba con
+     TEXTO puesto a mano: con el vacío de por defecto ninguna puerta abriría
+     nada y no se podría distinguir "la puerta no funciona" de "no hay
+     recado que mostrar". */
   function irYVolver(s){
     Object.defineProperty(s.d, 'visibilityState', {get:()=>'hidden', configurable:true});
     s.d.dispatchEvent(new s.w.Event('visibilitychange'));
@@ -775,6 +790,7 @@ console.log('6 bis. Recado del grupo');
     s.d.dispatchEvent(new s.w.Event('visibilitychange'));
   }
   const v = abrir();
+  v.w.eval("Recado.TEXTO = 'Aviso de prueba';");
   v.w.eval('Recado.cerrar()');
   comprobar('cerrado, se queda cerrado mientras navegas', !v.w.eval('Recado.abierto()'));
   v.w.irA(2);
@@ -798,17 +814,15 @@ console.log('6 bis. Recado del grupo');
   v.w.eval('Recado.MINUTOS_DESCANSO = 0;');
   v.dom.window.close();
 
-  /* Sale también entrando directo a una etapa, no solo en la portada */
+  /* Con TEXTO vacío por defecto, entrar directo a una etapa tampoco lo saca,
+     y la etapa de debajo se pinta igual */
   const e = abrir('https://ejemplo.org/?etapa=3');
-  comprobar('el recado sale también con ?etapa=3', e.w.eval('Recado.abierto()'));
+  comprobar('sin TEXTO, ?etapa=3 tampoco saca el recado', !e.w.eval('Recado.abierto()'));
   comprobar('y la etapa de debajo se ha pintado igual', largo(e) > 400);
   e.dom.window.close();
 
-  /* Sin recado (TEXTO vacío) no debe salir nada: es la forma de quitarlo */
-  const q = abrir();
-  q.w.eval('Recado.cerrar(); Recado.TEXTO = ""; Recado.abrir();');
-  comprobar('con Recado.TEXTO vacío no sale la ventana', !q.w.eval('Recado.abierto()'));
   /* Y tampoco al volver de otra app: si no, el "quitarlo" sería mentira */
+  const q = abrir();
   irYVolver(q);
   comprobar('sin recado, volver de otra app tampoco lo saca', !q.w.eval('Recado.abierto()'));
   q.dom.window.close();
